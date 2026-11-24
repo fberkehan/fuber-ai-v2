@@ -1,3 +1,19 @@
+# O.R.I.O.N.
+
+**O.R.I.O.N.** (Optimized Reasoning & Intelligent Operations Network) is a personal AI assistant for the Windows desktop: it listens and talks, keeps its memory on your computer, works with your files, email and documents, and runs on the model you choose (local, your own Claude key, or any OpenAI-compatible provider). It is part of [FUBER AI](https://fuber.ai). Earlier generations were published under the name "Fuber AI"; the generations are kept here as branches.
+
+| Generation | Branch | Tag | License | Status |
+| --- | --- | --- | --- | --- |
+| v1 (published as Fuber AI v1, 0.18.2) | [`v1`](https://github.com/fberkehan/orion/tree/v1) | [`v1-0.18.2`](https://github.com/fberkehan/orion/releases/tag/v1-0.18.2) | Apache-2.0 | archived |
+| v2 (published as Fuber AI v2, 2.0.0-demo.16) | [`v2`](https://github.com/fberkehan/orion/tree/v2) (`main` is identical apart from this overview) | [`v2-2.0.0-demo.16`](https://github.com/fberkehan/orion/releases/tag/v2-2.0.0-demo.16) | FSL-1.1-ALv2 (source-available) | current public source |
+| v3 | none | none | none | private alpha, not public |
+
+The license of `main` is the one of v2 (FSL-1.1-ALv2); each branch carries its own `LICENSE`.
+
+**Cloning on Windows:** the tree contains deep fixture paths, so enable long paths if checkout fails: `git clone -c core.longpaths=true https://github.com/fberkehan/orion.git`.
+
+---
+
 > **This branch is O.R.I.O.N. v2, first released as Fuber AI v2 (`2.0.0-demo.16`).** O.R.I.O.N. is the desktop assistant formerly published as Fuber AI. This generation is source-available under FSL-1.1-ALv2. The earlier generation is on the [`v1`](https://github.com/fberkehan/orion/tree/v1) branch.
 
 # Fuber AI v2

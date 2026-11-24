@@ -1,0 +1,371 @@
+/*
+ * Kartların canlı güncelleme efekti ve e-posta kartının kendi tasarımı (`live-update.ts`,
+ * `mail-card.tsx`). Her efekt bir kez oynar; sürekli yanıp sönen hiçbir şey yoktur. Azaltılmış
+ * harekette (`data-reduced` ya da sistem tercihi) yer değiştiren/süpüren hareket yok, yalnız renk geçişi.
+ * Katmanlı yazılır (TUZAKLAR §9). En küçük yazı 12 px.
+ */
+@layer components {
+  /* Kart türünün canlı rengi: ışık süpürmesi, taze satır ve "Yeni" vurgusu bunu alır. */
+  .kokpit-card {
+    --live: rgb(120 168 255);
+  }
+  .kokpit-card[data-kind^='mail'] {
+    --live: rgb(150 146 255);
+  }
+
+  /* ───────────── ortak: kenarda bir kez süpüren ışık ───────────── */
+  .kokpit-live-edge {
+    position: absolute;
+    inset: -1px;
+    padding: 1.5px;
+    border-radius: inherit;
+    background: linear-gradient(
+      110deg,
+      transparent 0 36%,
+      color-mix(in srgb, var(--live) 70%, transparent) 45%,
+      color-mix(in srgb, var(--live) 55%, white) 50%,
+      color-mix(in srgb, var(--live) 70%, transparent) 55%,
+      transparent 64% 100%
+    );
+    background-size: 320% 100%;
+    background-position: 100% 0;
+    opacity: 0;
+    pointer-events: none;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    animation: kokpit-live-sweep 1100ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  @keyframes kokpit-live-sweep {
+    0% {
+      background-position: 100% 0;
+      opacity: 0;
+    }
+    14% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      background-position: 0% 0;
+      opacity: 0;
+    }
+  }
+  /* Efektin kabı: her güncellemede yeniden takılır (anahtar), içindekiler bir kez oynar ve söner. */
+  .kokpit-live {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  /* Kartın içine doğru çok hafif, tek seferlik ışıma (süpürmeyle birlikte söner). */
+  .kokpit-live-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(90% 70% at 50% 0%, color-mix(in srgb, var(--live) 10%, transparent), transparent 70%);
+    opacity: 0;
+    animation: kokpit-live-glow 1100ms var(--ease-out) both;
+  }
+  @keyframes kokpit-live-glow {
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* ───────────── ortak: sayaçta sayı geçişi ───────────── */
+  .kokpit-roll {
+    display: inline-grid;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+  .kokpit-roll > span {
+    grid-area: 1 / 1;
+  }
+  .kokpit-roll-in {
+    animation: kokpit-roll-in 360ms var(--ease-out) both;
+  }
+  .kokpit-roll-out {
+    animation: kokpit-roll-out 280ms var(--ease-out) both;
+  }
+  @keyframes kokpit-roll-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--roll-from, 75%));
+    }
+  }
+  @keyframes kokpit-roll-out {
+    to {
+      opacity: 0;
+      transform: translateY(var(--roll-to, -75%));
+    }
+  }
+  .kokpit-roll:not([data-up]) {
+    --roll-from: -75%;
+    --roll-to: 75%;
+  }
+
+  /* ───────────── ortak: taze satır (kayarak girer, kısa süre renkli zemin) ───────────── */
+  .kokpit-fresh {
+    animation:
+      kokpit-row-in 420ms var(--ease-out) both,
+      kokpit-row-tint 1800ms var(--ease-out) both;
+  }
+  @keyframes kokpit-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes kokpit-row-tint {
+    0%,
+    35% {
+      background-color: color-mix(in srgb, var(--live) 11%, transparent);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  /* ───────────── ortak: "Yeni" vurgusu (1–2 sn) ───────────── */
+  .kokpit-new {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--live) 16%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--live) 45%, transparent);
+    color: color-mix(in srgb, var(--live) 70%, white);
+    font-size: calc(12px * var(--kokpit-k, 1));
+    font-weight: 600;
+    line-height: 1;
+    animation: kokpit-new 1800ms var(--ease-out) both;
+  }
+  .kokpit-new::before {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--live);
+    box-shadow: 0 0 8px var(--live);
+    content: '';
+  }
+  @keyframes kokpit-new {
+    0% {
+      opacity: 0;
+      transform: scale(0.86);
+    }
+    14% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    82% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* ───────────── e-posta kartının parçaları ───────────── */
+  .kokpit-link {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    min-height: 22px;
+    color: var(--color-fg-muted);
+    font-size: calc(13px * var(--kokpit-k, 1));
+    line-height: calc(18px * var(--kokpit-k, 1));
+  }
+  .kokpit-link-dot {
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-full);
+    background: var(--color-fg-faint);
+  }
+  .kokpit-link[data-link='connected'] .kokpit-link-dot {
+    background: var(--live);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 18%, transparent);
+  }
+  .kokpit-link[data-link='connecting'] .kokpit-link-dot {
+    background: var(--color-warning);
+  }
+  .kokpit-link[data-link='error'] .kokpit-link-dot {
+    background: var(--color-danger);
+  }
+  .kokpit-link[data-link='error'] {
+    color: var(--color-danger);
+  }
+
+  /* Baş harf rozeti: okunmamışta kart renginin koyu tonu, okunmuşta sakin gri. */
+  .kokpit-avatar {
+    display: grid;
+    flex-shrink: 0;
+    width: calc(34px * var(--kokpit-k, 1));
+    height: calc(34px * var(--kokpit-k, 1));
+    border-radius: var(--radius-full);
+    background: var(--color-surface-4);
+    color: var(--color-fg-muted);
+    font-size: calc(13px * var(--kokpit-k, 1));
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    place-items: center;
+  }
+  .kokpit-avatar[data-unread] {
+    background: color-mix(in srgb, var(--live) 18%, var(--color-surface-2));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--live) 35%, transparent);
+    color: color-mix(in srgb, var(--live) 65%, white);
+  }
+  .kokpit-avatar svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Okunmamış sayısı: kart renginde küçük hap. */
+  .kokpit-unread {
+    display: inline-grid;
+    flex-shrink: 0;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    background: var(--live);
+    color: #04140b;
+    font-size: calc(12px * var(--kokpit-k, 1));
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: calc(20px * var(--kokpit-k, 1));
+    place-items: center;
+  }
+  .kokpit-card[data-kind^='mail'] .kokpit-unread {
+    color: #0b0a24;
+  }
+
+  /* Hesap şeridi (e-posta): hesap başına okunmamış sayısı. */
+  .kokpit-accounts {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .kokpit-account {
+    display: inline-flex;
+    min-width: 0;
+    max-width: 100%;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 8px 0 10px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-3);
+    color: var(--color-fg-muted);
+    font-size: calc(12px * var(--kokpit-k, 1));
+    line-height: 1;
+  }
+  .kokpit-account > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .kokpit-account[data-error] {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-danger) 45%, transparent);
+    color: var(--color-danger);
+  }
+  .kokpit-account b {
+    color: var(--color-fg);
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Boş / bağlı değil / hata durumu: kartın ortasında sakin bir cümle ve (varsa) tek düğme. */
+  .kokpit-state {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    min-height: 0;
+    color: var(--color-fg-muted);
+    font-size: calc(13px * var(--kokpit-k, 1));
+    line-height: calc(19px * var(--kokpit-k, 1));
+  }
+
+  .kokpit-state-icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-3);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+    color: var(--color-fg-muted);
+    place-items: center;
+  }
+  .kokpit-state-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .kokpit-state-icon[data-tone='live'] {
+    background: color-mix(in srgb, var(--live) 12%, var(--color-surface-2));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--live) 30%, transparent);
+    color: color-mix(in srgb, var(--live) 75%, white);
+  }
+  .kokpit-state-icon[data-tone='danger'] {
+    background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface-2));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-danger) 35%, transparent);
+    color: var(--color-danger);
+  }
+
+  /* ───────────── azaltılmış hareket: yalnız renk ───────────── */
+  .kokpit-card[data-reduced] .kokpit-live-edge {
+    display: none;
+  }
+  .kokpit-card[data-reduced] .kokpit-live-glow {
+    background: none;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--live) 55%, transparent);
+  }
+  .kokpit-card[data-reduced] .kokpit-roll-in,
+  .kokpit-card[data-reduced] .kokpit-roll-out,
+  .kokpit-card[data-reduced] .kokpit-new,
+  .kokpit-card[data-reduced] .kokpit-fresh {
+    animation-name: kokpit-fade;
+  }
+  .kokpit-card[data-reduced] .kokpit-fresh {
+    animation:
+      kokpit-fade 200ms linear both,
+      kokpit-row-tint 1800ms var(--ease-out) both;
+  }
+  @keyframes kokpit-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kokpit-live-edge {
+      display: none;
+    }
+    .kokpit-live-glow {
+      background: none;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--live) 55%, transparent);
+    }
+    .kokpit-roll-in,
+    .kokpit-roll-out,
+    .kokpit-new {
+      animation-name: kokpit-fade;
+    }
+    .kokpit-fresh {
+      animation:
+        kokpit-fade 200ms linear both,
+        kokpit-row-tint 1800ms var(--ease-out) both;
+    }
+  }
+}

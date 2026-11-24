@@ -1,0 +1,429 @@
+{
+  "t": "hud.snapshot",
+  "seq": 42,
+  "data": {
+    "ts": 1763460300000,
+    "greeting": "Günaydın, efendim.",
+    "summary": "Bütün sistemler normal. Dikkatinizi bekleyen 3 konu var.",
+    "palette": "cyan",
+    "tab": "overview",
+    "clock": {
+      "time": "15:45:54",
+      "date": "Çar 18 Kas 2026",
+      "tz": "GMT+3",
+      "place": "İstanbul"
+    },
+    "env": {
+      "status": "ok",
+      "place": "İstanbul",
+      "lat": 41.0082,
+      "lon": 28.9784,
+      "tempC": 12.4,
+      "condition": "Parçalı bulutlu",
+      "windKmh": 18,
+      "windDir": "KB",
+      "humidity": 64,
+      "visibilityKm": 16,
+      "uv": 2,
+      "hourly": [
+        {
+          "time": "16:00",
+          "tempC": 12
+        },
+        {
+          "time": "18:00",
+          "tempC": 10
+        },
+        {
+          "time": "20:00",
+          "tempC": 9
+        },
+        {
+          "time": "22:00",
+          "tempC": 8
+        },
+        {
+          "time": "00:00",
+          "tempC": 7
+        }
+      ]
+    },
+    "cal": {
+      "status": "ok",
+      "nextInSec": 2529,
+      "items": [
+        {
+          "ref": "cal:1",
+          "time": "08:30",
+          "title": "Kahvaltı",
+          "place": "EV",
+          "current": false
+        },
+        {
+          "ref": "cal:2",
+          "time": "09:30",
+          "title": "Yönetim toplantısı: 3. çeyrek enerji",
+          "place": "OFİS",
+          "current": true
+        },
+        {
+          "ref": "cal:3",
+          "time": "11:00",
+          "title": "Sunum prova",
+          "place": "SAHNE",
+          "current": false
+        },
+        {
+          "ref": "cal:4",
+          "time": "13:00",
+          "title": "Öğle yemeği",
+          "place": "MERKEZ",
+          "current": false
+        },
+        {
+          "ref": "cal:5",
+          "time": "16:00",
+          "title": "Atölye: itici kalibrasyonu",
+          "place": "LAB",
+          "current": false
+        },
+        {
+          "ref": "cal:6",
+          "time": "19:30",
+          "title": "Hayır gecesi",
+          "place": "SALON",
+          "current": false
+        }
+      ]
+    },
+    "bio": {
+      "status": "live",
+      "source": "watch",
+      "worn": true,
+      "battery": 84,
+      "hr": 73,
+      "hrSeries": [
+        70,
+        71,
+        72,
+        74,
+        73,
+        72,
+        73
+      ],
+      "spo2": 98,
+      "steps": 5421,
+      "kcal": 312,
+      "skinTemp": 33.1,
+      "stress": 19,
+      "sleepMin": 432,
+      "lastSampleAgoSec": 1
+    },
+    "core": {
+      "label": "ÇEKİRDEK YÜKÜ",
+      "value": "37",
+      "unit": "%",
+      "sub": "GPU 61% · RAM 48%",
+      "cpu": 37,
+      "gpu": 61,
+      "ram": 48,
+      "vram": 40,
+      "tempC": 58,
+      "cpuSeries": [
+        22,
+        25,
+        31,
+        28,
+        35,
+        40,
+        37,
+        33,
+        38,
+        37,
+        41,
+        37
+      ],
+      "gpuSeries": [
+        50,
+        55,
+        58,
+        60,
+        63,
+        61,
+        64,
+        62,
+        60,
+        61,
+        63,
+        61
+      ],
+      "ramSeries": [
+        46,
+        46,
+        47,
+        47,
+        48,
+        48,
+        48,
+        49,
+        48,
+        48,
+        48,
+        48
+      ],
+      "cores": [
+        30,
+        45,
+        12,
+        60,
+        22,
+        18,
+        70,
+        35,
+        40,
+        28,
+        15,
+        55,
+        33,
+        20,
+        48,
+        26
+      ],
+      "ramUsedGb": 15.4,
+      "ramTotalGb": 32,
+      "vramUsedGb": 9.6,
+      "vramTotalGb": 24,
+      "uptimeSec": 187200,
+      "gpuName": "RTX 4090",
+      "tempSource": "gpu"
+    },
+    "fin": {
+      "status": "ok",
+      "marketOpen": true,
+      "focus": "BIST100",
+      "items": [
+        {
+          "sym": "BIST100",
+          "name": "Borsa İstanbul 100",
+          "price": 9712.45,
+          "currency": "TRY",
+          "changePct": 0.84,
+          "series": [
+            9650,
+            9660,
+            9645,
+            9680,
+            9700,
+            9690,
+            9720,
+            9705,
+            9740,
+            9712,
+            9760,
+            9712
+          ]
+        },
+        {
+          "sym": "USDTRY",
+          "name": "Dolar / Türk lirası",
+          "price": 43.18,
+          "currency": "TRY",
+          "changePct": 0.12,
+          "series": [
+            43.1,
+            43.12,
+            43.15,
+            43.18
+          ]
+        },
+        {
+          "sym": "XAUUSD",
+          "name": "Ons altın",
+          "price": 4012.3,
+          "currency": "USD",
+          "changePct": -0.34,
+          "series": [
+            4030,
+            4025,
+            4018,
+            4012
+          ]
+        },
+        {
+          "sym": "BTCUSD",
+          "name": "Bitcoin",
+          "price": 91250,
+          "currency": "USD",
+          "changePct": 1.9,
+          "series": [
+            89000,
+            90000,
+            90800,
+            91250
+          ]
+        }
+      ]
+    },
+    "links": {
+      "status": "ok",
+      "linked": 5,
+      "total": 6,
+      "items": [
+        {
+          "id": "pc",
+          "name": "Bu bilgisayar",
+          "kind": "device",
+          "detail": "MASAÜSTÜ",
+          "latencyMs": 2,
+          "quality": 1,
+          "up": true
+        },
+        {
+          "id": "quest",
+          "name": "Quest 3",
+          "kind": "device",
+          "detail": "WI-FI 6",
+          "latencyMs": 9,
+          "quality": 0.9,
+          "up": true
+        },
+        {
+          "id": "watch",
+          "name": "Saat",
+          "kind": "device",
+          "detail": "BLE",
+          "latencyMs": 40,
+          "quality": 0.7,
+          "up": true
+        },
+        {
+          "id": "nas",
+          "name": "Ağ diski",
+          "kind": "server",
+          "detail": "EV AĞI",
+          "latencyMs": 62,
+          "quality": 0.8,
+          "up": true
+        },
+        {
+          "id": "dns",
+          "name": "DNS",
+          "kind": "service",
+          "detail": "8.8.8.8",
+          "latencyMs": 87,
+          "quality": 0.6,
+          "up": true
+        },
+        {
+          "id": "media",
+          "name": "Medya sunucusu",
+          "kind": "server",
+          "detail": "EV AĞI",
+          "latencyMs": null,
+          "quality": 0,
+          "up": false
+        }
+      ]
+    },
+    "log": [
+      {
+        "ts": "07:44:05",
+        "tag": "SAT",
+        "text": "SAT-05 Pasifik üzerinde görüş hattını kaybetti.",
+        "ref": "log:5"
+      },
+      {
+        "ts": "07:43:28",
+        "tag": "BIO",
+        "text": "Nabız normale döndü."
+      },
+      {
+        "ts": "07:42:51",
+        "tag": "ENV",
+        "text": "Atölye iklimi 19 dereceye ayarlandı.",
+        "ref": "log:3"
+      },
+      {
+        "ts": "07:42:14",
+        "tag": "MSG",
+        "text": "Asistanınızdan üç okunmamış mesaj. Hepsi acil.",
+        "ref": "log:2"
+      },
+      {
+        "ts": "07:41:37",
+        "tag": "FIN",
+        "text": "Gece enerji çıktısı beklentiyi aştı.",
+        "ref": "log:1"
+      },
+      {
+        "ts": "07:40:02",
+        "tag": "SYS",
+        "text": "Köprü yeniden bağlandı."
+      }
+    ],
+    "voice": {
+      "state": "idle",
+      "text": ""
+    },
+    "paletteMode": "auto",
+    "load": {
+      "score": 62,
+      "level": "busy",
+      "reasons": [
+        "CPU %37",
+        "GPU %61",
+        "2 iş çalışıyor"
+      ]
+    },
+    "attention": 3,
+    "jobs": [
+      {
+        "id": "j1",
+        "title": "Haftalık rapor derleme",
+        "moduleId": "rapor",
+        "status": "running",
+        "startedAt": 1763460166000
+      },
+      {
+        "id": "j2",
+        "title": "Yedekleme: fotoğraf arşivi",
+        "moduleId": "yedek",
+        "status": "running",
+        "startedAt": 1763459788000
+      },
+      {
+        "id": "j3",
+        "title": "Tatil planı araştırması",
+        "moduleId": "web",
+        "status": "queued",
+        "startedAt": 0
+      }
+    ],
+    "notices": [
+      {
+        "ref": "notice:1",
+        "ts": "07:44:05",
+        "title": "Yönetim toplantısı 30 dk içinde",
+        "body": "Takvim: 09:30 Yönetim toplantısı: 3. çeyrek enerji",
+        "moduleId": "cal",
+        "pending": true
+      },
+      {
+        "ref": "notice:2",
+        "ts": "07:42:14",
+        "title": "Üç okunmamış mesaj",
+        "body": "Asistanınızdan üç okunmamış mesaj. Hepsi acil.",
+        "moduleId": "msg",
+        "pending": true
+      },
+      {
+        "ref": "notice:3",
+        "ts": "07:30:00",
+        "title": "Yedekleme tamamlandı",
+        "body": "Fotoğraf arşivinin yedeği başarıyla bitti.",
+        "moduleId": "yedek",
+        "pending": false
+      }
+    ]
+  }
+}

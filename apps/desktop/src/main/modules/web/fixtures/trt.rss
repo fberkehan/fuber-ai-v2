@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic fixture: the shape of the TRT Haber "son dakika" RSS feed. The headlines, summaries and links are invented
+     for the tests; they are not real news items. -->
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+<lastBuildDate>Mon, 16 Nov 2026 13:07:01 +0300</lastBuildDate>
+<title>TRT Haber Son Dakika Haberler</title>
+<description>Sentetik sınama akışı.</description>
+<link>https://www.trthaber.com/</link>
+<language>tr-TR</language>
+<item>
+<guid>https://www.trthaber.com/haber/gundem/ornek-kuvvetli-yagis-uyarisi-100001.html</guid>
+<pubDate>Mon, 16 Nov 2026 12:52:00 +0300</pubDate>
+<title>Meteorolojiden 6 il için kuvvetli yağış uyarısı</title>
+<description><![CDATA[<img src="https://example.com/resim/100001.jpg"/>Sentetik özet: sınama için yazılmış bir hava durumu haberi.]]></description>
+<media:content url="https://example.com/resim/100001.jpg" type="image/jpeg" expression="full" width="1280" height="720"/>
+<link>https://www.trthaber.com/haber/gundem/ornek-kuvvetli-yagis-uyarisi-100001.html</link>
+<content:encoded><![CDATA[<article><p>Sentetik haber metni. Ayrıntı alınmaz; yalnız başlık okunur.</p></article>]]></content:encoded>
+</item>
+<item>
+<guid>https://www.trthaber.com/haber/egitim/ornek-kutuphane-haftasi-etkinlikleri-100002.html</guid>
+<pubDate>Mon, 16 Nov 2026 12:34:00 +0300</pubDate>
+<title>Kütüphane haftası etkinlikleri başladı</title>
+<description><![CDATA[<img src="https://example.com/resim/100002.jpg"/>Sentetik özet: sınama için yazılmış bir eğitim haberi.]]></description>
+<link>https://www.trthaber.com/haber/egitim/ornek-kutuphane-haftasi-etkinlikleri-100002.html</link>
+</item>
+<item>
+<guid>https://www.trthaber.com/haber/gundem/ornek-sehir-ici-ulasim-duzenlemesi-100003.html</guid>
+<pubDate>Mon, 16 Nov 2026 12:10:00 +0300</pubDate>
+<title>Şehir içi ulaşımda yeni hafta sonu düzenlemesi</title>
+<description><![CDATA[<img src="https://example.com/resim/100003.jpg"/>Sentetik özet: sınama için yazılmış bir gündem haberi.]]></description>
+<link>https://www.trthaber.com/haber/gundem/ornek-sehir-ici-ulasim-duzenlemesi-100003.html</link>
+</item>
+<item>
+<guid>https://www.trthaber.com/haber/gundem/ornek-okullarda-bilim-senligi-100004.html</guid>
+<pubDate>Mon, 16 Nov 2026 12:07:00 +0300</pubDate>
+<title>Okullarda bilim şenliği haftası</title>
+<description><![CDATA[<img src="https://example.com/resim/100004.jpg"/>Sentetik özet: sınama için yazılmış bir gündem haberi.]]></description>
+<link>https://www.trthaber.com/haber/gundem/ornek-okullarda-bilim-senligi-100004.html</link>
+</item>
+</channel>
+</rss>

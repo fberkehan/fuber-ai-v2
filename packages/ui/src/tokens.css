@@ -1,0 +1,315 @@
+/*
+ * "Canlı Siyah" tasarım jetonları (KURGU §12). Tailwind v4 `@theme`: buradaki her değişken hem
+ * CSS değişkeni hem de yardımcı sınıf üretir (`bg-surface-2`, `text-fg-muted`, `rounded-md`, `shadow-float`).
+ * z-index ve süreler tema ad alanı değildir; değişken sözdizimiyle kullanılır: `z-(--z-layer)`,
+ * `duration-(--duration-fast)`. Bu dosya `@import "tailwindcss"` satırından SONRA içe aktarılır;
+ * uygulamalar `@fuber/ui/styles.css` kullanır.
+ */
+
+/* Inter Variable (OFL-1.1, @fontsource-variable/inter): latin ve latin-ext (Türkçe harfler). */
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* JetBrains Mono: kod ve saat. latin-ext, Türkçe harfler (ğ, ş, ı, İ) için gerekli. */
+@font-face {
+  font-family: 'JetBrains Mono Variable';
+  src: url('@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono Variable';
+  src: url('@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-ext-wght-normal.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* `static`: jetonlar kullanılmasa da CSS değişkeni olarak üretilir (JS ve satır içi stil de okuyabilsin diye). */
+@theme static {
+  /* Tailwind'in hazır paleti, yarıçapları, gölgeleri ve eğrileri kapalı: yalnız bu sistemin değerleri. */
+  --color-*: initial;
+  --radius-*: initial;
+  --text-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --ease-*: initial;
+  --animate-*: initial;
+  --blur-*: initial;
+
+  /* ── Zemin ve yüzeyler (koyudan açığa) ── */
+  --color-stage: #000000;
+  /*
+   * Sayfanın zemini: masaüstünde sahnenin kendisi (#000, yıldızların üstü), yönetimde düz yüzey.
+   * `appearance.css` içinde seçilir; zemini "delen" öğeler (zaman çizgisi noktasının halkası) bunu kullanır.
+   */
+  --color-page: #000000;
+  /* Yüzeyler nötr gridir (mavi ton yok). 1: kart (#0f0f0f) · 2: üstüne gelme, iç yüzey · 3: seçili satır. */
+  --color-surface-1: #0f0f0f;
+  --color-surface-2: #151515;
+  --color-surface-3: #1a1a1a;
+  /* Denetim dolgusu (ikincil düğme, giriş alanı, anahtar rayı). */
+  --color-surface-4: #1f1f1f;
+  --color-surface-5: #292929;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.16);
+  --color-scrim: rgba(0, 0, 0, 0.64);
+
+  /*
+   * ── Yazı dereceleri ── en açık yüzey #292929 (menü üzerinde satırı) üstünde bile ≥ 4.5:1:
+   * fg 13.8:1 · fg-muted 6.4:1 · fg-faint 4.7:1. Devre dışı yazı fg-faint'tir; saydamlıkla soldurulmaz.
+   */
+  --color-fg: #f5f5f7;
+  --color-fg-muted: #a8a8b0;
+  --color-fg-faint: #8f8f98;
+
+  /* ── Eylem ── */
+  --color-primary: #ffffff;
+  --color-primary-hover: #e6e6ea;
+  --color-on-primary: #000000;
+  --color-secondary: #1f1f1f;
+  --color-secondary-hover: #292929;
+  /* Tek vurgu: Fuber mavisi. Dolgu ve halka için. Üstündeki beyaz yazı 5.7:1. */
+  --color-accent: #0e59ef;
+  --color-accent-hover: #2a6cf3;
+  /* Koyu zeminde yazı ve ikon için vurgu (#17171A üstünde 6.6:1). */
+  --color-accent-fg: #5b9bff;
+  --color-accent-soft: rgba(14, 89, 239, 0.18);
+
+  /* ── Durum ── */
+  --color-success: #2bd67b;
+  --color-warning: #ffb020;
+  --color-danger: #ff4d4d;
+  --color-success-soft: rgba(43, 214, 123, 0.14);
+  --color-warning-soft: rgba(255, 176, 32, 0.14);
+  --color-danger-soft: rgba(255, 77, 77, 0.14);
+
+  /* ── Yarıçap: 12 / 18 / 26; ada ve haplar tam. `xs` yalnız 20 px altı denetimler (onay kutusu, tuş rozeti) için. ── */
+  --radius-xs: 6px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-full: 9999px;
+
+  /* ── Boşluk: 4'ün katları (`p-3` = 12px, `gap-6` = 24px) ── */
+  --spacing: 4px;
+
+  /* ── Yazı ── */
+  --font-sans: 'Inter Variable', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'Cascadia Mono', Consolas, monospace;
+
+  /* En küçük yazı 12px. Satır yükseklikleri 4'ün katı ya da yarımı; dikey ritim bozulmaz. */
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 20px;
+  --text-base: 15px;
+  --text-base--line-height: 22px;
+  --text-lg: 17px;
+  --text-lg--line-height: 24px;
+  --text-xl: 20px;
+  --text-xl--line-height: 26px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 30px;
+  --text-3xl: 32px;
+  --text-3xl--line-height: 36px;
+  --text-4xl: 44px;
+  --text-4xl--line-height: 46px;
+  --text-5xl: 60px;
+  --text-5xl--line-height: 60px;
+
+  --font-weight-regular: 440;
+  --font-weight-medium: 540;
+  --font-weight-semibold: 600;
+  --font-weight-heading: 640;
+  --tracking-heading: -0.045em;
+  --tracking-tight: -0.02em;
+  --tracking-body: -0.01em;
+
+  /*
+   * ── Gölge ve ışıma ── gölge yalnız yüzen yüzeylerde (ada, toast, menü, diyalog).
+   * `raise`: yüzeyin üst kenarına düşen ince ışık; düz siyahta katmanı okutur.
+   */
+  --shadow-raise: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-float: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 16px 48px -8px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-island: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 10px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow-accent: 0 0 0 1px rgba(91, 155, 255, 0.35), 0 0 24px -4px rgba(14, 89, 239, 0.55);
+
+  /* ── Eğriler (CSS geçişleri için; yaylar `motion.ts` içinde) ── */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Yay eğrileri: `spring-css.ts` üretir (sınama eşler; elle değiştirmeyin). Süreleri: --duration-spring(-bouncy). */
+  --ease-spring: linear(0, 0.048, 0.155, 0.282, 0.407, 0.521, 0.619, 0.701, 0.768, 0.821, 0.863, 0.896, 0.921, 0.941, 0.956, 0.967, 0.975, 0.982, 1);
+  --ease-spring-bouncy: linear(0, 0.086, 0.264, 0.458, 0.63, 0.766, 0.864, 0.93, 0.971, 0.994, 1.006, 1.01, 1.011, 1.01, 1.007, 1.005, 1.004, 1.002, 1);
+
+  /* ── Döngüsel animasyon: yalnız Spinner (Core kendi çizer). ── */
+  --animate-spin: fuber-spin 720ms linear infinite;
+  @keyframes fuber-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ── Düzen ölçüleri ── */
+  --size-rail: 232px;
+  --size-rail-collapsed: 72px;
+  --size-inspector: 360px;
+  --size-titlebar: 40px;
+}
+
+/* Tema dışı ölçekler: Tailwind sınıf üretmez, `z-(--z-layer)` / `duration-(--duration-fast)` ile okunur. */
+:root {
+  /* ── Hareket süreleri: 180–320 ms; basma geri bildirimi daha kısa. JS karşılığı motion.ts `durations`. ── */
+  --duration-instant: 120ms;
+  --duration-fast: 180ms;
+  --duration-base: 240ms;
+  --duration-slow: 320ms;
+  --duration-spring: 420ms;
+  --duration-spring-bouncy: 486ms;
+
+  /*
+   * ── Tek z-index ölçeği ── Uygulama içinde başka z-index değeri YAZILMAZ.
+   * Dialog ve Menu ortak yığındadır: açılış sırasıyla `--z-layer + sıra` alırlar (katman yöneticisi atar),
+   * böylece iç içe açılan her zaman üstte kalır. Tooltip ve toast yığının üstündedir.
+   */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-rail: 200;
+  --z-inspector: 300;
+  --z-layer: 500;
+  --z-tooltip: 800;
+  --z-toast: 900;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-stage);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    font-weight: var(--font-weight-regular);
+    letter-spacing: var(--tracking-body);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: 0;
+    font-weight: var(--font-weight-heading);
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
+  }
+
+  p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* Tek aralıklı yazı yalnız kod, yol ve sürüm için. Saatler Inter + eşit genişlikli rakamla yazılır. */
+  code,
+  kbd,
+  pre {
+    font-family: var(--font-mono);
+    letter-spacing: 0;
+  }
+
+  time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  button {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+
+  /* Seçilebilir içerik açıkça işaretlenir; uygulama kabuğu seçilemez. */
+  [data-selectable],
+  input,
+  textarea {
+    user-select: text;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+
+  /* Tek odak halkası: her yerde aynı, klavyeyle gelince görünür. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-fg);
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: var(--radius-full);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Azaltılmış hareket: konum değişimi kalkar, renk ve saydamlık geçişleri kısa kalır (anlamı taşırlar). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+    }
+    /* Spinner yüklemenin kendisini anlatır; yavaşlatılır ama durdurulmaz. */
+    [data-keep-motion] {
+      animation-duration: 1400ms !important;
+      animation-iteration-count: infinite !important;
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  // Ana süreç, ses işçisi ve yetenek konağı (Node ortamı). Renderer ve preload: tsconfig.web.json
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src/main", "src/worker", "src/tts-host", "src/skill-host"],
+  // Alt çizgiyle başlayan klasörler örnektir: keşfe ve derlemeye girmez.
+  "exclude": ["src/main/modules/_*"]
+}

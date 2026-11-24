@@ -1,0 +1,40 @@
+From - Mon Nov 10 09:00:00 2025
+X-Mozilla-Status: 0001
+X-Mozilla-Status2: 00000000
+Message-ID: <a1-toplanti@ornek.test>
+From: Ayse Yildiz <ayse@ornek.test>
+To: gulsah@ornek.test
+Subject: Toplanti notlari
+Date: Mon, 10 Nov 2025 09:00:00 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Merhaba, yarinki toplanti icin notlari ekledim.
+>From burada govdede satir basinda "From " gecer; mboxrd kacisi geri alinmali.
+Gorusmek uzere.
+
+From - Mon Nov 10 10:30:00 2025
+X-Mozilla-Status: 0001
+X-Mozilla-Status2: 00000000
+Message-ID: <b2-fatura@ornek.test>
+From: Muhasebe <muhasebe@firma.test>
+To: gulsah@ornek.test
+Subject: Kasim faturasi
+Date: Mon, 10 Nov 2025 10:30:00 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Kasim ayi faturasi ektedir. Son odeme gunu ayin 20'si.
+
+From - Tue Nov 11 08:15:00 2025
+X-Mozilla-Status: 0000
+X-Mozilla-Status2: 00000000
+Message-ID: <c3-selam@ornek.test>
+From: Can Oz <can@ornek.test>
+To: gulsah@ornek.test
+Subject: Selam
+Date: Tue, 11 Nov 2025 08:15:00 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Nasilsin? Bu ileti okunmamis (X-Mozilla-Status 0000).

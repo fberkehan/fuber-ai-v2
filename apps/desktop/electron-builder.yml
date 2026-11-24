@@ -1,0 +1,50 @@
+# Fuber AI 2 — NSIS x64 kurulum paketi. Çalıştırma: kökten `npm run dist:desktop`.
+# A1/A2 ajanları bu dosyaya dokunmaz: girişler ve kaynak kalıpları önceden açıktır.
+appId: ai.fuber.desktop2
+productName: Fuber AI 2
+electronVersion: 45.2.3
+# Yerel eklentiler N-API ile hazır gelir (koffi, sherpa-onnx-node); yeniden derleme gerekmez.
+npmRebuild: false
+directories:
+  output: release
+  buildResources: resources/icons
+files:
+  - dist/**/*
+  - '!dist/**/*.map'
+  # Uçtan uca sınamaların dist/ altına derlediği sınama süreçleri pakete girmez.
+  - '!dist/e2e-*/**'
+  - package.json
+# Alt süreçlerin (ses işçisi, yetenek konağı) okuyabilmesi için kaynaklar asar dışında durur:
+# resources/voice/** (uyandırma, VAD, Piper ses modelleri), resources/icons/**, resources/fonts/**,
+# resources/pc/** (bilgisayar modülünün yardımcıları: uia-helper.ps1 = UI Automation okuyucusu, system-helper.ps1 = ses
+# düzeyi, parlaklık, kilit, güç; PowerShell asar içinden okuyamaz).
+# whisper ikilileri ve modelleri pakete GİRMEZ; veri klasöründe (models/) durur.
+extraResources:
+  - from: resources
+    to: resources
+    filter:
+      - '**/*'
+asar: true
+asarUnpack:
+  - '**/*.node'
+  - '**/node_modules/koffi/**'
+  - '**/node_modules/sherpa-onnx-*/**'
+  # Belge işçisi: pdf-parse'ın taranmış sayfa görüntüsü için yüklediği Skia tuvali (.node + yanındaki icudtl.dat).
+  - '**/node_modules/@napi-rs/canvas*/**'
+win:
+  icon: resources/icons/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  # Kullanıcı başına, yönetici izni istemeyen tek tıkla kurulum.
+  oneClick: true
+  perMachine: false
+  runAfterFinish: true
+  createDesktopShortcut: true
+  shortcutName: Fuber AI 2
+  artifactName: Fuber AI 2 Kurulum ${version}.${ext}
+  installerIcon: resources/icons/icon.ico
+  uninstallerIcon: resources/icons/icon.ico
+publish: []

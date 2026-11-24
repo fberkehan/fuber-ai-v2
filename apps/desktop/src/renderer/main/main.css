@@ -1,0 +1,213 @@
+/*
+ * Ana pencereye özgü küçük hareketler ve canlı satırın yerleşimi. Tailwind'in hazır animasyonları kapalı
+ * (tokens.css); buradakilerin hepsi yalnız bir kez oynar (döngü yok) ve azaltılmış harekette anında biter.
+ */
+
+/* Akan yanıtta yeni gelen sözcük: yalnız saydamlık; konum oynamaz ki okunan satır kıpırdamasın. */
+@keyframes fuber-word-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fuber-word-in {
+  animation: fuber-word-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Kip ekranları (acil durdurma, zorunlu güncelleme): önce varlık, ardından başlık, ardından kart ve düğmeler. */
+@keyframes fuber-gate-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fuber-gate > * {
+  animation: fuber-gate-in var(--duration-spring) var(--ease-spring) both;
+}
+.fuber-gate > :nth-child(2) {
+  animation-delay: 80ms;
+}
+.fuber-gate > :nth-child(3) {
+  animation-delay: 140ms;
+}
+.fuber-gate > :nth-child(n + 4) {
+  animation-delay: 200ms;
+}
+
+/* Eski ad (başka sayfalar kullanıyor olabilir): tek blok giriş. */
+.fuber-gate-in {
+  animation: fuber-gate-in 320ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Sohbet içeriği seçilebilir; kabuk seçilemez (tokens.css). */
+.fuber-prose a {
+  color: var(--color-accent-fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--color-accent-fg) 45%, transparent);
+}
+
+/* ───────────── canlı çentik ───────────── */
+
+/*
+ * Pencerenin üst ortası: çentik başlık şeridinin ve içeriğin üstünde durur. Gövdeyi `IslandShell` çizer, içerik
+ * yerleşimi adayla ortaktır (`hud/island.css`). Boşta küçük işaret (tıklanınca dinler); pencere odaktayken durum.
+ */
+.window-notch {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: var(--z-sticky);
+  height: 0;
+  -webkit-app-region: no-drag;
+}
+/* Çentiğin gövdesi başlık şeridinin (sürükleme alanı) üstündedir: tıklanabilsin diye sürüklemeden açıkça çıkarılır. */
+.window-notch .pz-clip {
+  -webkit-app-region: no-drag;
+}
+.window-notch[data-kind='idle'] .pz-clip {
+  cursor: pointer;
+}
+/* Boştaki işaret: başlık şeridi boyunda, omuzlarla kaynaşan küçük siyah çentiğin ortasında. */
+.wn-idle {
+  display: grid;
+  width: 76px;
+  height: 30px;
+  padding-bottom: 1px;
+  color: var(--color-fg);
+  place-items: center;
+  opacity: 0.92;
+  transition: opacity 160ms var(--ease-out);
+}
+.window-notch .pz-clip:hover .wn-idle {
+  opacity: 1;
+}
+/* Pencere içinde satır, sağdaki denetimlerin üstüne taşmayacak kadar genişler; uzun söz sondan kısalır. */
+.window-notch .hud-say {
+  max-width: clamp(320px, calc(100vw - 900px), 480px);
+}
+
+/* ───────────── canlı satırın parçaları (çentik ve Bugün'deki alt yazı) ───────────── */
+
+.live-strong {
+  font-weight: 560;
+}
+.live-dim {
+  overflow: hidden;
+  color: var(--color-fg-muted);
+  text-overflow: ellipsis;
+}
+.live-num {
+  color: var(--color-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.live-word {
+  opacity: 1;
+  filter: none;
+  transition:
+    opacity 150ms var(--ease-out),
+    filter 180ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+/* Bugün'deki varlığın alt yazısı: içerik değişince yumuşakça yenilenir. */
+.live-caption {
+  opacity: 1;
+  filter: none;
+  transition:
+    opacity 200ms var(--ease-out),
+    filter 220ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+
+/* ───────────── açılış örtüsü ───────────── */
+
+/* Süreler `Splash.tsx` › SPLASH'tan gelir (CSS'te süre yazılmaz). Örtü tıklamayı yutmaz. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: #000;
+  pointer-events: none;
+  transition: opacity var(--splash-leave) var(--ease-out);
+}
+.splash[data-phase='leave'] {
+  opacity: 0;
+}
+.splash-word {
+  display: flex;
+  gap: 0.06em;
+  color: var(--color-fg);
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 48px;
+  letter-spacing: 0.02em;
+}
+@keyframes splash-letter {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(10px);
+  }
+}
+.splash-word span {
+  animation: splash-letter var(--splash-letter-in) cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes splash-line {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+}
+.splash-line {
+  display: block;
+  width: 132px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-accent-fg), transparent);
+  animation: splash-line var(--splash-line-in) cubic-bezier(0.23, 1, 0.32, 1) var(--splash-line-at) both;
+}
+/* İşaret ve yazı zeminden biraz önce söner (hayalet kalmaz). */
+.splash[data-phase='leave'] .splash-word,
+.splash[data-phase='leave'] .splash-line {
+  opacity: 0;
+  transition: opacity calc(var(--splash-leave) * 0.6) linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pz-shell[data-variant='window'] .pz-content > *,
+  .live-word,
+  .live-caption {
+    filter: none;
+    transition: opacity 160ms var(--ease-out);
+  }
+  .fuber-gate > * {
+    animation-delay: 0ms;
+  }
+  .splash-word span,
+  .splash-line {
+    animation: none;
+  }
+}

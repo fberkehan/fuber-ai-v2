@@ -1,0 +1,9 @@
+{
+  // Renderer ve preload (DOM ortamı).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable", "WebWorker"],
+    "types": ["node", "react", "react-dom"]
+  },
+  "include": ["src/renderer", "src/preload"]
+}

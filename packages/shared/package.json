@@ -1,0 +1,29 @@
+{
+  "name": "@fuber/shared",
+  "version": "2.0.0-demo.16",
+  "private": true,
+  "license": "FSL-1.1-ALv2",
+  "author": "Fuber AI",
+  "homepage": "https://fuber.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fberkehan/orion.git",
+    "directory": "packages/shared"
+  },
+  "bugs": {
+    "url": "https://github.com/fberkehan/orion/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./window-desktop": "./src/window-desktop.ts",
+    "./window-admin": "./src/window-admin.ts"
+  },
+  "scripts": {
+    "typecheck": "node ../../scripts/gen-index.mjs && tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}

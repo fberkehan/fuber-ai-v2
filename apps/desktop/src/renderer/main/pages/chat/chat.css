@@ -1,0 +1,539 @@
+/*
+ * Sohbet: tek birincil kutu (sahne) içinde üç bölme: sohbet listesi | konuşma | bağlam. Kırılımlar kap sorgusuyladır
+ * (`workspace`), pencereyle değil. Konuşma her genişlikte en geniş bölmedir.
+ *
+ *   < 860 px      tek bölme (konuşma); liste ve bağlam çekmecede; sayfa başı çizilmez ("Yeni sohbet" konuşma
+ *                 başlığına iner), boş yazma kutusu odaklanana kadar tek satırdır (dikey bütçe iletilere kalır)
+ *   860–1399 px   liste + konuşma; bağlam çekmecede (başlıktaki bilgi düğmesiyle)
+ *   ≥ 1400 px     liste + konuşma + bağlam
+ *   ≥ 1720 px     liste ve bağlam bir kademe geniş; okuma yazısı bir kademe büyük
+ */
+@layer components {
+  /* Sohbet yüksekliği dolduran sayfadır: sayfa başı ile sahne arası bir kademe sıkı. */
+  .chat-page > .ui-workspace-in {
+    gap: 18px;
+  }
+  .chat-layout {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .ui-panel.chat-stage {
+    position: relative;
+    display: grid;
+    flex: 1 1 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* ───────────── çekmeceler (dar kap): liste soldan, bağlam sağdan; ikisi de aynı dilde ───────────── */
+
+  .chat-list,
+  .chat-context {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: var(--z-raised);
+    display: flex;
+    flex-direction: column;
+    width: min(320px, 88%);
+    min-height: 0;
+    background: var(--color-surface-1);
+    box-shadow: var(--shadow-float);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      transform var(--duration-base) var(--ease-drawer),
+      opacity var(--duration-fast) var(--ease-out),
+      visibility 0s linear var(--duration-base);
+  }
+  .chat-list {
+    left: 0;
+    border-right: 1px solid var(--color-line-strong);
+    transform: translateX(-24px);
+  }
+  .chat-context {
+    right: 0;
+    overflow: hidden auto;
+    border-left: 1px solid var(--color-line-strong);
+    transform: translateX(24px);
+  }
+  .chat-list[data-open],
+  .chat-context[data-open] {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+    transition:
+      transform var(--duration-base) var(--ease-drawer),
+      opacity var(--duration-fast) var(--ease-out),
+      visibility 0s;
+  }
+  .chat-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: calc(var(--z-raised) - 1);
+    border: 0;
+    background: var(--color-scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .chat-scrim[data-open] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Klavyeyle (Esc) kapanan çekmece canlandırılmaz. */
+  .chat-layout[data-instant] .chat-list,
+  .chat-layout[data-instant] .chat-context,
+  .chat-layout[data-instant] .chat-scrim {
+    transition: none;
+  }
+  .chat-context-close,
+  .chat-list-toggle,
+  .chat-context-toggle,
+  .chat-new-compact {
+    display: flex;
+  }
+  .chat-context-close {
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    z-index: 1;
+  }
+  /* Çekmecede ilk bölümün başlığı kapatma düğmesine yer bırakır. */
+  .chat-context .ctx-section:first-child > .ctx-head {
+    padding-right: 36px;
+  }
+  /* Hiç sohbet yokken liste yoktur: ne sütunu ne çekmecesi. (Bağlam çekmecesi durur: sıradakiler oradan görülür.) */
+  .chat-stage[data-no-list] .chat-list,
+  .chat-stage[data-no-list] .chat-list-toggle,
+  .chat-stage[data-no-list] .chat-scrim[data-for='list'] {
+    display: none;
+  }
+  /* Bağlam bölümleri sahnenin iç kenarını paylaşır (20 px). */
+  .chat-context .ctx-section {
+    padding: 18px 20px;
+  }
+
+  /* ───────────── sohbet listesi ───────────── */
+
+  /* Sohbet satırı içerikle yarışmaz: başlık gövde yazısından bir kademe küçük ve sakin; seçili olan belirgin. */
+  .chat-session {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 48px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    outline-offset: -2px;
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  .chat-session:hover {
+    background: rgb(255 255 255 / 0.04);
+  }
+  .chat-session[aria-current='true'] {
+    background: var(--color-surface-4);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
+  .chat-session:active {
+    transform: scale(0.99);
+  }
+  .chat-session-title {
+    overflow: hidden;
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    line-height: calc(20px * var(--kokpit-k, 1));
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chat-session:hover .chat-session-title,
+  .chat-session[aria-current='true'] .chat-session-title {
+    color: var(--color-fg);
+  }
+  .chat-session[aria-current='true'] .chat-session-title {
+    font-weight: 500;
+  }
+  .chat-session-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-fg-faint);
+    font-size: var(--text-xs);
+    line-height: calc(16px * var(--kokpit-k, 1));
+  }
+
+  /* ───────────── konuşma ───────────── */
+
+  .chat-conv {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+  .chat-conv-head {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  /* Yeni sohbette başlık yinelenmez ("Yeni sohbet" düğmesi ve karşılama zaten söyler): şerit çıplak kalır. */
+  .chat-conv-head[data-bare] {
+    border-bottom-color: transparent;
+  }
+  .chat-conv-head[data-bare] > div > h2 {
+    visibility: hidden;
+  }
+  /*
+   * Başlık ve yazma kutusu, kaydırılan ileti alanıyla aynı kenarda durur: üçü de aynı kaydırma çubuğu payını ayırır
+   * (dar kapta sütun tam genişlikteyken de hizalar tutar).
+   */
+  .chat-conv-head,
+  .chat-composer-slot {
+    overflow-y: auto;
+    scrollbar-gutter: stable both-edges;
+  }
+  .chat-composer-slot > .chat-column {
+    padding-top: 4px;
+  }
+  /*
+   * Okuma sütunu: başlık, iletiler ve yazma kutusu AYNI sol ve sağ kenarda durur (tek eksen).
+   * Yan boşluk 24 px; yazma kutusunun altı da 24 px.
+   */
+  .chat-column {
+    width: 100%;
+    max-width: 664px;
+    margin-inline: auto;
+    padding-inline: 24px;
+  }
+  /* İletiler yazma kutusuna ve başlığa sert kesilmez: üstte kısa, altta uzun bir solma. Çubuk iki yanda yer tutar. */
+  .chat-scroller {
+    min-height: 0;
+    flex: 1 1 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable both-edges;
+    mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 60px), transparent 100%);
+  }
+  /*
+   * Boş konuşma: karşılama, hazır istekler ve yazma kutusu tek grup olarak bölmenin ortasında durur (üstte ve altta
+   * eşit boşluk). İlk iletiyle birlikte kutu alta iner, iletiler üstten akar.
+   */
+  .chat-conv[data-empty] > .chat-scroller {
+    flex: 0 1 auto;
+    margin-top: auto;
+    mask-image: none;
+  }
+  .chat-conv[data-empty] > .chat-composer-slot {
+    margin-bottom: auto;
+  }
+  .chat-conv[data-empty] > .chat-conv-head[data-bare] + .chat-scroller {
+    margin-top: auto;
+  }
+  .chat-welcome-title {
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl--line-height);
+  }
+  /*
+   * Satır ölçüsü: 15 px Inter'de Türkçe metnin ortalama harfi 6,1–6,6 px, 448 px ≈ 68–73 karakter (ölçüldü).
+   * Ölçü metin bloklarına uygulanır; kod bloğu okuma sütununun tamamını kullanır (daha az yatay kayar).
+   */
+  .chat-prose {
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+  .chat-prose > div > :not(.chat-code),
+  .chat-measure {
+    max-width: 448px;
+  }
+
+  /* Kullanıcı balonu: koyu, sakin yüzey; sayfanın en parlak öğesi yanıt metnidir, soru değil. */
+  .chat-me {
+    background: var(--color-surface-5);
+    color: var(--color-fg);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+
+  /* Hata turu: kehribar kıl payı çerçeve ve çok hafif kehribar zemin; kalın kenar çizgisi yok. */
+  .chat-error {
+    background: color-mix(in srgb, var(--color-warning) 6%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-warning) 26%, transparent);
+  }
+
+  /* Araç adımı: çerçevesiz, sakin satır. */
+  .chat-tool {
+    background: rgb(255 255 255 / 0.04);
+  }
+  /* Açılan adımlar: tek kap, solda kıl payı çizgi, dolgusuz eşit satırlar. */
+  .chat-steps {
+    display: flex;
+    flex-direction: column;
+    margin: 2px 0 0 13px;
+    padding-left: 13px;
+    border-left: 1px solid var(--color-line-strong);
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+  }
+  .chat-steps > li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    height: 28px;
+  }
+
+  /* Kod bloğu: başlık şeridi (dil + kopyala) ve yatayda kayan gövde. */
+  .chat-code {
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: #070707;
+  }
+  .chat-code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 34px;
+    padding: 0 6px 0 14px;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-fg-faint);
+    font-size: var(--text-xs);
+  }
+  .chat-code pre {
+    margin: 0;
+    padding: 12px 14px;
+    overflow-x: auto;
+    color: var(--color-fg);
+    font-size: var(--text-sm);
+    line-height: calc(20px * var(--kokpit-k, 1));
+  }
+
+  /* Yazma kutusu (yığılı): üstte yazı, altta araç şeridi. Tuş ipucu yalnız yazarken (odakta) görünür. */
+  .chat-composer {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-1);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
+  .chat-composer:focus-within {
+    border-color: rgb(255 255 255 / 0.3);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.04),
+      0 0 0 3px rgb(255 255 255 / 0.05);
+  }
+  .chat-composer textarea {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    max-height: 198px;
+    padding: 14px 16px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--color-fg);
+    font: inherit;
+    letter-spacing: inherit;
+    resize: none;
+    outline: none;
+    field-sizing: content;
+  }
+  .chat-composer textarea::placeholder {
+    color: var(--color-fg-faint);
+  }
+  .chat-composer .chat-hint {
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .chat-composer:focus-within .chat-hint {
+    opacity: 1;
+  }
+
+  /* Boş konuşmadaki istek satırı. */
+  .chat-suggest {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: rgb(255 255 255 / 0.02);
+    color: var(--color-fg);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      transform var(--duration-instant) var(--ease-out);
+  }
+  .chat-suggest:hover {
+    border-color: var(--color-line-strong);
+    background: rgb(255 255 255 / 0.05);
+  }
+  .chat-suggest:active {
+    transform: scale(0.97);
+  }
+  .chat-suggest-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 8px;
+  }
+
+  @container workspace (min-width: 560px) {
+    .chat-suggest-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /*
+   * Dar kap: dikey bütçe iletilere kalır. Sayfa başı görünmez (başlık okuyucular için yerinde durur; "Yeni sohbet"
+   * konuşma başlığındadır). Boş yazma kutusu odaklanana kadar tek satırdır: yazı | ataç | mikrofon | gönder.
+   */
+  @container workspace (max-width: 859px) {
+    .chat-page .ui-ws-header {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .chat-composer:not(:focus-within):has(textarea:placeholder-shown) {
+      flex-direction: row;
+      align-items: center;
+      padding-inline: 8px;
+    }
+    .chat-composer:not(:focus-within):has(textarea:placeholder-shown) > .chat-composer-tools {
+      display: contents;
+    }
+    .chat-composer:not(:focus-within):has(textarea:placeholder-shown) > .chat-composer-field {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .chat-composer:not(:focus-within):has(textarea:placeholder-shown) textarea {
+      padding: 12px 8px;
+    }
+    .chat-composer:not(:focus-within):has(textarea:placeholder-shown) .chat-composer-note {
+      display: none;
+    }
+    /* Tuş ipucu bu hâlde zaten görünmez; yer de tutmaz (görünürlüğü yardımcı sınıfla verildiği için konumla çıkarılır). */
+    .chat-composer:not(:focus-within):has(textarea:placeholder-shown) .chat-hint {
+      position: absolute;
+      pointer-events: none;
+    }
+  }
+
+  @container workspace (min-width: 860px) {
+    .ui-panel.chat-stage {
+      grid-template-columns: 292px minmax(0, 1fr);
+    }
+    .ui-panel.chat-stage[data-no-list] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .chat-list {
+      position: static;
+      width: auto;
+      border-right-color: var(--color-line);
+      background: rgb(0 0 0 / 0.22);
+      box-shadow: none;
+      opacity: 1;
+      transform: none;
+      visibility: visible;
+      transition: none;
+    }
+    .chat-scrim[data-for='list'],
+    .chat-list-toggle,
+    .chat-new-compact {
+      display: none;
+    }
+  }
+
+  @container workspace (min-width: 1400px) {
+    .ui-panel.chat-stage {
+      grid-template-columns: 292px minmax(0, 1fr) 320px;
+    }
+    .ui-panel.chat-stage[data-no-list] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .chat-context {
+      position: static;
+      width: auto;
+      border-left-color: var(--color-line);
+      background: rgb(0 0 0 / 0.22);
+      box-shadow: none;
+      opacity: 1;
+      transform: none;
+      visibility: visible;
+      transition: none;
+    }
+    .chat-scrim[data-for='context'],
+    .chat-context-toggle,
+    .chat-context-close {
+      display: none;
+    }
+    .chat-context .ctx-section:first-child > .ctx-head {
+      padding-right: 0;
+    }
+    /* Hiç sohbet yokken (ilk açılış) geniş kapta bağlam sütunu çizilmez: karşılama kutunun eksenine ortalanır. */
+    .chat-stage[data-no-list] .chat-context {
+      display: none;
+    }
+    /* Geniş kapta yeni sohbetin çıplak başlık şeridi hiç yer tutmaz (içinde gösterilecek düğme kalmaz). */
+    .chat-conv-head[data-bare] {
+      display: none;
+    }
+  }
+
+  @container workspace (min-width: 1720px) {
+    .ui-panel.chat-stage {
+      grid-template-columns: 340px minmax(0, 1fr) 400px;
+    }
+    .ui-panel.chat-stage[data-no-list] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    /* Geniş kapta yazı bir kademe büyür; satır ölçüsü aynı kalır (17 px'te 508 px ≈ 68–73 karakter). */
+    .chat-column {
+      max-width: calc(784px * var(--kokpit-k, 1));
+    }
+    .chat-prose {
+      font-size: var(--text-lg);
+      line-height: calc(26px * var(--kokpit-k, 1)); /* yazı panoda `--kokpit-k` ile büyür: satır yüksekliği de büyümeli (4K'da 30 px yazı 26 px satıra sıkışıyordu) */
+    }
+    .chat-prose > div > :not(.chat-code),
+    .chat-measure {
+      max-width: calc(508px * var(--kokpit-k, 1));
+    }
+    .chat-me {
+      font-size: var(--text-lg);
+      line-height: calc(26px * var(--kokpit-k, 1)); /* yazı panoda `--kokpit-k` ile büyür: satır yüksekliği de büyümeli (4K'da 30 px yazı 26 px satıra sıkışıyordu) */
+    }
+    .chat-welcome-title {
+      font-size: var(--text-3xl);
+      line-height: var(--text-3xl--line-height);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chat-list,
+    .chat-list[data-open],
+    .chat-context,
+    .chat-context[data-open],
+    .chat-scrim {
+      transition: none;
+    }
+  }
+}

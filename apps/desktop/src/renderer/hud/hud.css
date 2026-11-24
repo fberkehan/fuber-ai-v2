@@ -1,0 +1,107 @@
+/*
+ * HUD yüzeylerinin kalıcı düzen sözleşmesi (KURGU §9): içerik kutusu (`.hud-content`) pencerenin sol üst köşesinden
+ * başlar; pencere bu kutunun ölçüsüne getirilir. Görünüm penceresinin boyutu içeriği etkilemez (yoksa ölçüm
+ * pencereye, pencere ölçüme bağlanır ve boyut oturmaz).
+ *
+ * Hareketli yüzeylerde kutunun ölçüsü "zarf"tır: görünen şeklin, süren geçişin kaplayacağı en büyük alanla
+ * birleşimi. Büyürken zarf önce büyür (pencere önce büyür), küçülürken geçiş bitince küçülür; görünen şekil
+ * pencere kenarına göre değil görünüm penceresine göre konumlanır ki pencere yeniden boyutlanırken yerinden oynamasın.
+ */
+html[data-transparent],
+html[data-transparent] body,
+html[data-transparent] #root {
+  overflow: hidden;
+  background: transparent;
+}
+
+.hud-content {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: 600px;
+}
+/* Ada: sabit sahne (bkz. Island.tsx › STAGE); en geniş satır (bilgisayar kullanımı + "Durdur") buna sığar. */
+.hud-content[data-surface='island'] {
+  max-width: 720px;
+}
+
+/*
+ * Windows üst düzey pencereyi belli bir yükseklikten alçak yapmaz (SM_CYMINTRACK: %100 ölçekte 39 px, %150'de
+ * 56 px ≈ 37,3 CSS px; `minHeight` seçeneği bunu aşmıyor, ölçüldü). Daha alçak içerikte pencere içerikten
+ * büyük kalır ve fazlalık tıklama yutar; bu yüzden yüzeydeki her kutu en az 40 px yüksektir.
+ */
+.hud-content > * {
+  min-height: 40px;
+}
+
+:root {
+  /* Hafif esnek yay (≈ %2 aşma, 320 ms'de yerleşir); `motion.ts` › `spring.gentle` ile aynı his. */
+  --hud-spring: linear(0, 0.0397, 0.1351, 0.2581, 0.389, 0.5153, 0.6295, 0.7276, 0.8086, 0.873, 0.9224, 0.9587, 0.9843,
+    1.0014, 1.0119, 1.0175, 1.0197, 1.0197, 1.0182, 1.0159, 1.0133, 1.0107, 1.0083, 1.0062, 1);
+  --hud-spring-duration: 420ms;
+  /* Pencere kenarında kırpılmayacak kadar kısa gölge: gölge payı (aşağıdaki boşluklar) bunu kaplar. */
+  --hud-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 0 0 1px rgba(255, 255, 255, 0.1), 0 6px 14px -4px rgba(0, 0, 0, 0.7),
+    0 2px 5px rgba(0, 0, 0, 0.45);
+}
+
+/* ───────────────────────────── ada ───────────────────────────── */
+
+/*
+ * Görünüm penceresinin üst ortası: gövde buradan aşağı doğar (ekranın üst kenarına kaynaklı; üstte pay yok).
+ * Pencere yeniden konumlanırken ekrandaki yeri değişmez. Gövdeyi ve biçim geçişini `IslandShell` çizer
+ * (`@fuber/ui` › presence); içeriğin yerleşimi `island.css`'te (solda ışık çekirdeği: 58 px pay).
+ */
+.island-anchor {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+/* Adanın içerik yerleşimi `island.css`'tedir (ana pencerenin çentiği de aynı dosyayı kullanır). */
+
+/* ───────────────────────────── toast yığını ───────────────────────────── */
+
+/* Sağ alta yaslı: yeni kart altta doğar, pencere yukarı doğru büyür, eskiler yerinden kaymaz. */
+.toasts-anchor {
+  position: fixed;
+  right: 12px;
+  bottom: 16px;
+}
+
+/* ───────────────────────────── sahne ───────────────────────────── */
+
+/* Sağa yaslı ve dikeyde ortada: ana süreç pencereyi içeriğin ortasına göre yerleştirir. */
+.stage-anchor {
+  position: fixed;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.stage-scroll {
+  max-height: 720px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.stage-scroll[data-overflow] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+}
+
+/* Başlık çubuğu pencereyi taşır (işletim sistemi sürüklemesi); içindeki düğmeler tıklanır kalır. */
+.stage-drag {
+  -webkit-app-region: drag;
+}
+.stage-drag button,
+.stage-drag a {
+  -webkit-app-region: no-drag;
+}
+
+.stage-frame {
+  display: block;
+  border: 0;
+  background: var(--color-stage);
+}

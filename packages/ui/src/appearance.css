@@ -1,0 +1,203 @@
+/*
+ * Görünüm katmanı. Masaüstü uygulamasının tek görünümü Takımyıldız'dır: sahne tek parça siyah, arkasında yıldızlı
+ * gökyüzü; içerik doğrudan sahnede durur, kartlar arkadan ışık alır; başlıkta canlı çentik. Masaüstü sayfaları belge
+ * köküne sabit `data-appearance="takimyildiz"` yazar (HTML girişleri). Kullanıcıya görünüm seçimi sunulmaz.
+ *
+ * Yönetim uygulaması bu işareti taşımaz: sade kart (ışıksız) ve düz yüzey kalır.
+ */
+
+/* Katman: bileşen. Tailwind yardımcı sınıfları (konum, taşma, boşluk) bu kuralların üstüne yazabilir. */
+@layer components {
+  :root {
+    --card-light: none;
+    --card-halo: 0 0 #0000;
+    --pano-bg: #0a0a0a;
+    --pano-line: var(--color-line);
+    --pano-shadow: var(--shadow-raise);
+  }
+
+  :root[data-appearance='takimyildiz'] {
+    --color-page: #000000;
+    /* Arkadan ışık: kartın üst kenarının gerisinde soğuk, yumuşak bir hale. */
+    --card-light: radial-gradient(80% 90px at 50% -34px, rgba(150, 190, 255, 0.075), transparent 72%);
+    --card-halo: 0 -22px 70px -42px rgba(91, 155, 255, 0.5);
+    --pano-bg: transparent;
+    --pano-line: transparent;
+    --pano-shadow: 0 0 #0000;
+  }
+
+  /* ───────────── kart ───────────── */
+
+  /* Kart yüzeyi: dolgu + kıl payı çizgi + görünümün ışığı. `Surface` ve `Card` bunu taşır. */
+  .ui-card {
+    position: relative;
+    isolation: isolate;
+    box-shadow: var(--card-halo);
+  }
+  .ui-card::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--card-light);
+    content: '';
+    pointer-events: none;
+  }
+
+  /* Dikkat isteyen kart (bekleyen onay): kehribar kıl payı çerçeve ve üstten hafif kehribar ışık; kenar çizgisi yok. */
+  .ui-card[data-attention] {
+    border-color: color-mix(in srgb, var(--color-warning) 36%, transparent);
+  }
+  .ui-card[data-attention]::before {
+    background: radial-gradient(70% 80px at 18% -30px, rgba(255, 176, 32, 0.12), transparent 72%);
+  }
+
+  /* Yeni beliren önemli kart: ışık bir kez süpürür, sonra sakin (döngü yok). */
+  @keyframes ui-sweep {
+    0% {
+      opacity: 0;
+      transform: translateX(-110%);
+    }
+    22% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(260%);
+    }
+  }
+  .ui-sweep {
+    overflow: hidden;
+  }
+  .ui-sweep > .ui-sweep-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 42%;
+    background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.09) 50%, transparent 100%);
+    opacity: 0;
+    pointer-events: none;
+    animation: ui-sweep 820ms cubic-bezier(0.4, 0, 0.2, 1) 240ms 1 both;
+  }
+
+  /* ───────────── kabuk ───────────── */
+
+  .ui-shell {
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* Pano: içeriğin durduğu yüzey. Takımyıldız'da görünmez (içerik sahnede); yönetimde düz yüzey. */
+  .ui-pano {
+    border-radius: var(--radius-lg);
+    background: var(--pano-bg);
+    box-shadow:
+      inset 0 0 0 1px var(--pano-line),
+      var(--pano-shadow);
+  }
+
+  /* Çerçevesiz pencere: başlık şeridi pencereyi taşır; içindeki denetimler tıklanır kalır. */
+  .ui-drag {
+    -webkit-app-region: drag;
+  }
+  .ui-no-drag,
+  .ui-drag button,
+  .ui-drag a,
+  .ui-drag input,
+  .ui-drag [role='status'],
+  .ui-drag [tabindex] {
+    -webkit-app-region: no-drag;
+  }
+
+  /* Yıldızlı gökyüzü: durağan tuval; sayfa değişince birkaç piksel kayar (derinlik), döngü yok. */
+  .ui-sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .ui-sky canvas {
+    position: absolute;
+    top: 0;
+    left: -12px;
+    display: block;
+    transition: transform var(--duration-spring) var(--ease-spring);
+  }
+  /* Üstten çok hafif soğuk ışık: sahne düz siyah bir panel gibi durmasın. */
+  .ui-sky::after {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(70% 46% at 62% -8%, rgba(60, 110, 230, 0.13), transparent 70%);
+    content: '';
+  }
+
+  /* Logotip: işaret + "FUBER" (Inter 900, açık aralık) + ürün adı (ince); altında küçük ikincil satır. */
+  .ui-brand-mark {
+    color: var(--color-fg);
+  }
+  .ui-logo-word {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--color-fg);
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 18px;
+    letter-spacing: 0.06em;
+  }
+  .ui-logo-product {
+    color: color-mix(in srgb, var(--color-fg) 62%, transparent);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .ui-logo-caption {
+    margin-top: 2px;
+    color: var(--color-fg-muted);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 15px;
+    letter-spacing: 0.01em;
+  }
+
+  /* Raydaki sayfa kısayolu (Ctrl+1…8): üstüne gelince satırın sağında soluk bir tuş rozeti. */
+  .ui-nav-shortcut {
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .ui-nav-shortcut::after {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-4);
+    color: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    content: attr(data-shortcut);
+  }
+  [data-nav-item]:hover .ui-nav-shortcut,
+  [data-nav-item]:focus-visible .ui-nav-shortcut {
+    opacity: 1;
+  }
+
+  /* Kaydırılan sayfada kaydırma çubuğu belirince içerik yana kaymaz. */
+  .ui-scroll {
+    scrollbar-gutter: stable;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-sky canvas {
+      transition: none;
+    }
+    .ui-sweep > .ui-sweep-band {
+      animation: none;
+    }
+  }
+}

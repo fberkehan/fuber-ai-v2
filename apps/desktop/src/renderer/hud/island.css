@@ -1,0 +1,350 @@
+/*
+ * Adanın içeriği (satır, altyazı, kart, hızlı denetimler). Yüzen ada (`hud/`) ve ana pencerenin canlı çentiği
+ * (`main/shell/LiveLine.tsx`) aynı içeriği aynı ölçüyle taşır. Solda ışık çekirdeği yer tutar (58 px pay).
+ */
+
+/* İçeriğin giriş geçişi kabuktadır (`@fuber/ui` › presence.css › `.pz-content-in`). */
+
+.hud-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-fg);
+  white-space: nowrap;
+}
+.hud-strong {
+  font-weight: 560;
+  color: var(--color-fg);
+}
+.hud-dim {
+  color: var(--color-fg-muted);
+}
+.hud-num {
+  color: var(--color-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.hud-ellip {
+  display: inline-block;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hud-ellip-short {
+  max-width: 190px;
+}
+/* Adım sabit genişlikte: adım değişirken ada genişleyip daralmaz; yeni adım aşağıdan belirir (bir kez). */
+.hud-step {
+  display: inline-block;
+  width: 196px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: hud-step-in 260ms var(--ease-out);
+}
+@keyframes hud-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+/* Toplantı kaydı göstergesi: küçük, sakin kırmızı nokta (kayıt sürüyor). */
+.hud-rec {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-danger);
+}
+.hud-sep {
+  flex-shrink: 0;
+  width: 1px;
+  height: 16px;
+  background: var(--color-line-strong);
+}
+.hud-ghost {
+  height: 32px;
+  padding: 0 10px;
+}
+.hud-mini {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  background: var(--color-surface-4);
+  color: var(--color-fg);
+  font-size: 12px;
+  font-weight: 560;
+  cursor: pointer;
+  transition:
+    background-color 140ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+.hud-mini:hover {
+  background: var(--color-surface-5);
+}
+/* Birincil küçük düğme (bilgisayar kullanımında "Durdur"): satırın en belirgin öğesi; kontrol her an geri alınabilir. */
+.hud-mini[data-primary] {
+  height: 30px;
+  background: var(--color-fg);
+  color: #000;
+}
+.hud-mini[data-primary]:hover {
+  background: #fff;
+}
+.hud-mini[data-primary] .hud-mini-keys {
+  opacity: 0.7;
+}
+.hud-mini:active {
+  transform: scale(0.96);
+}
+.hud-mini-keys {
+  margin-right: -6px;
+  opacity: 0.85;
+}
+
+/* Yazıya dökülen söz: sabit en çok genişlikte tek satır; taşınca sondan tutulur. */
+.hud-tail-box {
+  max-width: 300px;
+  color: var(--color-fg);
+}
+
+/* Altyazı: cümle yerini alır, sözcükler söylendikçe belirir. */
+.hud-say {
+  color: var(--color-fg);
+  font-weight: 540;
+  text-wrap: pretty;
+}
+.hud-say p {
+  margin: 0;
+}
+.hud-word {
+  opacity: 1;
+  filter: none;
+  transition:
+    opacity 150ms var(--ease-out),
+    filter 180ms var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+/* Kart: bildirim, onay, uzun ileti. */
+.hud-card {
+  text-align: left;
+  white-space: normal;
+}
+.hud-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  color: var(--color-fg-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+.hud-card-head.text-warning {
+  color: var(--color-warning);
+}
+.hud-card-head.text-danger {
+  color: var(--color-danger);
+}
+.hud-x {
+  margin-right: -6px;
+  border-radius: 9999px;
+}
+.hud-card-title {
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--color-fg);
+  font-size: 22px;
+  font-weight: 640;
+  line-height: 27px;
+  letter-spacing: -0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hud-card-title-sm {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 23px;
+  letter-spacing: -0.025em;
+  text-wrap: pretty;
+  white-space: normal;
+}
+.hud-card-sub {
+  margin: 6px 0 0;
+  color: var(--color-fg-muted);
+  font-size: 13px;
+  line-height: 19px;
+}
+.hud-card-sub-solo {
+  margin-top: 2px;
+  color: var(--color-fg);
+  font-size: 14px;
+  line-height: 20px;
+}
+.hud-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.hud-message {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: 13.5px;
+  line-height: 20px;
+}
+.hud-bad-lead::first-line {
+  color: var(--color-danger);
+}
+
+/* ── Üstüne gelince: satır yerinde kalır, yanında hızlı denetimler açılır ── */
+.hud-hover {
+  display: flex;
+  align-items: center;
+}
+.hud-hover[data-open] > .hud-line,
+.hud-hover[data-open] > .hud-say {
+  padding-right: 12px;
+}
+/* Denetimlere yer açılır: uzun söz biraz daralır ki ada sahneyi aşmasın (altyazı yeniden kırılmaz: genişliği sabit). */
+.hud-hover[data-open] .hud-tail-box,
+.hud-hover[data-open] .hud-ellip {
+  max-width: 170px;
+}
+.hud-controls[data-leaving] {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms var(--ease-out);
+}
+.hud-controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  padding: 0 12px 0 8px;
+  border-left: 1px solid var(--color-line);
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 160ms var(--ease-out) 60ms,
+    transform 200ms var(--ease-out) 60ms;
+
+  @starting-style {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+}
+.hud-controls {
+  margin-bottom: 5px;
+}
+.hud-hover[data-bare] {
+  height: 48px;
+  padding-left: 58px;
+}
+.hud-hover[data-bare] > .hud-controls {
+  border-left: 0;
+  padding-left: 0;
+}
+.hud-ctl {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  color: var(--color-fg-muted);
+  font-size: 17px;
+  cursor: pointer;
+  transition:
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+.hud-ctl:hover {
+  background: var(--color-surface-4);
+  color: var(--color-fg);
+}
+.hud-ctl:active {
+  transform: scale(0.94);
+}
+.hud-ctl:focus-visible {
+  outline: 2px solid var(--color-fg);
+  outline-offset: -2px;
+}
+.hud-ctl[data-on] {
+  color: var(--color-danger);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-controls {
+    transition: opacity 120ms linear;
+
+    @starting-style {
+      transform: none;
+    }
+  }
+}
+
+/* ── Yerleşim: solda ışık çekirdeği ── */
+.hud-line {
+  height: 48px;
+  padding: 0 26px 5px 58px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.hud-line[data-trailing] {
+  padding-right: 14px;
+}
+.hud-say {
+  max-width: 480px;
+  min-height: 48px;
+  padding: 11px 28px 17px 58px;
+  font-size: 15px;
+  line-height: 20px;
+}
+.hud-card {
+  width: 392px;
+  padding: 14px 18px 18px 70px;
+}
+.hud-card-head {
+  height: 36px;
+  margin-top: -2px;
+}
+.hud-card-slim {
+  padding: 16px 22px 18px 70px;
+}
+
+
+/* Uzun canlı yazı: tek satır, en yeni sözcükler görünür. Durağanken metin bir sözcüğün başından başlar (kırpık harf
+   yok); sol kenar yalnız eski sözcükler kayıp çıkarken yumuşakça söner. */
+.hud-tail {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.hud-tail[data-sliding] {
+  mask-image: linear-gradient(to right, transparent 0, #000 24px);
+}
+.hud-tail > span {
+  display: inline-block;
+  transition: transform 240ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pz-content > *,
+  .hud-word {
+    filter: none;
+    transition: opacity 160ms var(--ease-out);
+  }
+  .hud-step {
+    animation: none;
+  }
+  .hud-tail > span {
+    transition: none;
+  }
+}

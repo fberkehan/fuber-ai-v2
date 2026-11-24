@@ -1,0 +1,9 @@
+{
+  // Yalnız örnek modülün (modules/_example) derlenebildiğini denetler; uygulamanın tür denetimine girmez
+  // (örnekteki tip genişletmeleri gerçek `Api` haritasını kirletmesin diye).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src/main/modules/_example"]
+}

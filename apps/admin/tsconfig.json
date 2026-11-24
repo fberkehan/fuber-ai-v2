@@ -1,0 +1,8 @@
+{
+  // Ana süreç (Node ortamı). Renderer ve preload: tsconfig.web.json
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src/main"]
+}

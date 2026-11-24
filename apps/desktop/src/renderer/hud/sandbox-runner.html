@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      Sahne mini uygulamalarının koşucusu. `sandbox="allow-scripts"` çerçevede (köken opak, üst pencereye ve köprüye
+      erişim yok) kendi içerik politikasıyla açılır: ağ yok, yalnız satır içi betik/stil ve gömülü görüntü.
+      Neden ayrı belge: srcdoc/blob/data çerçeveleri sahne sayfasının politikasını devralır ve orada satır içi
+      betik yasaktır; bu belge dosyadan yüklendiği için devralmaz. Mini uygulamanın HTML'i üst pencereden ileti
+      olarak gelir ve bu belgenin yerine yazılır (politika belgeyle birlikte kalır).
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; media-src data:; form-action 'none'; base-uri 'none'"
+    />
+    <script>
+      addEventListener('message', function (event) {
+        if (event.source !== parent || !event.data || typeof event.data.html !== 'string') return;
+        document.open();
+        document.write(event.data.html);
+        document.close();
+      });
+      parent.postMessage({ fuberStage: 'ready' }, '*');
+    </script>
+  </head>
+  <body></body>
+</html>

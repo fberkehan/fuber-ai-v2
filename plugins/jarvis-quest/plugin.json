@@ -1,0 +1,17 @@
+{
+  "id": "jarvis-quest",
+  "name": "Fuber AI for JARVIS: Quest 3",
+  "version": "1.0.0",
+  "description": "Meta Quest 3 headset bridge (QR + PIN pairing, encrypted TCP) and the JARVIS HUD stream. Also provides the device bridge the Galaxy Watch plugin uses.",
+  "requires": [],
+  "workspace": "@fuber/desktop",
+  "files": [
+    { "from": "desktop/modules/xr", "to": "apps/desktop/src/main/modules/xr" },
+    { "from": "desktop/pages/xr", "to": "apps/desktop/src/renderer/main/pages/xr" },
+    { "from": "desktop/i18n/xr.ts", "to": "packages/shared/src/i18n/tr/xr.ts" },
+    { "from": "docs/protokol-test-vektoru.json", "to": "docs/protokol-test-vektoru.json" }
+  ],
+  "moduleIds": ["xr"],
+  "dependencies": { "qrcode": "1.5.4" },
+  "devDependencies": { "@types/qrcode": "1.5.6" }
+}

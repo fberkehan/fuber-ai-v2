@@ -1,0 +1,92 @@
+/*
+ * Yetenekler: sayfaya özgü yerleşim. Kırılımlar kap sorgusuyladır: sayfanın kabı `workspace`; yerleşik yetenek
+ * dizini (`skl-index`) kendi genişliğine bakar.
+ */
+
+/* ───────────── yerleşik yetenekler: kümeler yan yana sütun, satır simge + ad ───────────── */
+
+.skl-index {
+  container: skl-index / inline-size;
+}
+.skl-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px 12px;
+  padding: 14px 12px 12px;
+}
+@container skl-index (min-width: 440px) {
+  .skl-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container skl-index (min-width: 900px) {
+  .skl-groups {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.skl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.skl-row-caret {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .skl-row:hover {
+    background: var(--color-surface-3);
+  }
+  .skl-row:hover .skl-row-caret {
+    opacity: 1;
+  }
+}
+.skl-row[aria-pressed='true'] {
+  background: var(--color-surface-3);
+}
+.skl-row[aria-pressed='true'] .skl-row-caret {
+  opacity: 1;
+}
+.skl-row:active {
+  transform: scale(0.99);
+}
+
+/* ───────────── kendi geliştirdiklerim: seçilebilir satır ───────────── */
+
+.skl-own {
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+.skl-own[data-selected] {
+  background: var(--color-surface-3);
+}
+
+/* ───────────── ana alan: çok geniş kapta iki sütun (ek genişlik ek sütuna döner) ─────────────
+   Sol sütun: geliştirme alanı ve kendi yetenekleri (geniş); sağ sütun: yerleşik yetenek dizini. */
+
+.skl-main,
+.skl-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ───────────── bağlam sütunu: ayrıntı kendi içinde kayar ───────────── */
+
+@container workspace (min-width: 1040px) {
+  .skl-detail-scroll {
+    max-height: calc(100dvh - 190px);
+    overflow-y: auto;
+  }
+}

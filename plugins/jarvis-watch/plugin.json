@@ -1,0 +1,16 @@
+{
+  "id": "jarvis-watch",
+  "name": "Fuber AI for JARVIS: Galaxy Watch",
+  "version": "1.0.0",
+  "description": "Galaxy Watch companion: heart rate, battery and wear state in a Watch page. Pairs through the device bridge shipped by the jarvis-quest plugin.",
+  "requires": ["jarvis-quest"],
+  "workspace": "@fuber/desktop",
+  "files": [
+    { "from": "desktop/modules/jarvis-watch", "to": "apps/desktop/src/main/modules/jarvis-watch" },
+    { "from": "desktop/pages/saat", "to": "apps/desktop/src/renderer/main/pages/saat" },
+    { "from": "desktop/i18n/saat.ts", "to": "packages/shared/src/i18n/tr/saat.ts" }
+  ],
+  "moduleIds": ["jarvis-watch"],
+  "dependencies": {},
+  "devDependencies": {}
+}

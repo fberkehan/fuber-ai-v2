@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src"],
+  // İki `window.fuber` bildirimi aynı derlemede çakışır; her biri kendi uygulamasının renderer'ında denetlenir.
+  "exclude": ["src/window-desktop.ts", "src/window-admin.ts"]
+}

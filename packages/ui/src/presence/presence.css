@@ -1,0 +1,207 @@
+/*
+ * Jarvis'in varlığı: kenara kaynaklı gövde (`IslandShell`) ve tek başına varlık (`Presence`).
+ * Biçimi motor yazar (`shell-engines.ts`); burada yalnız katmanların yerleşimi ve içerik geçişi var.
+ * Sınıflar `pz-` önekiyle; Tailwind taramasına bağlı değildir.
+ */
+
+/* Katman: bileşen. Tailwind yardımcı sınıfları (konum, taşma, boşluk) bu kuralların üstüne yazabilir. */
+@layer components {
+  /* Üst orta nokta: gövde buradan aşağı doğar. Kap sıfır ölçülüdür; taşan gövde tıklamayı yalnız kendi şeklinde alır. */
+  .pz-shell {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .pz-host {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* İçerik kırpma kutusu: ölçüsünü ve köşesini motor her karede yazar. */
+  .pz-clip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    pointer-events: auto;
+  }
+  /*
+   * İçerik gövdenin SOL kenarına bağlıdır (ortaya değil): gövde büyürken ya da küçülürken yazı, solda duran çekirdekle
+   * birlikte, tek parça olarak hareket eder; fazlası sağdan kırpılır. Ortaya bağlıyken yazı son yerinde sabit duruyor,
+   * çekirdek ise büyüyen kenarla kayıyordu: geçiş boyunca çekirdek yazının üstüne biniyordu.
+   */
+  .pz-content,
+  .pz-ghost {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+  }
+  /* Giriş: eski içerik hızla söner, yenisi kısa bir gecikmeyle bulanıktan netleşir (iki yazı üst üste okunmaz). */
+  .pz-content-in {
+    opacity: 1;
+    filter: none;
+    transition:
+      opacity 180ms var(--ease-out) 70ms,
+      filter 200ms var(--ease-out) 70ms;
+
+    @starting-style {
+      opacity: 0;
+      filter: blur(4px);
+    }
+  }
+  .pz-ghosts {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  /* Çıkan katman eski içeriğin kopyasıdır: girişler orada yeniden oynamaz, yalnız söner. */
+  .pz-ghost,
+  .pz-ghost * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pz-ghost {
+    opacity: 1;
+    filter: blur(0);
+    transition:
+      opacity 110ms var(--ease-out),
+      filter 120ms var(--ease-out) !important;
+  }
+  .pz-ghost.pz-ghost-out {
+    opacity: 0;
+    filter: blur(4px);
+  }
+
+  /* ───────────── Gövde: düz siyah + içbükey omuzlar + renkli kenar ışığı ───────────── */
+  .pz-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.38));
+  }
+  .pz-body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+      inset 0 -1px 0 rgba(255, 255, 255, 0.11),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+  }
+  .pz-fx {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+  .pz-swarm {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: block;
+  }
+  .pz-nogl .pz-swarm {
+    display: none;
+  }
+  /* Kenar ışığı (durum rengi): alt kenar boyunca ince çizgi; motor yalnız değişince çizer. */
+  .pz-rim {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: block;
+    pointer-events: none;
+  }
+  .pz-glow {
+    position: absolute;
+    right: 6%;
+    bottom: -62%;
+    left: 6%;
+    height: 120%;
+    opacity: 0;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.2), transparent);
+  }
+  .pz-glow[data-c='b'] {
+    background: radial-gradient(closest-side, rgba(14, 89, 239, 0.6), transparent);
+  }
+  .pz-glow[data-c='a'] {
+    background: radial-gradient(closest-side, rgba(255, 176, 32, 0.3), transparent);
+  }
+  .pz-glow[data-c='r'] {
+    background: radial-gradient(closest-side, rgba(255, 77, 77, 0.32), transparent);
+  }
+  .pz-shoulder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 12.5px;
+    height: 12px;
+  }
+  .pz-shoulder-l {
+    background: radial-gradient(circle at 0 100%, transparent 11.5px, #000 12px);
+    transform-origin: 100% 0;
+  }
+  .pz-shoulder-r {
+    background: radial-gradient(circle at 100% 100%, transparent 11.5px, #000 12px);
+    transform-origin: 0 0;
+  }
+  /* Parçacık ışığının üstünde yazı okunur kalsın. */
+  .pz-shell .pz-content {
+    text-shadow:
+      0 0 5px #000,
+      0 0 2px #000;
+  }
+  .pz-shell[data-card] .pz-content,
+  .pz-shell .pz-content button {
+    text-shadow: none;
+  }
+
+  /* ───────────── Tek başına varlık ───────────── */
+  .pz-presence {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+  }
+  .pz-orb {
+    display: block;
+  }
+  /* WebGL2 yoksa: sakin bir ışık noktası (düzen ve yazı çalışmaya devam eder). */
+  .pz-presence[data-nogl]::before {
+    content: '';
+    width: 36%;
+    height: 36%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, #fff, rgba(91, 155, 255, 0.5) 60%, transparent);
+  }
+  .pz-presence[data-nogl][data-state='muted']::before,
+  .pz-presence[data-nogl][data-state='stopped']::before {
+    background: radial-gradient(closest-side, #9a9aa3, transparent);
+  }
+  .pz-presence[data-nogl][data-state='error']::before {
+    background: radial-gradient(closest-side, #ff5c5c, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pz-ghost {
+      filter: none !important;
+    }
+    .pz-content-in {
+      filter: none;
+      transition: opacity 140ms var(--ease-out);
+
+      @starting-style {
+        filter: none;
+      }
+    }
+  }
+}

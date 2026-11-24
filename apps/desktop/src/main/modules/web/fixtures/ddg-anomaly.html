@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<!-- Synthetic fixture: the shape of the DuckDuckGo "anomaly" (bot check) page that html.duckduckgo.com returns with
+     HTTP 202. Not a real capture; it carries no request tokens. -->
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>DuckDuckGo</title>
+</head>
+<body>
+  <div class="anomaly-modal__modal" data-testid="anomaly-modal">
+    <div class="anomaly-modal__title">Unfortunately, bots use DuckDuckGo too.</div>
+    <div class="anomaly-modal__description">Please complete the following challenge to confirm this search was made by a human.</div>
+    <form id="challenge-form" action="//duckduckgo.com/anomaly.js?sv=html&amp;cc=synthetic" method="POST">
+      <input type="hidden" name="q" value="sourdough starter feeding schedule" />
+      <button type="submit" class="anomaly-modal__submit">Submit</button>
+    </form>
+  </div>
+</body>
+</html>

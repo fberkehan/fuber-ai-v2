@@ -1,0 +1,743 @@
+/* Yönetim arayüzünün stil girişi. Jetonlar ve bileşen sınıfları @fuber/ui'den gelir. */
+@import '@fuber/ui/styles.css';
+
+/*
+ * Yönetim'e özgü yerleşimler (`ad-` önekli; renk, yarıçap ve süreler jetonlardan). Kırılımlar öğenin kendi kabına
+ * bakar: aynı tablo geniş ana alanda sütunlu, dar sütunda ya da dar pencerede alt alta dizilir.
+ */
+
+/* ── Model tablosu: satır iş, sütun ayar ── */
+.ad-models {
+  container: ad-models / inline-size;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.ad-models-head,
+.ad-model {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.45fr) 172px minmax(150px, 1.4fr) 132px 72px 72px;
+  align-items: center;
+  column-gap: 12px;
+}
+.ad-models-head {
+  padding-bottom: 8px;
+  color: var(--color-fg-faint);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+}
+.ad-models-head > :nth-child(n + 5) {
+  text-align: center;
+}
+.ad-model {
+  row-gap: 6px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-line);
+}
+.ad-model:last-child {
+  padding-bottom: 2px;
+}
+.ad-model-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+.ad-model-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.ad-cell-label {
+  display: none;
+  color: var(--color-fg-muted);
+  font-size: var(--text-sm);
+}
+/* İş adı kutu başlığından küçük ve hafiftir (başlıkla yarışmaz). */
+.ad-model-name {
+  color: var(--color-fg);
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+}
+.ad-model-local,
+.ad-model-wide {
+  grid-column: 3 / -1;
+}
+/* OpenAI uyumlu sağlayıcıda ayarlar (sağlayıcı, model, efor, fiyat) satırın denetim sütunlarını birlikte kaplar. */
+.ad-model-wide {
+  min-width: 0;
+  padding: 4px 0;
+}
+/* Uzun satırda iş adı ve "nerede" seçimi üstte, ilk ayar denetimleriyle aynı çizgide (etiket payı kadar aşağıda). */
+@container ad-models (min-width: 700px) {
+  .ad-model:has(> .ad-model-wide) {
+    align-items: start;
+  }
+  .ad-model:has(> .ad-model-wide) > :nth-child(-n + 2) {
+    margin-top: 32px;
+  }
+}
+/* Not satır ızgarasının içindedir: denetim sütunlarının altında, iş adının sütunu boş kalır. */
+.ad-model-note {
+  grid-column: 2 / -1;
+  color: var(--color-fg-faint);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+@container ad-models (max-width: 699px) {
+  .ad-models-head {
+    display: none;
+  }
+  .ad-model {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    row-gap: 10px;
+    padding: 14px 0;
+  }
+  /* Dar kapta iş adı satırın başlığıdır: tek başına, tam genişlikte. */
+  .ad-model-name {
+    grid-column: 1 / -1;
+    font-weight: var(--font-weight-medium);
+  }
+  .ad-models-head + .ad-model {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .ad-model-switch {
+    justify-content: space-between;
+  }
+  .ad-cell-label {
+    display: inline;
+  }
+  .ad-model-local,
+  .ad-model-wide,
+  .ad-model-note {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Anahtarlar: sağlayıcı başına bir satır (ad · durum · eylemler) ── */
+/* Sütunlar bütün satırlarda aynı çizgidedir (alt ızgara): rozetler alt alta, eylemler sağda tek hizada. */
+.ad-keys {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(220px, 1.1fr) minmax(0, 1fr) auto;
+  column-gap: 20px;
+}
+.ad-key {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: start;
+  row-gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-line);
+}
+.ad-key:first-child {
+  padding-top: 2px;
+  border-top: 0;
+}
+.ad-key:last-child {
+  padding-bottom: 2px;
+}
+.ad-key-state {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 2px;
+}
+.ad-key-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.ad-key-wide {
+  grid-column: 1 / -1;
+}
+@container workspace (max-width: 759px) {
+  .ad-keys {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .ad-key-state {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* ── Yerel modeller: kimlik · iş · boyut ── */
+.ad-locals {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ad-locals > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(120px, 1fr) 72px;
+  align-items: baseline;
+  column-gap: 16px;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-line);
+}
+.ad-locals > li:first-child {
+  padding-top: 2px;
+  border-top: 0;
+}
+.ad-locals > li:last-child {
+  padding-bottom: 2px;
+}
+
+/* ── Modüller: eşit boylu satırlar, sütunlar arası geniş boşluk (anahtar yandaki modüle ait görünmesin) ── */
+/* Dikey akan sütunlar: liste yukarıdan aşağı okunur, son sırada yetim hücre kalmaz. */
+.ad-modules {
+  columns: 270px 3;
+  column-gap: 40px;
+}
+.ad-module {
+  display: flex;
+  min-height: 72px;
+  align-items: flex-start;
+  gap: 12px;
+  /* Çizgi yok: sütunlar farklı boyda biter, satırlar karşılıklı durmaz; ayrımı boşluk taşır. */
+  padding: 10px 0;
+  break-inside: avoid;
+  cursor: pointer;
+}
+/* Ad ve açıklama üstten hizalı (yan yana modüllerin adları aynı çizgide); anahtar satırın ortasında. */
+.ad-module > :last-child {
+  align-self: center;
+}
+
+/* ── Kullanım: dar kutuda ölçüler üstte, geniş kutuda grafiğin solunda ── */
+.ad-usage {
+  container: ad-usage / inline-size;
+  min-width: 0;
+}
+.ad-usage-in {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+.ad-usage-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+@container ad-usage (min-width: 760px) {
+  .ad-usage-in {
+    grid-template-columns: 200px minmax(0, 1fr);
+    align-items: end;
+    gap: 40px;
+  }
+  .ad-usage-metrics {
+    grid-template-columns: minmax(0, 1fr);
+    align-self: start;
+  }
+}
+
+/* ═══════════════ v1 Yönetim kalıpları (KURGU §12 içinde): sayfa başı, ölçüler, durum dili, adımlar, sistem ═══════════════ */
+
+/* ── Sayfa başı: büyük başlık, altında tek cümle; eylemler sağda, alt çizgiye hizalı. Yalnız Yönetim'de (ortak stil değişmez). ── */
+.ad-head .ui-ws-header-row {
+  align-items: flex-end;
+  gap: 16px 24px;
+}
+.ad-head .ui-ws-header-text {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+.ad-head .ui-ws-title {
+  font-size: clamp(36px, 2.2vw + 14px, 52px);
+  font-weight: var(--font-weight-heading);
+  line-height: 1.04;
+  letter-spacing: var(--tracking-heading);
+}
+.ad-head .ui-ws-status {
+  max-width: 72ch;
+  color: var(--color-fg-muted);
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  text-wrap: pretty;
+}
+@container workspace (max-width: 719px) {
+  .ad-head .ui-ws-title {
+    font-size: 34px;
+  }
+  .ad-head .ui-ws-status {
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+}
+
+/* ── Bölüm kutusu: başlık 17/600, açıklama soluk ve yakın, iç boşluk 24 ── */
+.ad-block.ui-panel[data-pad='md'] {
+  gap: 20px;
+  padding: 24px;
+}
+.ad-block-title {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  letter-spacing: -0.015em;
+}
+
+/* ── Simge kutusu ── */
+.ad-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--color-surface-4);
+  color: var(--color-fg-muted);
+}
+.ad-icon[data-size='28'] {
+  width: 28px;
+  height: 28px;
+}
+.ad-icon[data-size='30'] {
+  width: 30px;
+  height: 30px;
+}
+.ad-icon[data-size='36'] {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.ad-icon[data-size='44'] {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+}
+.ad-icon > svg {
+  width: 16px;
+  height: 16px;
+}
+.ad-icon[data-size='36'] > svg,
+.ad-icon[data-size='44'] > svg {
+  width: 19px;
+  height: 19px;
+}
+.ad-icon[data-tone='warning'] {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.ad-icon[data-tone='accent'] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-fg);
+}
+.ad-icon[data-tone='danger'] {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+/* ── Durum: nokta + metin ── */
+.ad-status {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-fg-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--text-sm--line-height);
+  white-space: nowrap;
+}
+.ad-status-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ad-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--color-fg-faint);
+  transition: background-color var(--duration-base) var(--ease-out);
+}
+.ad-status[data-tone='success'] .ad-dot {
+  background: var(--color-success);
+}
+.ad-status[data-tone='warning'] .ad-dot {
+  background: var(--color-warning);
+}
+.ad-status[data-tone='danger'] .ad-dot {
+  background: var(--color-danger);
+}
+.ad-status[data-tone='accent'] .ad-dot {
+  background: var(--color-accent-fg);
+}
+
+/* ── Özet şeridi: 4 ölçü kartı ── */
+.ad-stats {
+  display: grid;
+  grid-template-columns: repeat(var(--stat-cols, 4), minmax(0, 1fr));
+  gap: 16px;
+}
+.ad-stats[data-count='3'] {
+  --stat-cols: 3;
+}
+@container workspace (min-width: 1720px) {
+  .ad-stats {
+    gap: 24px;
+  }
+}
+@container workspace (max-width: 899px) {
+  .ad-stats,
+  .ad-stats[data-count='3'] {
+    --stat-cols: 2;
+    gap: 12px;
+  }
+  .ad-stats .ad-stat.ui-panel[data-pad='md'] {
+    min-height: 128px;
+  }
+}
+.ad-stat.ui-panel[data-pad='md'] {
+  min-height: 156px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 20px;
+}
+.ad-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ad-stat-label {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-fg-faint);
+  font-size: 13.5px;
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ad-stat-value {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--color-fg);
+  font-size: clamp(30px, 1.6vw + 12px, 48px);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+.ad-stat-value[data-text] {
+  font-size: clamp(22px, 0.9vw + 12px, 30px);
+  letter-spacing: -0.025em;
+}
+.ad-stat[data-state='warning'] .ad-stat-value {
+  color: var(--color-warning);
+}
+.ad-stat[data-state='danger'] .ad-stat-value {
+  color: var(--color-danger);
+}
+.ad-stat-unit {
+  flex: none;
+  color: var(--color-fg-faint);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+.ad-stat-note {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-fg-faint);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Adımlar: 30 px daire, daireleri birleştiren 1 px çizgi ── */
+.ad-steps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ad-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 14px;
+  padding-bottom: 20px;
+}
+.ad-step:last-child {
+  padding-bottom: 0;
+}
+.ad-step::before {
+  position: absolute;
+  top: 34px;
+  bottom: 4px;
+  left: 14.5px;
+  width: 1px;
+  background: var(--color-line-strong);
+  content: '';
+}
+.ad-step:last-child::before {
+  display: none;
+}
+.ad-step-no {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-surface-4);
+  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+  color: var(--color-fg-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+.ad-step-no > svg {
+  width: 14px;
+  height: 14px;
+}
+.ad-step[data-state='done'] .ad-step-no {
+  background: var(--color-primary);
+  box-shadow: none;
+  color: var(--color-on-primary);
+}
+.ad-step[data-state='pending'] .ad-step-no {
+  box-shadow: inset 0 0 0 1.5px var(--color-warning);
+  color: var(--color-warning);
+}
+.ad-step-text {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  padding-top: 4px;
+}
+.ad-step-title {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  color: var(--color-fg);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-base--line-height);
+}
+.ad-step-body {
+  color: var(--color-fg-faint);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  text-wrap: pretty;
+}
+
+/* ── Sistem satırları ── */
+.ad-system {
+  display: grid;
+  margin: -4px -10px;
+}
+.ad-system-row {
+  display: flex;
+  min-width: 0;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.ad-system-row + .ad-system-row {
+  box-shadow: 0 -1px 0 var(--color-line);
+}
+button.ad-system-row {
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  button.ad-system-row:hover {
+    background: var(--color-surface-3);
+    box-shadow: none;
+  }
+  button.ad-system-row:hover + .ad-system-row {
+    box-shadow: none;
+  }
+  button.ad-system-row:hover .ad-system-caret {
+    color: var(--color-fg);
+    transform: translateX(2px);
+  }
+}
+button.ad-system-row:active {
+  transform: scale(0.99);
+}
+button.ad-system-row:focus-visible {
+  outline: 2px solid var(--color-accent-fg);
+  outline-offset: -2px;
+}
+.ad-system-name {
+  display: flex;
+  min-width: 0;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-fg);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+}
+.ad-system-value {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.ad-system-caret {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--color-fg-faint);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+/* ── Sakin boş durum ── */
+.ad-calm {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 28px 12px;
+  color: var(--color-fg-muted);
+  font-size: var(--text-base);
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* ── Satır listesi (onay bekleyenler, seçili modeller): simge + ad/alt satır + sağda eylem ── */
+.ad-rows {
+  display: grid;
+}
+.ad-row {
+  display: flex;
+  min-width: 0;
+  min-height: 64px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border: 0;
+}
+.ad-row + .ad-row {
+  border-top: 1px solid var(--color-line);
+}
+.ad-row:first-child {
+  padding-top: 0;
+}
+.ad-row:last-child {
+  padding-bottom: 0;
+}
+.ad-row-text {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+.ad-row-title {
+  overflow: hidden;
+  color: var(--color-fg);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ad-row-sub {
+  overflow: hidden;
+  color: var(--color-fg-faint);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ad-row-end {
+  display: flex;
+  min-width: 0;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+button.ad-row {
+  width: 100%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  button.ad-row:hover .ad-row-title {
+    text-decoration: underline;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 3px;
+  }
+}
+button.ad-row:focus-visible {
+  outline: 2px solid var(--color-accent-fg);
+  outline-offset: 2px;
+}
+
+/* ── İki bölüm yan yana (tam genişlik alanında), dar kapta alt alta ── */
+.ad-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  align-items: start;
+  gap: 20px;
+}
+@container workspace (min-width: 1720px) {
+  .ad-pair {
+    gap: 24px;
+  }
+}
+
+/* ── Ses: örnek ses kartı ── */
+.ad-sample-wave {
+  display: flex;
+  height: 72px;
+  align-items: center;
+  padding: 4px 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Anahtar satırı: v1 kimliği (44 px simge kutusu, ad 16/600, altında noktalı durum) ── */
+.ad-key-mark {
+  color: var(--color-fg-faint);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+}
+.ad-key-mark[data-present] {
+  background: var(--color-surface-5);
+  color: var(--color-fg);
+}
+.ad-key-name {
+  color: var(--color-fg);
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}

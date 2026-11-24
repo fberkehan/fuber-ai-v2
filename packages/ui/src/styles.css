@@ -1,0 +1,11 @@
+/*
+ * Uygulamaların tek stil girişi: `@import "@fuber/ui/styles.css";`
+ * Tailwind + jetonlar + bu paketteki bileşenlerin sınıf taraması. Uygulamanın kendi kaynakları
+ * Vite kökünden kendiliğinden taranır.
+ */
+@import 'tailwindcss';
+@import './tokens.css';
+@import './appearance.css';
+@import './workspace.css';
+@import './presence/presence.css';
+@source './';

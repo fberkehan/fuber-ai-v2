@@ -1,0 +1,278 @@
+/*
+ * Çalışma yüzeyi: sayfaların ortak kompozisyonu (bkz. shell/Workspace.tsx). Kap sorgusuyla çalışır; kırılımlar
+ * pencereye değil sayfanın kendi genişliğine bakar (ray açık/kapalı, pencere dar/geniş aynı kuralla çözülür).
+ *
+ *   < 720 px      tek sütun, sıkı yan boşluk (980 px pencere, ray açık)
+ *   720–1039 px   tek sütun
+ *   ≥ 1040 px     ana alan + bağlam sütunu (1440 px pencere)
+ *   ≥ 1720 px     bağlam sütunu bir kademe geniş, aralıklar 32 px (2560 px pencere)
+ */
+@layer components {
+  .ui-workspace {
+    container: workspace / inline-size;
+    width: 100%;
+    max-width: var(--ws-max, 2240px);
+    margin-inline: auto;
+  }
+  .ui-workspace-in {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 28px 32px 72px;
+  }
+  .ui-workspace-fill,
+  .ui-workspace-fill > .ui-workspace-in {
+    height: 100%;
+    min-height: 0;
+  }
+  .ui-workspace-fill > .ui-workspace-in {
+    padding-bottom: 24px;
+  }
+  @container workspace (max-width: 719px) {
+    .ui-workspace-in {
+      gap: 20px;
+      padding: 20px 20px 56px;
+    }
+  }
+  @container workspace (min-width: 1720px) {
+    .ui-workspace-in {
+      gap: 32px;
+      padding: 36px 48px 88px;
+    }
+  }
+
+  /* ───────────── sayfa başı ───────────── */
+
+  .ui-ws-header {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .ui-ws-header-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+    min-height: 40px;
+  }
+  .ui-ws-header-text {
+    display: flex;
+    flex: 1 1 320px;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 14px;
+    min-width: 0;
+  }
+  .ui-ws-title {
+    color: var(--color-fg);
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .ui-ws-status {
+    min-width: 0;
+    color: var(--color-fg-muted);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+
+  /* ───────────── ana alan + bağlam sütunu ───────────── */
+
+  .ui-ws-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+    min-width: 0;
+  }
+  .ui-ws-main,
+  .ui-ws-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+  .ui-ws-grid[data-aside-first] > .ui-ws-aside {
+    order: -1;
+  }
+  @container workspace (min-width: 1040px) {
+    .ui-ws-grid[data-aside='end'] {
+      grid-template-columns: minmax(0, 1fr) var(--ws-aside, 340px);
+    }
+    .ui-ws-grid[data-aside='start'] {
+      grid-template-columns: var(--ws-aside, 340px) minmax(0, 1fr);
+    }
+    .ui-ws-grid[data-aside='start'] > .ui-ws-aside {
+      order: -1;
+    }
+    .ui-ws-grid[data-aside-first] > .ui-ws-aside {
+      order: 0;
+    }
+    .ui-ws-grid[data-aside='start'][data-aside-first] > .ui-ws-aside {
+      order: -1;
+    }
+    .ui-ws-aside {
+      position: sticky;
+      top: 16px;
+    }
+  }
+  @container workspace (min-width: 1720px) {
+    .ui-ws-grid {
+      gap: 32px;
+    }
+    .ui-ws-grid[data-aside='end'] {
+      grid-template-columns: minmax(0, 1fr) calc(var(--ws-aside, 340px) * 1.22);
+    }
+    .ui-ws-grid[data-aside='start'] {
+      grid-template-columns: calc(var(--ws-aside, 340px) * 1.22) minmax(0, 1fr);
+    }
+    .ui-ws-main,
+    .ui-ws-aside {
+      gap: 24px;
+    }
+  }
+
+  /* ───────────── kutu ───────────── */
+
+  .ui-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    isolation: isolate;
+  }
+  .ui-panel[data-tone='base'],
+  .ui-panel[data-tone='lead'] {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-1);
+  }
+  .ui-panel[data-tone='lead'] {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      var(--card-halo);
+  }
+  .ui-panel[data-tone='lead']::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--card-light);
+    content: '';
+    pointer-events: none;
+  }
+  .ui-panel[data-pad='sm'] {
+    padding: 16px;
+    gap: 12px;
+  }
+  .ui-panel[data-pad='md'] {
+    padding: 20px;
+    gap: 16px;
+  }
+  .ui-panel[data-tone='lead'][data-pad='md'] {
+    padding: 24px;
+    gap: 20px;
+  }
+  .ui-panel[data-tone='quiet'] {
+    padding: 0;
+    gap: 12px;
+  }
+  .ui-panel[data-pad='none'] > .ui-panel-head {
+    padding: 16px 20px 0;
+  }
+  .ui-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 28px;
+  }
+  .ui-panel-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    color: var(--color-fg);
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: var(--text-base--line-height);
+    letter-spacing: -0.01em;
+  }
+  .ui-panel[data-tone='quiet'] .ui-panel-title {
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: var(--text-sm--line-height);
+    letter-spacing: 0;
+  }
+  .ui-panel-count {
+    color: var(--color-fg-faint);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
+  /* ───────────── ölçü ───────────── */
+
+  .ui-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .ui-metric-label {
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+  .ui-metric-value {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--color-fg);
+    font-size: 32px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 36px;
+    letter-spacing: -0.03em;
+  }
+  .ui-metric[data-size='lg'] .ui-metric-value {
+    font-size: 52px;
+    line-height: 54px;
+    letter-spacing: -0.04em;
+  }
+  .ui-metric-unit {
+    color: var(--color-fg-muted);
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  .ui-metric-hint {
+    color: var(--color-fg-faint);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+  .ui-metric[data-tone='warning'] .ui-metric-value {
+    color: var(--color-warning);
+  }
+  .ui-metric[data-tone='danger'] .ui-metric-value {
+    color: var(--color-danger);
+  }
+  .ui-metric[data-tone='success'] .ui-metric-value {
+    color: var(--color-success);
+  }
+
+  /* ───────────── kendiliğinden sütunlanan ızgara ───────────── */
+
+  .ui-auto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--col-min, 300px), 100%), 1fr));
+    gap: 16px;
+    min-width: 0;
+  }
+}

@@ -1,0 +1,852 @@
+/*
+ * Kokpit (Bugün): sayfanın iki bölmesi, kutucuklu ızgara, kart çerçevesi ve bugün bandı.
+ * Katmanlı yazılır (TUZAKLAR §9: katmansız CSS Tailwind'in yardımcı sınıflarını ezer). Renk ve ölçüler jetonlardan.
+ * Kırılımlar pencereye değil kaba bakar: sayfa `Workspace` kabının (`workspace`), bant kendi kabının (`kokpit-band`).
+ * Yerleşim ölçüleri `--kokpit-k` ile çarpılır: çok geniş kapta sayfa bir bütün olarak büyür (aşağıda).
+ */
+@layer components {
+  /* ───────────── sayfa: solda pano, sağda yerleşik sohbet ───────────── */
+
+  .kokpit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 16px;
+    height: 100%;
+    min-height: 0;
+    /* Çalışma yüzeyinin alt boşluğu pano için fazladır: kaydırma alanı pencerenin dibine yakın biter. */
+    margin-bottom: -12px;
+
+    /*
+     * Sayfa ölçeği. Yazı, boşluk ve yarıçap jetonları bu alt ağaçta tek bir çarpandan (`--kokpit-k`) yeniden
+     * hesaplanır; bileşenler jetonlardan okuduğu için pano ve sohbet aynı oranda büyür. Izgara da aynı çarpanı okur
+     * (birim, boşluk ve sütun eşiği). Çarpanı aşağıdaki kap sorguları seçer; 1 iken değerler jetonların kendisidir.
+     */
+    --kokpit-k: 1;
+    --spacing: calc(4px * var(--kokpit-k));
+    --text-xs: calc(12px * var(--kokpit-k));
+    --text-xs--line-height: calc(16px * var(--kokpit-k));
+    --text-sm: calc(13px * var(--kokpit-k));
+    --text-sm--line-height: calc(20px * var(--kokpit-k));
+    --text-base: calc(15px * var(--kokpit-k));
+    --text-base--line-height: calc(22px * var(--kokpit-k));
+    --text-lg: calc(17px * var(--kokpit-k));
+    --text-lg--line-height: calc(24px * var(--kokpit-k));
+    --text-xl: calc(20px * var(--kokpit-k));
+    --text-xl--line-height: calc(26px * var(--kokpit-k));
+    --text-2xl: calc(24px * var(--kokpit-k));
+    --text-2xl--line-height: calc(30px * var(--kokpit-k));
+    --text-3xl: calc(32px * var(--kokpit-k));
+    --text-3xl--line-height: calc(36px * var(--kokpit-k));
+    --text-4xl: calc(44px * var(--kokpit-k));
+    --text-4xl--line-height: calc(46px * var(--kokpit-k));
+    --text-5xl: calc(60px * var(--kokpit-k));
+    --text-5xl--line-height: calc(60px * var(--kokpit-k));
+    --radius-sm: calc(12px * var(--kokpit-k));
+    --radius-md: calc(18px * var(--kokpit-k));
+    --radius-lg: calc(26px * var(--kokpit-k));
+  }
+  /*
+   * Pano kendi içinde kayar; sohbet yerinde durur. Kenar payı, kartların ışığı kaydırma kabında kırpılmasın diye.
+   * Kaydırma çubuğu içerikten yer almaz (sağdaki ek pay onun yeridir): çubuk belirince kartlar daralmaz.
+   * Alt kenarda içerik yumuşakça söner; kesik kart "devamı var" diye okunur.
+   */
+  .kokpit-main {
+    min-width: 0;
+    min-height: 0;
+    margin: -12px -20px 0 -12px;
+    padding: 12px 12px 40px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+  }
+  .kokpit-main::-webkit-scrollbar {
+    width: 8px;
+  }
+  .kokpit-main::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .kokpit-main::-webkit-scrollbar-thumb {
+    border-radius: var(--radius-full);
+    background: transparent;
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  .kokpit-main:hover::-webkit-scrollbar-thumb {
+    background: var(--color-surface-5);
+  }
+  .kokpit-main::-webkit-scrollbar-button {
+    display: none;
+  }
+  .kokpit-dock {
+    min-width: 0;
+    min-height: 0;
+  }
+  @container workspace (min-width: 1040px) {
+    .kokpit[data-dock='side'] {
+      grid-template-columns: minmax(0, 1fr) var(--kokpit-dock, 340px);
+      grid-template-rows: minmax(0, 1fr);
+      gap: 24px;
+    }
+  }
+  @container workspace (min-width: 1500px) {
+    .kokpit {
+      --kokpit-dock: 400px;
+    }
+  }
+  /* Geniş kap (2560 sınıfı, ölçeksiz): sayfa bir bütün olarak büyür. */
+  @container workspace (min-width: 2100px) {
+    .kokpit {
+      --kokpit-k: 1.16;
+      --kokpit-dock: 500px;
+      gap: 32px;
+    }
+  }
+  /*
+   * Karşılama (panoda çizilecek kart yok): tek sütun. Bant üstte; altında, kalan alanın ortasında dar bir kolonda
+   * örnek sözler ve hemen altlarında yazma kutusu. Boş kutu çizilmez.
+   */
+  .kokpit[data-solo] {
+    display: flex;
+    flex-direction: column;
+    /* Tek blok, tek eksen: bant, örnekler ve yazma kutusu aynı kolonda, pencerenin ortasında (biraz üstünde). */
+    justify-content: safe center;
+    gap: calc(24px * var(--kokpit-k));
+    /* Kenar payı, bandın ışığı kırpılmasın diye (kaydırma kabı taşanı keser). */
+    margin: -12px -12px 0;
+    padding: 12px 12px calc(8vh + 12px);
+    overflow: hidden auto;
+  }
+  .kokpit[data-solo] > * {
+    flex: none;
+    width: 100%;
+    max-width: calc(1040px * var(--kokpit-k, 1));
+    margin-inline: auto;
+  }
+  .kokpit[data-solo] .kokpit-main {
+    margin-block: 0;
+    padding: 0;
+    overflow: visible;
+    scrollbar-gutter: auto;
+    mask-image: none;
+  }
+  .kokpit[data-solo] .kokpit-dock {
+    display: flex;
+    flex-direction: column;
+    gap: calc(24px * var(--kokpit-k, 1));
+  }
+  .kokpit-welcome {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: calc(16px * var(--kokpit-k, 1));
+    padding-inline: calc(24px * var(--kokpit-k, 1));
+  }
+  .kokpit-welcome-list {
+    padding-top: calc(8px * var(--kokpit-k, 1));
+    border-top: 1px solid var(--color-line);
+  }
+  /* Geniş kolon: solda karşılama cümlesi, sağda örnekler (bandın selamı ve hafta şeridiyle aynı iki kenara oturur). */
+  @container workspace (min-width: 900px) {
+    .kokpit-welcome {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      align-items: start;
+      gap: calc(40px * var(--kokpit-k, 1));
+    }
+    .kokpit-welcome-list {
+      padding-top: 0;
+      padding-left: calc(24px * var(--kokpit-k, 1));
+      border-top: 0;
+      border-left: 1px solid var(--color-line);
+    }
+  }
+  /* Alçak pencere: açıklama cümlesi çekilir, boşluklar kısalır; örnekler ve yazma kutusu kaydırmadan sığar. */
+  @media (max-height: 780px) {
+    .kokpit[data-solo] {
+      gap: 14px;
+      padding-bottom: 12px;
+    }
+    .kokpit[data-solo] .kokpit-dock {
+      gap: 14px;
+    }
+    .kokpit-welcome-body {
+      display: none;
+    }
+  }
+
+  /* 4K sınıfı (geniş VE yüksek pencere): 2560 düzeni bir buçuk kat. Yalnız geniş ama alçak pencere (ultra geniş) büyümez. */
+  @media (min-height: 1700px) {
+    @container workspace (min-width: 2900px) {
+      .kokpit {
+        --kokpit-k: 1.75;
+        --kokpit-dock: 760px;
+        gap: 48px;
+      }
+    }
+  }
+
+  /*
+   * Karşılama geniş pencerede daha da büyür: gösterecek başka bir şey yokken tek blok ekranı doldurmalı, köşede
+   * küçük bir kutu gibi kalmamalı. Yükseklik de yetmeli (blok sığmıyorsa büyümez).
+   */
+  @media (min-height: 860px) {
+    @container workspace (min-width: 1500px) {
+      .kokpit[data-solo] {
+        --kokpit-k: 1.25;
+      }
+    }
+  }
+  @media (min-height: 1100px) {
+    @container workspace (min-width: 2100px) {
+      .kokpit[data-solo] {
+        --kokpit-k: 1.6;
+      }
+    }
+  }
+  @media (min-height: 1700px) {
+    @container workspace (min-width: 2900px) {
+      .kokpit[data-solo] {
+        --kokpit-k: 2.3;
+      }
+    }
+  }
+
+  /* ───────────── ızgara ───────────── */
+
+  /*
+   * Satır izleri birimdir (`DASHBOARD_ROWS`): kart en az boyutunun gerektirdiği kadar yer tutar, içeriği taşarsa iz
+   * büyür (kırpma yok). Yerleşimi `packDashboard` verir; delik kalmaz. Birim, pano pencereden kısaysa biraz büyür
+   * (grid.tsx): geniş ekranda altta boş bant kalmaz.
+   */
+  .kokpit-grid {
+    position: relative;
+    display: grid;
+    grid-auto-rows: minmax(var(--kokpit-unit, 76px), auto);
+    gap: var(--kokpit-gap, 16px);
+    min-width: 0;
+  }
+  .kokpit-cell {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+  }
+  /*
+   * Sürüklenen kartın bırakılacağı yer: kart kalkınca altında vurgu renginde yuva belirir (birden değil, kısa bir
+   * geçişle); bırakınca kart yerine otururken söner. Yuva sakin durur: gözü kart çeker, yuva yalnız yeri gösterir.
+   */
+  .kokpit-cell:not([data-band])::before {
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in srgb, var(--color-accent-fg) 42%, transparent);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-accent-soft) 62%, transparent);
+    opacity: 0;
+    content: '';
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  /* Bırakılan kart yuvasına oturana kadar yuva görünür kalır (oturmadan yeniden tutulursa yuva titremez). */
+  .kokpit-cell[data-dragging]::before,
+  .kokpit-cell:has(.kokpit-float[data-settling])::before {
+    opacity: 1;
+  }
+  .kokpit-float {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+  .kokpit-cell[data-dragging] .kokpit-float {
+    cursor: grabbing;
+    will-change: transform;
+  }
+  /* Bırakınca yuvasına yayla oturur; yeniden tutulursa geçiş kesilir ve kart bulunduğu yerden devam eder. */
+  .kokpit-float[data-settling] {
+    transition: transform var(--duration-spring) var(--ease-spring);
+  }
+
+  /* ───────────── kart ───────────── */
+
+  .kokpit-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    padding: calc(16px * var(--kokpit-k, 1)) calc(18px * var(--kokpit-k, 1)) calc(18px * var(--kokpit-k, 1));
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-1);
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+  /*
+   * Üç kademe (bant dördüncü ve en üst): odak (sıradaki iş) açık çerçeve ve mavi üst ışık alır; sıradan kart olağan
+   * yüzeydir; ortam bilgisi (hava, döviz, haber) ışıksız ve bir kat koyudur, geri çekilir.
+   */
+  .kokpit-card[data-tone='focus'] {
+    border-color: rgb(255 255 255 / 0.13);
+    background: var(--color-surface-2);
+  }
+  .kokpit-card[data-tone='focus']::before {
+    background: radial-gradient(70% 150px at 16% -50px, rgb(91 155 255 / 0.13), transparent 72%);
+  }
+  .kokpit-card[data-tone='ambient'] {
+    /* Ortam bilgisinin yazısı da geri çekilir: sayfanın en parlak yazısı odak kartında kalır. */
+    --color-fg: #c9c9d1;
+    border-color: rgb(255 255 255 / 0.06);
+    background: color-mix(in srgb, var(--color-surface-1) 55%, var(--color-page));
+    box-shadow: none;
+  }
+  .kokpit-card[data-tone='ambient'] .kokpit-figure {
+    font-weight: var(--font-weight-medium);
+  }
+  .kokpit-card[data-tone='ambient']::before {
+    background: none;
+  }
+  /* Kalkma: kart tutulunca hafifçe büyür ve gölgelenir; bırakınca yerine otururken aynı geçişle iner (kesilebilir). */
+  .kokpit-cell[data-dragging] .kokpit-card {
+    border-color: rgb(255 255 255 / 0.22);
+    background: var(--color-surface-3);
+    box-shadow: var(--shadow-float);
+    transform: scale(1.03);
+  }
+  .kokpit-card-head {
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--kokpit-k, 1));
+    min-height: calc(28px * var(--kokpit-k, 1));
+    margin: calc(-4px * var(--kokpit-k, 1)) calc(-6px * var(--kokpit-k, 1)) calc(8px * var(--kokpit-k, 1)) 0;
+  }
+  .kokpit-card-head[data-handle] {
+    cursor: grab;
+    touch-action: none;
+  }
+  .kokpit-card-head[data-handle]:active {
+    cursor: grabbing;
+  }
+  .kokpit-card-title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-fg-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--text-sm--line-height);
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .kokpit-card-count {
+    color: var(--color-fg-faint);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Kart araçları (bağlantı, menü) üstüne gelince ya da klavyeyle içine girince belirir; dokunmatikte hep görünür. */
+  .kokpit-card-tools {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .kokpit-card:hover .kokpit-card-tools,
+  .kokpit-card:focus-within .kokpit-card-tools,
+  .kokpit-card-tools[data-open] {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .kokpit-card-tools {
+      opacity: 1;
+    }
+  }
+  .kokpit-card-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* Kart içi satır: liste kartlarının ortak ritmi. */
+  .kokpit-row {
+    display: flex;
+    align-items: center;
+    gap: calc(12px * var(--kokpit-k, 1));
+    min-height: calc(44px * var(--kokpit-k, 1));
+    margin-inline: calc(-8px * var(--kokpit-k, 1));
+    padding: calc(6px * var(--kokpit-k, 1)) calc(8px * var(--kokpit-k, 1));
+    border-radius: var(--radius-sm);
+    text-align: left;
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  button.kokpit-row,
+  .kokpit-row[role='button'] {
+    cursor: pointer;
+    outline-offset: -2px;
+  }
+  /* Düğme satır, eksi kenar payına rağmen kartın iç genişliğini tam doldurur (sağdaki değer kenara oturur). */
+  button.kokpit-row {
+    width: calc(100% + 16px * var(--kokpit-k, 1));
+  }
+  @media (hover: hover) {
+    button.kokpit-row:hover,
+    .kokpit-row[role='button']:hover,
+    .kokpit-row[data-hover]:hover {
+      background: rgb(255 255 255 / 0.04);
+    }
+  }
+  button.kokpit-row:active {
+    background: rgb(255 255 255 / 0.07);
+  }
+  /* "Tamamlandı" işareti: boş halka; satırın ya da halkanın üstüne gelince içi dolar. */
+  .kokpit-check {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(32px * var(--kokpit-k, 1));
+    height: calc(32px * var(--kokpit-k, 1));
+    border-radius: var(--radius-full);
+    color: var(--color-fg-faint);
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      transform var(--duration-instant) var(--ease-out);
+  }
+  .kokpit-check > svg {
+    width: calc(20px * var(--kokpit-k, 1));
+    height: calc(20px * var(--kokpit-k, 1));
+  }
+  .kokpit-check > svg:last-child {
+    position: absolute;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .kokpit-check:hover {
+      color: var(--color-fg);
+    }
+    .kokpit-check:hover > svg:last-child {
+      opacity: 1;
+    }
+  }
+  .kokpit-check:active {
+    transform: scale(0.94);
+  }
+  .kokpit-check[data-done] {
+    color: var(--color-success);
+  }
+  .kokpit-check[data-done] > svg:last-child {
+    opacity: 1;
+  }
+
+  /* Kart içi liste: kart yeterince genişse iki sütuna bölünür (`data-split`). */
+  .kokpit-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: calc(28px * var(--kokpit-k, 1));
+    align-content: start;
+    min-width: 0;
+  }
+  .kokpit-list[data-split] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Büyük rakam: sayı kartı, sıcaklık, kur, kalan gün. Hepsi aynı (eşit genişlikli) rakam takımından. */
+  .kokpit-figure {
+    color: var(--color-fg);
+    font-weight: var(--font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  /* ───────────── bugün bandı (sayfanın tek birincil kutusu) ───────────── */
+
+  /*
+   * Tek satır: solda Jarvis'in varlığı ve selam, sağda (ızgaranın sağ kenarına hizalı) hafta şeridi. Dar bantta
+   * hafta şeridi alt satıra iner. Onay bekleyen iş bandın alt bölümüdür.
+   */
+  .kokpit-band {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      var(--card-halo);
+    container: kokpit-band / inline-size;
+    isolation: isolate;
+  }
+  .kokpit-band::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--card-light);
+    content: '';
+    pointer-events: none;
+  }
+  .kokpit-band-top {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(14px * var(--kokpit-k, 1)) calc(18px * var(--kokpit-k, 1));
+    padding: calc(16px * var(--kokpit-k, 1)) calc(18px * var(--kokpit-k, 1));
+    --band-line: var(--text-2xl--line-height);
+  }
+  /*
+   * Selam bloğu: varlık + yazı. Varlık ayrı bir kutu değildir; selamın satırında durur ve satırın ortasına hizalıdır
+   * (düğmenin kutusu satır kutusuyla aynı merkezdedir), alt satırlar selamın sol kenarından başlar.
+   */
+  .kokpit-band-lead {
+    display: flex;
+    flex: 1 1 calc(240px * var(--kokpit-k, 1));
+    align-items: flex-start;
+    gap: calc(16px * var(--kokpit-k, 1));
+    min-width: 0;
+  }
+  /*
+   * Varlığın düğmesi: zeminsiz, çerçevesiz. Dokunma alanı en az 44 px; kutusu selam satırından yüksek olduğu için
+   * eksi payla satırın ortasına oturur (yazıyı itmez). Odak halkası klavyeyle gelince görünür.
+   */
+  .kokpit-band-presence {
+    --band-hit: calc(44px * var(--kokpit-k, 1));
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--band-hit);
+    height: var(--band-hit);
+    /* Optik hiza: varlığın merkezi selamın büyük harfinin ortasına gelir (satır kutusunun ortasının 1 px altı). */
+    margin-block: calc((var(--band-line) - var(--band-hit)) / 2 + 1px * var(--kokpit-k, 1)) calc((var(--band-line) - var(--band-hit)) / 2 - 1px * var(--kokpit-k, 1));
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: transform var(--duration-instant) var(--ease-out);
+  }
+  .kokpit-band-presence:focus-visible {
+    outline: 2px solid var(--color-accent-fg);
+    outline-offset: 2px;
+  }
+  .kokpit-band-presence:active {
+    transform: scale(0.92);
+  }
+  /* Düğme çekirdeğin durduğu yerdir (çekirdeği gökyüzü tuvali çizer); çevresinde ışınlara yer kalır. */
+  .kokpit-band-presence {
+    position: relative;
+    width: calc(52px * var(--kokpit-k, 1));
+  }
+  /*
+   * Dinlenen çekirdek: düğmenin ortasında, tuvali düğmeden büyük (kutuyla kesilmez), tıklamayı almaz. Yalnız boştayken
+   * görünür; hâl değişince söner ve aynı noktadaki gökyüzü çekirdeği devralır (yalnız saydamlık, kısa).
+   */
+  .kokpit-band-presence > .pz-presence {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    translate: -50% -50%;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .kokpit-band-presence[data-state='idle'] > .pz-presence {
+    opacity: 1;
+    transition-duration: var(--duration-slow);
+  }
+  /*
+   * Bandın gökyüzü parçası: çekirdek ve çevresindeki toz. Selamın arkasındadır, tıklamayı almaz, sağa
+   * doğru söner (hafta şeridinin altına girmez). Basınca çekirdeğin çevresinde hafifçe büzülür.
+   */
+  .kokpit-band-sky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
+    mask-image: linear-gradient(to right, #000 0, #000 34%, transparent 96%);
+    transition: transform var(--duration-instant) var(--ease-out);
+  }
+  .kokpit-band:has(.kokpit-band-presence:active) .kokpit-band-sky {
+    transform: scale(0.92);
+  }
+  /* WebGL yoksa: geniş tuvalin ortasındaki yedek ışık çizilmez; çekirdeğin yerinde sakin bir nokta durur. */
+  .kokpit-band-sky .pz-presence[data-nogl]::before {
+    display: none;
+  }
+  .kokpit-band:has(.pz-presence[data-nogl]) .kokpit-band-presence::before {
+    width: calc(14px * var(--kokpit-k, 1));
+    height: calc(14px * var(--kokpit-k, 1));
+    border-radius: var(--radius-full);
+    background: radial-gradient(closest-side, #fff, rgb(91 155 255 / 0.5) 60%, transparent);
+    content: '';
+  }
+  /* Yazı, çekirdeğin taşan ışınlarının üstünde durur. */
+  .kokpit-band-text {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .kokpit-band-week {
+    flex: 0 0 auto;
+    width: calc(336px * var(--kokpit-k, 1));
+    max-width: 100%;
+  }
+  .kokpit-greeting {
+    overflow: hidden;
+    color: var(--color-fg);
+    font-size: var(--text-2xl);
+    line-height: var(--band-line);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* İki satırlık sabit kutu: özet de canlı satır da buraya sığar; içerik değişince bandın boyu değişmez. */
+  .kokpit-band-lines {
+    display: grid;
+    min-height: calc(2 * var(--text-base--line-height) + 2px * var(--kokpit-k, 1));
+  }
+  .kokpit-band-lines > * {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+  .kokpit-summary[data-live] {
+    visibility: hidden;
+  }
+  .kokpit-summary {
+    margin-top: calc(2px * var(--kokpit-k, 1));
+    color: var(--color-fg-muted);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+  @container kokpit-band (min-width: 900px) {
+    .kokpit-band-top {
+      gap: calc(24px * var(--kokpit-k, 1));
+      padding: calc(20px * var(--kokpit-k, 1)) calc(24px * var(--kokpit-k, 1));
+      --band-line: var(--text-3xl--line-height);
+    }
+    .kokpit-band-lead {
+      gap: calc(22px * var(--kokpit-k, 1));
+    }
+    .kokpit-band-lines {
+      min-height: calc(2 * var(--text-lg--line-height) + 4px * var(--kokpit-k, 1));
+    }
+    .kokpit-band-week {
+      width: calc(420px * var(--kokpit-k, 1));
+    }
+    .kokpit-greeting {
+      font-size: var(--text-3xl);
+    }
+    .kokpit-summary {
+      margin-top: calc(4px * var(--kokpit-k, 1));
+      font-size: var(--text-lg);
+      line-height: var(--text-lg--line-height);
+    }
+  }
+  /* Dar bant: hafta şeridi kendi satırında, tam genişlikte, tek sıra ve alçak. */
+  @container kokpit-band (max-width: 739px) {
+    .kokpit-band-week {
+      flex-basis: 100%;
+      width: 100%;
+    }
+    .kokpit-band-top {
+      row-gap: calc(8px * var(--kokpit-k, 1));
+      padding-bottom: calc(10px * var(--kokpit-k, 1));
+    }
+    /* Dar şeritte noktalar çizilmez (kayıt sayısı ipucunda yazar): yedi gün eşit aralıkla durur. */
+    .kokpit-band-week .kokpit-day-dots {
+      display: none;
+    }
+    .kokpit-band-week .kokpit-day {
+      flex-direction: row;
+      justify-content: center;
+      gap: calc(6px * var(--kokpit-k, 1));
+      padding-block: calc(5px * var(--kokpit-k, 1));
+    }
+  }
+
+  /* Hafta şeridi: yedi gün; bugün dolu hap. Noktalar o günün kayıt sayısıdır (en çok üç). */
+  .kokpit-week {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: calc(2px * var(--kokpit-k, 1));
+  }
+  .kokpit-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(1px * var(--kokpit-k, 1));
+    min-width: 0;
+    padding: calc(6px * var(--kokpit-k, 1)) 0 calc(7px * var(--kokpit-k, 1));
+    border-radius: var(--radius-sm);
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      transform var(--duration-instant) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .kokpit-day:hover {
+      background: rgb(255 255 255 / 0.06);
+    }
+  }
+  .kokpit-day:active {
+    transform: scale(0.97);
+  }
+  .kokpit-day[data-today] {
+    background: rgb(255 255 255 / 0.1);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+    color: var(--color-fg);
+  }
+  .kokpit-day-name {
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--line-height);
+  }
+  .kokpit-day-number {
+    color: var(--color-fg);
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--text-base--line-height);
+  }
+  .kokpit-day-dots {
+    display: flex;
+    gap: calc(3px * var(--kokpit-k, 1));
+    height: calc(4px * var(--kokpit-k, 1));
+  }
+  .kokpit-day-dots > span {
+    width: calc(4px * var(--kokpit-k, 1));
+    height: calc(4px * var(--kokpit-k, 1));
+    border-radius: var(--radius-full);
+    background: var(--color-fg-muted);
+  }
+  .kokpit-day[data-today] .kokpit-day-dots > span {
+    background: var(--color-fg);
+  }
+
+  /* Onay bekleyen iş: bandın alt bölümü (ayrı kart değil). Kehribar kıl payı çizgi ve kehribar ışık. */
+  .kokpit-approval {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(12px * var(--kokpit-k, 1)) calc(18px * var(--kokpit-k, 1));
+    padding: calc(14px * var(--kokpit-k, 1)) calc(18px * var(--kokpit-k, 1)) calc(14px * var(--kokpit-k, 1)) calc(20px * var(--kokpit-k, 1));
+    border-top: 1px solid color-mix(in srgb, var(--color-warning) 34%, transparent);
+    background: linear-gradient(180deg, rgb(255 176 32 / 0.1), rgb(255 176 32 / 0.04));
+  }
+  @container kokpit-band (min-width: 900px) {
+    .kokpit-approval {
+      padding-inline: calc(28px * var(--kokpit-k, 1)) calc(24px * var(--kokpit-k, 1));
+    }
+  }
+
+  /* ───────────── yerleşik sohbet ───────────── */
+
+  .kokpit-chat {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-1);
+  }
+  /* Yandaki panel sütunun tam boyundadır: yazma kutusu hep aynı yerde (altta) durur, konuşma onun üstünde birikir. */
+  .kokpit-chat[data-mode='side'] {
+    height: 100%;
+  }
+  .kokpit-chat[data-bare] {
+    border-color: transparent;
+    background: transparent;
+  }
+  /*
+   * Sohbet bu ziyarette şeritten yan sütuna açıldıysa (ilk yanıt geldi) birden belirmez: kısa bir girişle gelir.
+   * Sayfa açılırken zaten yandaysa oynamaz (`data-opened` yalnız ziyaret sırasındaki geçişte yazılır).
+   */
+  .kokpit-chat[data-opened] {
+    animation: kokpit-dock-in var(--duration-base) var(--ease-out) both;
+  }
+  @keyframes kokpit-dock-in {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+  }
+  .kokpit-chat-scroll {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-surface-5) transparent;
+  }
+  /* Konuşma kısaysa yazma kutusunun hemen üstünde durur (arada boşluk kalmaz); uzunsa alttan kayar. */
+  .kokpit-chat-scroll > :first-child {
+    margin-top: auto;
+  }
+  /* Dar pencere: sohbet altta bir şerittir; konuşma istenince şeridin üstünde açılır. */
+  .kokpit-chat[data-mode='bar'] .kokpit-chat-scroll {
+    max-height: min(46vh, 420px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kokpit-float[data-settling] {
+      transition: none;
+    }
+    .kokpit-chat[data-opened] {
+      animation-name: kokpit-dock-fade;
+    }
+    @keyframes kokpit-dock-fade {
+      from {
+        opacity: 0;
+      }
+    }
+    .kokpit-cell[data-dragging] .kokpit-card {
+      transform: none;
+    }
+
+    .kokpit-day,
+    .kokpit-band-presence,
+    .kokpit-band-sky,
+    .kokpit-check {
+      transition: none;
+    }
+  }
+}
+
+/*
+ * Yerleşik sohbetin iletileri panoda geri çekilir (katmansız: Sohbet sayfasının katmansız balon stillerini yalnız bu
+ * panelde ezer; Sohbet sayfası kendi gümüş balonlarını korur). Kullanıcı balonu koyu ve sakin, asistanın yanıtı
+ * çerçevesiz düz metindir: panel bir karttır, içinde ikinci bir kart çizilmez ve sayfanın en parlak yüzeyi sohbet olmaz.
+ */
+.kokpit-chat .chat-me {
+  background: var(--color-surface-4);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  color: var(--color-fg);
+  font-weight: var(--font-weight-normal);
+}
+.kokpit-chat .chat-me ::selection,
+.kokpit-chat .chat-me::selection {
+  background: rgb(255 255 255 / 0.22);
+}
+.kokpit-chat .chat-assistant {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+/* Şeritte konuşma yokken yalnız yazma kutusu kalır (yardımcı sınıfları ezmek için katmansız). */
+.kokpit-chat[data-bare] .kokpit-chat-head {
+  display: none;
+}
+.kokpit-chat[data-bare] .kokpit-chat-compose {
+  padding: 0;
+}

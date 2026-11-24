@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fuber AI 2 · duman</title>
+  </head>
+  <body>
+    <script>
+      // Ses penceresini taklit eder: 16 kHz mono Int16, 20 ms çerçeveleri porttan işçiye yollar.
+      // Aynı çerçeveler üç biçimde gönderilir; hangisinin karşıya ulaştığını işçi sayar.
+      const FRAME_SAMPLES = 320;
+      const FRAMES = 250; // 5 saniyelik ses
+      window.addEventListener('message', (event) => {
+        if (event.data?.fuberPort !== 'audio') return;
+        const port = event.ports[0];
+        let checksum = 0;
+        port.onmessage = (message) => {
+          if (message.data?.type !== 'pcm') return;
+          const pcm = message.data.pcm;
+          window.smoke.report({
+            sentFramesPerMode: FRAMES,
+            sentChecksum: checksum,
+            workerModes: message.data.modes,
+            replyReceivedAs: Object.prototype.toString.call(pcm),
+            replySamples: pcm.length,
+            replyLast: pcm[pcm.length - 1],
+          });
+        };
+        const makeFrame = (f) => {
+          const pcm = new Int16Array(FRAME_SAMPLES);
+          for (let i = 0; i < FRAME_SAMPLES; i++) pcm[i] = Math.round(Math.sin((f * FRAME_SAMPLES + i) / 12) * 12000);
+          return pcm;
+        };
+        for (let f = 0; f < FRAMES; f++) {
+          const pcm = makeFrame(f);
+          for (let i = 0; i < FRAME_SAMPLES; i++) checksum = (checksum + pcm[i]) | 0;
+          // 1) Int16Array, kopyalanarak
+          port.postMessage({ type: 'frame', mode: 'int16array_clone', pcm });
+          // 2) ArrayBuffer, kopyalanarak
+          port.postMessage({ type: 'frame', mode: 'arraybuffer_clone', pcm: pcm.buffer.slice(0) });
+          // 3) ArrayBuffer, aktarılarak (kopyasız)
+          const moved = makeFrame(f);
+          port.postMessage({ type: 'frame', mode: 'arraybuffer_transfer', pcm: moved.buffer }, [moved.buffer]);
+        }
+        port.postMessage({ type: 'end' });
+      });
+    </script>
+  </body>
+</html>

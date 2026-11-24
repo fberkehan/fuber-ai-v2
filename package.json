@@ -1,0 +1,56 @@
+{
+  "name": "fuber-ai-v2",
+  "version": "2.0.0-demo.16",
+  "private": true,
+  "license": "FSL-1.1-ALv2",
+  "author": "Fuber AI",
+  "homepage": "https://fuber.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fberkehan/orion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fberkehan/orion/issues"
+  },
+  "type": "module",
+  "description": "Fuber AI v2: a Windows desktop voice assistant (Electron, React) and its management app. Source-available under FSL-1.1-ALv2.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "gen": "node scripts/gen-index.mjs",
+    "typecheck": "node scripts/gen-index.mjs && npm run typecheck --workspaces --if-present",
+    "test": "node scripts/gen-index.mjs && vitest run",
+    "test:watch": "vitest",
+    "build": "node scripts/build.mjs all",
+    "build:desktop": "node scripts/build.mjs desktop",
+    "build:admin": "node scripts/build.mjs admin",
+    "dev:desktop": "node scripts/dev.mjs desktop",
+    "dev:admin": "node scripts/dev.mjs admin",
+    "dist:desktop": "node scripts/build.mjs desktop && npm run dist -w @fuber/desktop",
+    "dist:admin": "node scripts/build.mjs admin && npm run dist -w @fuber/admin",
+    "clean": "node scripts/clean.mjs",
+    "postinstall": "node scripts/postinstall.mjs",
+    "smoke:electron": "node scripts/smoke-electron.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.5",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/ws": "8.18.2",
+    "@vitejs/plugin-react": "6.3.0",
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0",
+    "esbuild": "0.28.2",
+    "playwright": "1.65.1",
+    "tailwindcss": "4.3.5",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  }
+}

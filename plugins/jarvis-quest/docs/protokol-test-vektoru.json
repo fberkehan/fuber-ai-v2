@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "note": "Fuber XR protokol v1 bilinen cevap vektörü. Girdiler sabit test anahtarlarıdır; iki taraf (masaüstü TS, Unity C#) aynı çıktıyı üretmelidir. Tüm ikili alanlar hex.",
+  "x25519_keypairs": [
+    {
+      "priv": "0101010101010101010101010101010101010101010101010101010101010101",
+      "pub": "a4e09292b651c278b9772c569f5fa9bb13d906b46ab68c9df9dc2b4409f8a209"
+    },
+    {
+      "priv": "0202020202020202020202020202020202020202020202020202020202020202",
+      "pub": "ce8d3ad1ccb633ec7b70c17814a5c76ecd029685050d344745ba05870e587d59"
+    },
+    {
+      "priv": "0303030303030303030303030303030303030303030303030303030303030303",
+      "pub": "5dfedd3b6bd47f6fa28ee15d969d5bb0ea53774d488bdaf9df1c6e0124b3ef22"
+    },
+    {
+      "priv": "0404040404040404040404040404040404040404040404040404040404040404",
+      "pub": "ac01b2209e86354fb853237b5de0f4fab13c7fcbf433a61c019369617fecf10b"
+    }
+  ],
+  "x25519_dh": {
+    "aPriv": "0505050505050505050505050505050505050505050505050505050505050505",
+    "aPub": "50a61409b1ddd0325e9b16b700e719e9772c07000b1bd7786e907c653d20495d",
+    "bPriv": "0606060606060606060606060606060606060606060606060606060606060606",
+    "bPub": "f5b2d6e60f9477e310c2982daaa6c9136c108a1777c5947e448fa37d68174557",
+    "shared": "edfa360a9633ca9b6fe655be8849389323ae3a3444866567f463c8e2c80bbb5a"
+  },
+  "fingerprint": {
+    "pub": "5dfedd3b6bd47f6fa28ee15d969d5bb0ea53774d488bdaf9df1c6e0124b3ef22",
+    "fp": "PXQ1njioikJaV9hxb-PAjer_C2gyVxde_AfmjTUrRi8"
+  },
+  "hkdf_session_pair": {
+    "mode": "pair",
+    "clientEphPriv": "0101010101010101010101010101010101010101010101010101010101010101",
+    "serverEphPriv": "0202020202020202020202020202020202020202020202020202020202020202",
+    "serverStaticPriv": "0303030303030303030303030303030303030303030303030303030303030303",
+    "hello1_utf8": "{\"t\":\"hello\",\"v\":1,\"mode\":\"pair\",\"eph\":\"pOCSkrZRwni5dyxWn1-puxPZBrRqtoyd-dwrRAn4ogk\"}",
+    "hello2_utf8": "{\"t\":\"hello\",\"v\":1,\"eph\":\"zo060cy2M-x7cMF4FKXHbs0CloUFDTRHRboFhw5YfVk\",\"static\":\"Xf7dO2vUf2-ijuFdlp1bsOpTd01Ii9r53xxuASSz7yI\",\"name\":\"Fuber PC\"}",
+    "th": "cec6a3b047de1a597e26a88bf106a98962ed8096af2842fa056c10e496687c66",
+    "okm": "91ead97a9a8daf9669a6b77b57d724ce24400d6b2dd250f392bfe44f827eb5d9a0181a0e3153dabb507e42b9ce1ed1f188e5a8fa3a35cfdcaac706745cf1d0cc",
+    "c2s": "91ead97a9a8daf9669a6b77b57d724ce24400d6b2dd250f392bfe44f827eb5d9",
+    "s2c": "a0181a0e3153dabb507e42b9ce1ed1f188e5a8fa3a35cfdcaac706745cf1d0cc"
+  },
+  "hkdf_session_resume": {
+    "mode": "resume",
+    "clientEphPriv": "0101010101010101010101010101010101010101010101010101010101010101",
+    "serverEphPriv": "0202020202020202020202020202020202020202020202020202020202020202",
+    "serverStaticPriv": "0303030303030303030303030303030303030303030303030303030303030303",
+    "devicePriv": "0404040404040404040404040404040404040404040404040404040404040404",
+    "hello1_utf8": "{\"t\":\"hello\",\"v\":1,\"mode\":\"resume\",\"eph\":\"pOCSkrZRwni5dyxWn1-puxPZBrRqtoyd-dwrRAn4ogk\",\"deviceId\":\"dev-test-0001\"}",
+    "hello2_utf8": "{\"t\":\"hello\",\"v\":1,\"eph\":\"zo060cy2M-x7cMF4FKXHbs0CloUFDTRHRboFhw5YfVk\",\"static\":\"Xf7dO2vUf2-ijuFdlp1bsOpTd01Ii9r53xxuASSz7yI\",\"name\":\"Fuber PC\"}",
+    "th": "c9827f424021c53d85fd1208915dcbf114ac52290b0eb8f3d9e70da79bc1bb6c",
+    "okm": "0d9196cc9366d588934f8f79696f3c688f8bba635237b48b0cb2a155a94525b9b21edeb6550e5429fec5db86db9d0f8bfa826d7a4903a5ba14568e34b4df5ea4",
+    "c2s": "0d9196cc9366d588934f8f79696f3c688f8bba635237b48b0cb2a155a94525b9",
+    "s2c": "b21edeb6550e5429fec5db86db9d0f8bfa826d7a4903a5ba14568e34b4df5ea4"
+  },
+  "aes_gcm": {
+    "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "seals": [
+      {
+        "counter": 0,
+        "nonce": "000000000000000000000000",
+        "plain_utf8": "merhaba fuber",
+        "sealed": "63d9c7b6d44ee29d6eddcb506ac866199caf1fdd8538f2d794d83af72d"
+      },
+      {
+        "counter": 1,
+        "nonce": "000000000000000000000001",
+        "plain_utf8": "ikinci çerçeve — türkçe: ışık, ğ, ş, ü, ç, ö, İ",
+        "sealed": "7cbdd692279d10dda94b23fa4bc34c92357d9cc044c69738016bc07e430a539a8b53f8359947a81c9d40ef21a97b2b13edaa7fb23e4931677da331459c05e3f50a835996e3fb5a77123a2f2579d9"
+      }
+    ]
+  },
+  "frame": {
+    "body": "6365726365766520676f766465736920313233",
+    "encoded": "000000136365726365766520676f766465736920313233"
+  },
+  "plain_json": {
+    "msg": {
+      "t": "ping",
+      "ts": 1234567890
+    },
+    "encoded": "017b2274223a2270696e67222c227473223a313233343536373839307d"
+  },
+  "plain_binary": {
+    "channel": 1,
+    "seq": 7,
+    "data": "deadbeef007f",
+    "encoded": "020100000007deadbeef007f"
+  },
+  "qr": {
+    "hosts": [
+      "192.168.1.50",
+      "10.0.0.3"
+    ],
+    "port": 47852,
+    "fp": "PXQ1njioikJaV9hxb-PAjer_C2gyVxde_AfmjTUrRi8",
+    "code": "obLD1OX2BxgpOktcbX6PkA",
+    "name": "Fuber PC — oda",
+    "uri": "fuberxr:1?h=192.168.1.50,10.0.0.3&p=47852&f=PXQ1njioikJaV9hxb-PAjer_C2gyVxde_AfmjTUrRi8&c=obLD1OX2BxgpOktcbX6PkA&n=Fuber%20PC%20%E2%80%94%20oda"
+  }
+}

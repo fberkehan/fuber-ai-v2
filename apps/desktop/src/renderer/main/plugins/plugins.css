@@ -1,0 +1,239 @@
+/*
+ * Eklenti sayfası: başlık şeridi + güvenli kutu çerçevesi. Sayfa bir uygulama gibi içerik alanını doldurur.
+ * Çerçeve koyu zeminde saydam kalır; belgenin temel stilini ana süreç ekler.
+ */
+.plg-host {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  padding: 16px 24px 20px;
+}
+
+.plg-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  min-height: 40px;
+}
+.plg-head-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-3);
+  color: var(--color-fg);
+}
+.plg-head-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.plg-head-text {
+  display: flex;
+  flex: 1 1 200px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 12px;
+  min-width: 0;
+}
+.plg-head-title {
+  color: var(--color-fg);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 26px;
+}
+.plg-head-sub {
+  color: var(--color-fg-muted);
+  font-size: 14px;
+}
+.plg-head-safe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-fg-faint);
+  font-size: 12px;
+}
+.plg-head-safe svg {
+  width: 13px;
+  height: 13px;
+  color: var(--color-success, currentColor);
+}
+.plg-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.plg-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-1);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+}
+.plg-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color-scheme: dark;
+}
+.plg-skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  background: var(--color-surface-1);
+  pointer-events: none;
+}
+
+/* ───────────── Eklentiler sayfası: türler, rozetler, önizleme, etkinlik ───────────── */
+
+.plg-kinds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+}
+.plg-kind {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-3);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.plg-kind:active {
+  transform: scale(0.98);
+}
+@media (hover: hover) and (pointer: fine) {
+  .plg-kind:hover {
+    background: var(--color-surface-4);
+  }
+}
+.plg-kind-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-fg);
+  font-size: 14px;
+  font-weight: 500;
+}
+.plg-kind-head svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-fg-muted);
+}
+.plg-kind-example {
+  color: var(--color-fg-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.plg-adds {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.plg-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px 2px 6px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--color-surface-4);
+  color: var(--color-fg-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.plg-add svg {
+  width: 13px;
+  height: 13px;
+}
+
+.plg-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px 40px;
+}
+@container (min-width: 520px) {
+  .plg-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.plg-two-wrap {
+  container: plg-two / inline-size;
+}
+
+.plg-add-list,
+.plg-perm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.plg-chip {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 1px 7px;
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-4);
+  color: var(--color-fg);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.plg-new {
+  background: var(--color-accent-soft, var(--color-surface-4));
+  color: var(--color-accent-fg, var(--color-fg));
+}
+
+.plg-tabs-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-inline: -4px;
+  padding-inline: 4px;
+}
+.plg-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.plg-version {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-3);
+}
+.plg-version[data-current] {
+  background: var(--color-surface-4);
+}
+
+.plg-result {
+  max-height: 96px;
+  overflow: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plg-kind {
+    transition: none;
+  }
+}

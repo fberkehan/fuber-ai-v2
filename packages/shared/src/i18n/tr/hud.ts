@@ -1,0 +1,57 @@
+/**
+ * Türkçe sözlük · alan: hud. Ada, toast yığını ve sahne.
+ * Düz anahtarlar; yer tutucu `{ad}`. Yeni anahtar bu alanın önekiyle başlar ve başka dosyada yinelenemez.
+ */
+export default {
+  'hud.island.listening': 'Dinliyorum',
+  'hud.island.thinking': 'Düşünüyorum',
+  'hud.island.speaking': 'Konuşuyorum',
+  'hud.island.followup': 'Sizi dinliyorum',
+  'hud.island.micOff': 'Mikrofon kapalı',
+  'hud.island.micOffHint': 'ile açılır',
+  'hud.island.conversation': 'Sohbet',
+  'hud.island.endConversation': 'Bitir',
+  'hud.controls.label': 'Hızlı denetimler',
+  'hud.controls.micOff': 'Mikrofonu kapat',
+  'hud.controls.micOn': 'Mikrofonu aç',
+  'hud.controls.stop': 'Sustur',
+  'hud.controls.conversation': 'Sohbet kipini başlat',
+  'hud.controls.open': 'Ana pencereyi aç',
+  'hud.island.endConversationLabel': 'Sohbeti bitir',
+  'hud.island.notice': 'Bildirim',
+  'hud.island.approvalHint': 'Sesle de “onaylıyorum” diyebilirsiniz.',
+  'hud.island.secondsLeft': '{n} sn',
+  'hud.island.error': 'Ses hattı',
+  'hud.island.jobQueued': 'Sırada bekliyor',
+  'hud.island.jobPercent': '%{n}',
+  'hud.island.jobMore': '+{n} iş',
+  'hud.island.meeting': 'Toplantı kaydı sürüyor',
+  // Bildirimin kaynağı (kart başlığı).
+  'hud.island.source.planner': 'Hatırlatma',
+  'hud.island.source.projects': 'Projeler',
+  'hud.island.source.memory': 'Hafıza',
+  'hud.island.source.web': 'Web',
+  'hud.island.source.skills': 'Yetenekler',
+  'hud.island.source.admin': 'Fuber Yönetim',
+  // Düşünürken süren araç adımı.
+  'hud.island.tool.planner': 'Planlara bakıyorum',
+  'hud.island.tool.projects': 'Projelere bakıyorum',
+  'hud.island.tool.memory': 'Hafızama bakıyorum',
+  'hud.island.tool.web': 'Web’de arıyorum',
+  'hud.island.tool.pc': 'Ekrana bakıyorum',
+  'hud.island.tool.documents': 'Belgelere bakıyorum',
+  'hud.island.tool.skills': 'Yeteneklere bakıyorum',
+  'hud.island.tool.other': 'Üzerinde çalışıyorum',
+
+  'hud.toast.dismiss': 'Bildirimi kapat',
+
+  'hud.stage.close': 'Kartı kapat',
+  'hud.stage.openMain': 'Ana pencerede aç',
+  'hud.stage.more': '{n} kart daha',
+  'hud.stage.less': 'Daha az göster',
+  'hud.stage.app': 'Mini uygulama',
+  'hud.stage.appSandboxed': 'Kapalı alan · ağ yok',
+  'hud.stage.appTooLarge': 'Mini uygulama gösterilemeyecek kadar büyük.',
+  'hud.stage.progress': '{done}/{total} tamam',
+  'hud.stage.dragHint': 'Sürükleyerek taşıyın',
+} as const;

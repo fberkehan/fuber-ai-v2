@@ -1,0 +1,37 @@
+# Fuber Yönetim 2 — NSIS x64 kurulum paketi. Çalıştırma: kökten `npm run dist:admin`.
+appId: ai.fuber.admin2
+productName: Fuber Yönetim 2
+electronVersion: 45.2.3
+npmRebuild: false
+directories:
+  output: release
+  buildResources: resources/icons
+files:
+  - dist/**/*
+  - '!dist/**/*.map'
+  - package.json
+extraResources:
+  - from: resources
+    to: resources
+    filter:
+      - '**/*'
+asar: true
+asarUnpack:
+  - '**/*.node'
+win:
+  icon: resources/icons/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  # Kullanıcı başına, yönetici izni istemeyen tek tıkla kurulum.
+  oneClick: true
+  perMachine: false
+  runAfterFinish: true
+  createDesktopShortcut: true
+  shortcutName: Fuber Yönetim 2
+  artifactName: Fuber Yönetim 2 Kurulum ${version}.${ext}
+  installerIcon: resources/icons/icon.ico
+  uninstallerIcon: resources/icons/icon.ico
+publish: []

@@ -1,0 +1,566 @@
+/*
+ * Ekran katmanı ("Jarvis bilgisayarı kullanıyor"): tam ekran, saydam, tıklamayı geçiren pencere (`PcOverlay.tsx`).
+ * Renkler belirteçlerden (`@fuber/ui` › tokens.css / appearance.css): soğuk mavi, arkadan ışık alan derin kenar
+ * parıltısı (yıldızlı sahnenin ışığı).
+ * Hareket azaltıldığında (`data-reduced`) hiçbir şey yer değiştirmez/büyümez: yalnız opaklık.
+ */
+
+html[data-surface='pc-overlay'],
+html[data-surface='pc-overlay'] body,
+html[data-surface='pc-overlay'] #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.pco {
+  /* Görünümden bağımsız temel */
+  --pco-accent: var(--color-accent-fg);
+  --pco-amber: var(--color-warning);
+  --pco-right: color-mix(in srgb, var(--color-warning) 62%, #ff7a1a);
+  --pco-ink: #0b0b0d;
+  --pco-chip-bg: color-mix(in srgb, var(--color-stage) 88%, transparent);
+  --pco-line: rgba(255, 255, 255, 0.18);
+  --pco-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Takımyıldız (varsayılan) */
+  --pco-edge-line: color-mix(in srgb, var(--pco-accent) 62%, #ffffff);
+  --pco-edge-glow: color-mix(in srgb, var(--pco-accent) 52%, transparent);
+  --pco-edge-radius: 0px;
+  --pco-cursor-glow: color-mix(in srgb, var(--pco-accent) 85%, transparent);
+  --pco-tag-halo: 0 0 14px color-mix(in srgb, var(--pco-accent) 50%, transparent);
+
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  font-family: var(--font-sans);
+  color: var(--color-fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* Onay beklerken: kehribar, sakin (nefes yok). */
+.pco[data-state='waiting'] {
+  --pco-edge-line: color-mix(in srgb, var(--pco-amber) 70%, #ffffff);
+  --pco-edge-glow: color-mix(in srgb, var(--pco-amber) 22%, transparent);
+  --pco-cursor-glow: color-mix(in srgb, var(--pco-amber) 70%, transparent);
+}
+/* Kontrol kullanıcıda / durduruldu: renk çekilir, nötr ve sönük. */
+.pco[data-state='interrupted'],
+.pco[data-state='stopped'] {
+  --pco-edge-line: rgba(255, 255, 255, 0.42);
+  --pco-edge-glow: rgba(255, 255, 255, 0.08);
+  --pco-cursor-glow: rgba(255, 255, 255, 0.35);
+}
+
+/* ───────────── kenar ışığı ───────────── */
+
+.pco-edge {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--pco-edge-radius);
+  opacity: 0;
+  /* İçte koyu kıl payı: açık renkli pencerelerin üstünde de ışık çizgisi seçilir. Kullanıcı: "net şekilde 'bu cihazı şu an
+     ben kullanıyorum' diye göstermeli" (koordinatör 4K'da ince buldu): çizgi 4 px, parıltı geniş ve ekran ölçeğiyle büyür. */
+  box-shadow:
+    inset 0 0 0 calc(4px * var(--pco-s, 1)) var(--pco-edge-line),
+    inset 0 0 0 calc(5px * var(--pco-s, 1)) rgba(0, 0, 0, 0.22),
+    inset 0 0 calc(70px * var(--pco-s, 1)) var(--pco-edge-glow),
+    inset 0 0 calc(200px * var(--pco-s, 1)) color-mix(in srgb, var(--pco-edge-glow) 55%, transparent);
+  transition:
+    opacity 0.45s ease,
+    box-shadow 0.6s ease;
+}
+.pco[data-on] .pco-edge {
+  opacity: 1;
+}
+/* Çok hafif nefes: yalnız çalışırken; abartısız (opaklık 0,78 ↔ 1, 4,8 sn). */
+.pco[data-on][data-state='working']:not([data-reduced]) .pco-edge {
+  animation: pco-breathe 4.8s ease-in-out infinite;
+}
+@keyframes pco-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.78;
+  }
+}
+
+/* ───────────── iz ───────────── */
+
+.pco-trail {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.pco-trail line {
+  stroke: var(--pco-accent);
+}
+.pco[data-reduced] .pco-trail {
+  display: none;
+}
+
+/* ───────────── hedef alan ───────────── */
+
+.pco-target {
+  position: absolute;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--pco-accent) 85%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--pco-accent) 16%, transparent),
+    0 0 26px color-mix(in srgb, var(--pco-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--pco-accent) 6%, transparent);
+  animation: pco-target-in 0.24s var(--pco-ease) both;
+}
+.pco[data-state='waiting'] .pco-target {
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--pco-amber) 85%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--pco-amber) 16%, transparent),
+    0 0 24px color-mix(in srgb, var(--pco-amber) 26%, transparent);
+  background: color-mix(in srgb, var(--pco-amber) 6%, transparent);
+}
+@keyframes pco-target-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pco[data-reduced] .pco-target {
+  animation-name: pco-fade-in;
+}
+@keyframes pco-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Köşe işaretleri: vizör gibi, alanın dışına 5 px taşar. */
+.pco-target > i {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  /* Vurgu renginde ve koyu kenarlı: açık renkli pencerelerin üstünde de seçilir (beyaz işaret açık zeminde kayboluyordu). */
+  border: 0 solid var(--pco-accent);
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 3px var(--pco-edge-glow));
+}
+.pco[data-state='waiting'] .pco-target > i {
+  border-color: var(--pco-amber);
+}
+.pco-target > i[data-corner='tl'] {
+  top: -5px;
+  left: -5px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-top-left-radius: 4px;
+}
+.pco-target > i[data-corner='tr'] {
+  top: -5px;
+  right: -5px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+  border-top-right-radius: 4px;
+}
+.pco-target > i[data-corner='bl'] {
+  bottom: -5px;
+  left: -5px;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+  border-bottom-left-radius: 4px;
+}
+.pco-target > i[data-corner='br'] {
+  right: -5px;
+  bottom: -5px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+  border-bottom-right-radius: 4px;
+}
+
+.pco-target-label {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: -5px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* ───────────── tıklama dalgası ───────────── */
+
+.pco-rings {
+  position: absolute;
+  inset: 0;
+}
+.pco-ring {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid color-mix(in srgb, var(--pco-accent) 70%, #ffffff);
+  border-radius: 50%;
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--pco-accent) 90%, transparent),
+    inset 0 0 6px color-mix(in srgb, var(--pco-accent) 50%, transparent);
+  animation: pco-ring 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+/* Dalganın içi: tıklama anında kısa, dolu bir parlama (halka tek başına hızlı sönüyor ve imlecin altında kalıyordu). */
+.pco-ring::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--pco-accent) 55%, #ffffff) 0%, color-mix(in srgb, var(--pco-accent) 40%, transparent) 60%, transparent 72%);
+  animation: pco-flash 0.42s ease-out forwards;
+}
+.pco-ring[data-button='right']::after {
+  background: radial-gradient(circle, color-mix(in srgb, var(--pco-right) 60%, #ffffff) 0%, color-mix(in srgb, var(--pco-right) 40%, transparent) 60%, transparent 72%);
+}
+@keyframes pco-flash {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.pco-ring[data-button='right'] {
+  border-color: color-mix(in srgb, var(--pco-right) 75%, #ffffff);
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--pco-right) 85%, transparent),
+    inset 0 0 6px color-mix(in srgb, var(--pco-right) 50%, transparent);
+}
+@keyframes pco-ring {
+  0% {
+    opacity: 1;
+    transform: scale(0.6);
+  }
+  55% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(4.2);
+  }
+}
+/* Hareket azaltıldığında: halka büyümez, yerinde belirip söner. */
+.pco[data-reduced] .pco-ring {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  animation-name: pco-ring-fade;
+}
+@keyframes pco-ring-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ───────────── imleç ───────────── */
+
+.pco-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 0.25s ease;
+}
+/* İmleç, etiket ve rozet birlikte ekran ölçeğiyle büyür (`--pco-s`, `PcOverlay.tsx` › overlayScale); uç noktası yerinde kalır. */
+.pco-cursor-body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(var(--pco-s, 1));
+  transform-origin: 0 0;
+}
+.pco[data-on] .pco-cursor[data-show] {
+  opacity: 1;
+}
+.pco[data-state='interrupted'] .pco-cursor[data-show],
+.pco[data-state='stopped'] .pco-cursor[data-show] {
+  opacity: 0.92;
+}
+
+.pco-arrow {
+  position: absolute;
+  top: -2px;
+  left: -3px;
+  transform-origin: 3px 2px;
+  filter: drop-shadow(0 0 8px var(--pco-cursor-glow)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+.pco-arrow svg {
+  display: block;
+}
+/* Basış: imleç bir an küçülür (gerçek düğmeye basılıyor). */
+.pco-arrow[data-pressed] {
+  animation: pco-press 0.22s var(--pco-ease);
+}
+@keyframes pco-press {
+  40% {
+    transform: scale(0.86);
+  }
+}
+.pco[data-reduced] .pco-arrow[data-pressed] {
+  animation: none;
+}
+
+.pco-tag {
+  position: absolute;
+  top: 30px;
+  left: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--color-page);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.28),
+    var(--pco-tag-halo);
+}
+.pco-tag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pco-accent);
+  box-shadow: 0 0 8px var(--pco-accent);
+}
+.pco[data-state='waiting'] .pco-tag-dot {
+  background: var(--pco-amber);
+  box-shadow: 0 0 8px var(--pco-amber);
+}
+.pco[data-state='interrupted'] .pco-tag-dot,
+.pco[data-state='stopped'] .pco-tag-dot {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: none;
+}
+
+.pco-badge {
+  position: absolute;
+  top: 58px;
+  left: 26px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 320px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  animation: pco-badge-in 0.2s ease both;
+}
+.pco-badge:has(.pco-meter) {
+  border-radius: 10px;
+  padding-bottom: 6px;
+}
+.pco-badge-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pco-badge[data-tone='amber'] {
+  background: var(--pco-amber);
+}
+@keyframes pco-badge-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.pco[data-reduced] .pco-badge {
+  animation-name: pco-fade-in;
+}
+
+/* Ekranın sağ kenarına yakın: etiket ve rozet imlecin soluna geçer. */
+.pco-cursor[data-flip] .pco-tag {
+  right: 8px;
+  left: auto;
+}
+.pco-cursor[data-flip] .pco-badge {
+  right: 6px;
+  left: auto;
+}
+
+/* Yazma ilerlemesi: rozetin içinde ince çubuk. */
+.pco-meter {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 96px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.12);
+}
+.pco-meter > span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transform-origin: left center;
+  transition: transform 0.18s linear;
+}
+.pco[data-reduced] .pco-meter > span {
+  transition: none;
+}
+
+/* ───────────── şerit (alt orta; ada üst ortada, çakışmaz) ───────────── */
+
+.pco-strip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(920px, calc(100vw - 48px));
+  padding: 7px 16px 7px 12px;
+  border-radius: 999px;
+  background: rgba(6, 6, 8, 0.86);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 1px var(--pco-line),
+    0 10px 30px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translate(-50%, calc(-100% + 8px));
+  transition:
+    opacity 0.45s var(--pco-ease),
+    transform 0.45s var(--pco-ease);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+.pco[data-on] .pco-strip {
+  opacity: 1;
+  transform: translate(-50%, -100%);
+}
+.pco[data-reduced] .pco-strip,
+.pco[data-reduced][data-on] .pco-strip {
+  transform: translate(-50%, -100%);
+  transition: opacity 0.45s ease;
+}
+.pco .pco-strip {
+  box-shadow:
+    0 0 0 1px var(--pco-line),
+    0 -14px 40px -22px color-mix(in srgb, var(--pco-accent) 70%, transparent),
+    0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.pco-strip-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pco-accent);
+  box-shadow: 0 0 10px var(--pco-accent);
+  animation: pco-pulse 1.2s ease-in-out infinite;
+}
+.pco[data-state='waiting'] .pco-strip-dot {
+  background: var(--pco-amber);
+  box-shadow: 0 0 10px var(--pco-amber);
+  animation-duration: 2.4s;
+}
+.pco[data-state='interrupted'] .pco-strip-dot,
+.pco[data-state='stopped'] .pco-strip-dot {
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: none;
+  animation: none;
+}
+.pco[data-reduced] .pco-strip-dot {
+  animation: none;
+}
+@keyframes pco-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.pco-strip-title {
+  flex: none;
+  font-weight: 700;
+}
+.pco-strip-step {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255, 255, 255, 0.86);
+}
+.pco-strip-hint {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-fg-muted);
+}
+.pco-sep {
+  flex: none;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+.pco-chip {
+  flex: none;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.86);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 18px;
+}
+.pco-keys {
+  display: inline-flex;
+  gap: 3px;
+}
+.pco-keys kbd {
+  min-width: 20px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}

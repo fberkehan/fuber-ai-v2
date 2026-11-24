@@ -1,0 +1,88 @@
+/*
+ * Bağlam sütununun ortak parçaları (Sohbet, Hafıza, Planlar): tek yüzey içinde kıl payı çizgiyle ayrılan bölümler,
+ * tanım satırı, tıklanabilir tek satır. Bölümlerin hepsi aynı iç kenarda durur (20 px; `Panel`in iç boşluğuyla aynı);
+ * sütunda çıplak, hizasız metin kalmaz. Bölüm başlığı `Panel` başlığıyla aynı ölçüdedir.
+ */
+@layer components {
+  .ctx-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 18px 20px;
+  }
+  .ctx-section + .ctx-section {
+    border-top: 1px solid var(--color-line);
+  }
+  .ctx-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 24px;
+  }
+  .ctx-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    color: var(--color-fg);
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: var(--text-base--line-height);
+    letter-spacing: -0.01em;
+  }
+  .ctx-title > span {
+    color: var(--color-fg-faint);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Tanım satırı: sabit ad sütunu, değer hemen yanında sola yaslı (göz satırı kaybetmez). */
+  .ctx-fact {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+  .ctx-fact > dt {
+    color: var(--color-fg-muted);
+  }
+  .ctx-fact > dd {
+    min-width: 0;
+    margin: 0;
+    color: var(--color-fg);
+  }
+
+  /* Tıklanabilir tek satır (sabitlenen, son öğrenilen, gün, rapor, sıradaki hatırlatıcı). Zemin bölümün iç kenarını aşmaz. */
+  .ctx-link {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: calc(100% + 16px);
+    margin-inline: -8px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  .ctx-link:hover {
+    background: var(--color-surface-3);
+  }
+  .ctx-link[aria-current='true'] {
+    background: var(--color-surface-4);
+  }
+  .ctx-line {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 6px 0;
+  }
+}

@@ -1,0 +1,7 @@
+/* Dört renderer girişinin ortak stil girişi. Jetonlar ve bileşen sınıfları @fuber/ui'den gelir. */
+@import '@fuber/ui/styles.css';
+
+/* HUD yüzeyleri saydam pencerede yaşar: pencere = görünen şekil (KURGU §9). */
+html[data-transparent] body {
+  background: transparent;
+}

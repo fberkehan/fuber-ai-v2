@@ -1,0 +1,60 @@
+/* ── Seçici (Secici.tsx): girdi ailesinden tetik + opak açılır panel. Renkler yalnız belirteçlerden (tasarim.css). ──────────
+   Panel document.body'de, `position: fixed`; temada --acilir (koyu bir ton açık, açık beyaz, camda %95 koyu cam). En küçük
+   yazı 12 px; satır ≥ 36 px. Etkin satır --dolgu-3; seçili satırda sağda onay işareti (mavi yok). */
+.secici {
+  display: inline-flex; align-items: center; gap: 8px; min-width: 150px; max-width: 100%; height: 38px; padding: 0 11px 0 14px;
+  border: 0; border-radius: 12px; background: var(--girdi); box-shadow: inset 0 0 0 1px var(--cizgi-2); color: var(--ink);
+  font-size: 14px; text-align: left; white-space: nowrap; transition: box-shadow var(--sure-hiz);
+}
+.secici:hover { box-shadow: inset 0 0 0 1px var(--cizgi-3); }
+.secici[aria-expanded='true'] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 40%, transparent), 0 0 0 3px var(--dolgu-2); }
+/* Devre dışı (0.11 G8, A-56): soluk değil — ikincil zemin, --ink-3 yazı (üç temada okunur); imleç not-allowed, ipucu (title) için pointer-events açık. */
+.secici:disabled { background: var(--dugme-2); color: var(--ink-3); cursor: not-allowed; }
+.secici:disabled:hover { box-shadow: inset 0 0 0 1px var(--cizgi-2); }
+:root[data-tema='cam'] .secici:disabled { color: var(--metin); }
+.secici__deger { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.secici__deger--bos { color: var(--ink-4); }
+.secici__ok { flex: none; color: var(--ink-3); transition: transform var(--sure-hiz) var(--yay-cikis); }
+.secici[aria-expanded='true'] .secici__ok { transform: rotate(180deg); }
+
+.secici__panel {
+  position: fixed; z-index: 1000; display: flex; flex-direction: column; min-height: 0; padding: 6px;
+  border-radius: 14px; background: var(--acilir); box-shadow: inset 0 0 0 1px var(--cizgi-2), var(--acilir-golge);
+  backdrop-filter: blur(24px) saturate(1.2); color: var(--ink); font-size: 14px; user-select: none;
+  transform-origin: top center; animation: secici-ac 150ms var(--yay-cikis);
+}
+.secici__panel[data-yon='ust'] { transform-origin: bottom center; animation-name: secici-ac-ust; }
+.secici__panel[data-klavye] { animation: none; }
+@keyframes secici-ac { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+@keyframes secici-ac-ust { from { opacity: 0; transform: translateY(4px) scale(0.98); } }
+
+.secici__ara { position: relative; display: flex; align-items: center; flex: none; margin-bottom: 6px; }
+.secici__ara > svg { position: absolute; left: 10px; color: var(--ink-4); pointer-events: none; }
+.secici__ara input {
+  width: 100%; height: 34px; padding: 0 10px 0 32px; border: 0; border-radius: 9px; outline: 0;
+  background: var(--dolgu-2); box-shadow: inset 0 0 0 1px var(--cizgi); color: var(--ink); font: inherit; font-size: 13.5px; user-select: text;
+}
+.secici__ara input:focus { box-shadow: inset 0 0 0 1px var(--cizgi-3); }
+.secici__ara input::placeholder { color: var(--ink-4); }
+
+.secici__liste { flex: 1; min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; overscroll-behavior: contain; }
+.secici__secenek {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto 16px; align-items: center; gap: 10px;
+  min-height: 36px; padding: 7px 8px 7px 10px; border-radius: 9px; cursor: pointer;
+}
+.secici__secenek[data-aktif] { background: var(--dolgu-3); }
+.secici__secenek[aria-disabled='true'] { cursor: not-allowed; }
+.secici__secenek[aria-disabled='true'] .secici__etiket { color: var(--ink-4); }
+.secici__metin { display: grid; gap: 1px; min-width: 0; }
+.secici__etiket { color: var(--ink); line-height: 1.35; overflow-wrap: anywhere; }
+.secici__aciklama { font-size: 12px; line-height: 1.4; color: var(--ink-3); }
+.secici__rozet {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--r-hap); white-space: nowrap;
+  background: var(--dolgu-2); box-shadow: inset 0 0 0 1px var(--cizgi); font-size: 12px; font-weight: 550; color: var(--ink-3);
+}
+.secici__isaret { display: grid; place-items: center; color: var(--ink); }
+.secici__bos { padding: 10px; font-size: 13px; color: var(--ink-3); list-style: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .secici__panel, .secici__panel[data-yon='ust'] { animation: none !important; }
+}

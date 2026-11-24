@@ -1,0 +1,26 @@
+/* Sohbet durum şeridi (SohbetSeridi.tsx; 0.10 Görev 2; 0.11 G8: abonelik yok): nötr (gri) = Fuber hesabı bağlı değil / onay bekliyor, kırmızı =
+   çalışan bağlantı koptu / hesap kapalı / kullanım hakkı doldu, sarı = yalnız yerel model (yedek ya da kullanım hakkı doldu). Renk yalnız noktada, kenarda
+   ve başlıkta; açıklama --ink-2. Yazı ≥ 12 px ve ≥ 4.5:1, düğme 32 px. Gönderim yalnız hiç motor yokken kapalı; yazı alanının kırmızı
+   kenarı yalnız kırmızı hâlde (data-motor=durdu), hiç bağlanmamışken sakin (data-motor=kapali). */
+.sohbet-seridi {
+  --ton: var(--onem-acil); --ton-yazi: var(--yazi-hata);
+  display: grid; gap: 6px; margin: 0 14px; padding: 10px 12px 12px; border-radius: 16px;
+  background: color-mix(in srgb, var(--ton) 9%, var(--yazici-zemin)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ton) 40%, transparent);
+  animation: gir 360ms var(--yay-cikis);
+}
+.sohbet-seridi[data-seviye='sari'] { --ton: var(--onem-dikkat); --ton-yazi: var(--yazi-uyari); }
+/* 0.10 Görev 2 (A-3, D2): hiç bağlanmamış / hesap onay bekliyor — sakin, nötr (gri): hata değil, bir sonraki adım. */
+.sohbet-seridi[data-seviye='notr'] { --ton: var(--ink-4); --ton-yazi: var(--ink); background: var(--yazici-zemin); box-shadow: inset 0 0 0 1px var(--cizgi-2); }
+.sohbet-seridi__ust { display: flex; align-items: center; gap: 8px; }
+.sohbet-seridi__ust b { font-size: 13.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--ton-yazi); }
+.sohbet-seridi__nokta { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ton); }
+.sohbet-seridi__metin { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-2); text-wrap: pretty; }
+.sohbet-seridi__dugmeler { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.sohbet--genis .sohbet-seridi { margin-inline: max(14px, calc((100% - 804px) / 2)); }
+.yazici[data-motor='durdu'] .yazici__kutu { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--onem-acil) 50%, transparent), var(--kart-golge); }
+.yazici textarea:disabled { color: var(--ink-3); cursor: not-allowed; }
+/* A-37: boş alanda yer tutucu dar sütunda iki satıra kırılınca tek satırlık alan kaydırma çubuğu açmasın. */
+.yazici textarea:placeholder-shown { overflow: hidden; }
+.yazici textarea:disabled::placeholder { color: var(--ink-3); }
+.yazici[data-motor='durdu'] .yazici__kutu:focus-within { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--onem-acil) 70%, transparent), 0 0 0 4px color-mix(in srgb, var(--onem-acil) 12%, transparent), var(--kart-golge); }
+@media (prefers-reduced-motion: reduce) { .sohbet-seridi { animation: none; } }

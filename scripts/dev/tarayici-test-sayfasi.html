@@ -1,0 +1,87 @@
+<!doctype html>
+<!-- Fuber Tarayıcı (0.14 T15) yerel test sayfası: form (POST), arama formu (GET), açılır liste, kendiliğinden gönderen liste, sayfa betiğiyle
+     gönderen düğme (algılamanın kaçıracağı gönderim: POST kalkanı yakalar), tehlikeli düğme, parola formu, tuş kutusu, gecikmeli metin,
+     indirme bağlantıları. Yalnız yerel sunucuda (scripts/dev/tarayici-onizle.mjs /t15) açılır; gerçek siteye hiçbir şey gitmez. -->
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Fuber Tarayıcı test sayfası</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 28px 44px; color: #14161c; background: #fff; line-height: 1.5 }
+  h1 { font-size: 30px; letter-spacing: -.02em; margin: 0 0 6px }
+  section { margin-top: 18px; padding: 14px 18px; border-radius: 12px; background: #f2f4f8; max-width: 640px }
+  h2 { font-size: 15px; margin: 0 0 8px }
+  label { display: block; font-size: 14px; font-weight: 600; margin-top: 8px }
+  input, select { font-size: 15px; padding: 7px 10px; margin-top: 4px; width: 300px; border: 1px solid #c5cad6; border-radius: 8px; display: block }
+  button { margin-top: 10px; margin-right: 8px; font-size: 15px; padding: 8px 18px; border-radius: 999px; border: 0; background: #14161c; color: #fff }
+  .dugme { display: inline-block; margin-top: 10px; padding: 8px 18px; border-radius: 999px; background: #1747c9; color: #fff; cursor: pointer }
+  #durum { font-weight: 600; color: #1747c9 }
+</style>
+</head>
+<body>
+  <h1>Fuber Tarayıcı test sayfası</h1>
+  <p>Durum: <span id="durum">hazır</span></p>
+
+  <section id="basvuru-kutusu">
+    <h2>Başvuru formu (POST)</h2>
+    <form id="basvuru" method="post" action="/gonder">
+      <input type="hidden" name="kaynak" value="t15-basvuru">
+      <label>Ad <input name="ad" placeholder="Adınız"></label>
+      <label>Ülke
+        <select name="ulke" id="ulke">
+          <option value="">Seçiniz</option>
+          <option value="TR">Türkiye</option>
+          <option value="DE">Almanya</option>
+          <option value="FR">Fransa</option>
+        </select>
+      </label>
+      <button type="submit">Gönder</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Arama (GET) ve sıradan düğmeler</h2>
+    <form id="ara" method="get" action="/ara"><input name="q" type="search" placeholder="Ara kutusu" aria-label="Ara kutusu"><button type="submit">Ara</button></form>
+    <button type="button" id="menu" onclick="document.getElementById('durum').textContent = 'menü açıldı'">Menü</button>
+    <button type="button" id="sil" onclick="document.getElementById('durum').textContent = 'silindi'">Sil</button>
+    <a id="ikinci" href="/a">İkinci sayfa bağlantısı</a>
+  </section>
+
+  <section>
+    <h2>Algılamanın kaçıracağı gönderimler (POST kalkanı)</h2>
+    <form id="gizli" method="post" action="/gonder"><input type="hidden" name="kaynak" value="t15-gizli"><input type="hidden" name="ad" value="gizli"></form>
+    <div class="dugme" id="devam-div" role="presentation" onclick="document.getElementById('gizli').submit()">Devam et (betikle gönderir)</div>
+    <form id="otomatik" method="post" action="/gonder">
+      <input type="hidden" name="kaynak" value="t15-otomatik"><input type="hidden" name="ad" value="otomatik">
+      <label>Kendiliğinden gönderen liste
+        <select id="oto" onchange="this.form.submit()"><option value="">Seçiniz</option><option value="a">Birinci</option><option value="b">İkinci</option></select>
+      </label>
+    </form>
+  </section>
+
+  <section>
+    <h2>Parola formu</h2>
+    <form id="giris" method="post" action="/gonder">
+      <input type="hidden" name="kaynak" value="t15-giris">
+      <label>E-posta <input name="eposta" placeholder="E-posta adresi"></label>
+      <label>Parola <input name="parola" type="password" placeholder="Parolanız"></label>
+      <button type="button" id="giris-dugme" onclick="document.getElementById('durum').textContent = 'giriş denendi'">Devam</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Tuşlar, bekleme, indirme</h2>
+    <label>Tuş kutusu <input id="tus" placeholder="Tuş kutusu" aria-label="Tuş kutusu"></label>
+    <p id="gecikmeli" hidden>Sonuç hazır: kayıt tamam</p>
+    <a id="indir" href="/indir">Raporu indir</a> ·
+    <a id="exe" href="/zararli.exe">Kurulum programı</a>
+  </section>
+
+  <script>
+    // Tuş kutusu: basılan tuşu durum satırına yazar (Escape, Tab, ArrowDown …).
+    document.getElementById('tus').addEventListener('keydown', function (e) { document.getElementById('durum').textContent = e.key + ' alındı'; });
+    // Gecikmeli metin: tarayici_bekle bunu bekler.
+    setTimeout(function () { document.getElementById('gecikmeli').hidden = false; }, 1500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+p11_eposta|Hey Fuber, e-postalarıma bakar mısın?
+p12_hatirlat|Hey Fuber, yarın dokuzda hatırlat.
+p13_cok_yavas|<prosody rate='x-slow'>Hey Fuber.</prosody>
+p14_orta|<prosody rate='medium' pitch='+10%'>Hey Fuber, bugün neler var?</prosody>
+p15_vurgu|<emphasis>Hey Fuber</emphasis>, bir şey soracağım.
+p16_duraklama|Hey <break time='200ms'/> Fuber.
+p17_soru|Hey Fuber, Mavi Kuş ne durumda?
+p18_alcak|<prosody volume='soft'>Hey Fuber.</prosody>
+p19_yuksek|<prosody volume='loud'>Hey Fuber!</prosody>
+p20_kisa|<prosody rate='fast'>Hey Fuber.</prosody>
+n16_millet|Hey millet, toplanın bakalım.
+n17_yavrum|Hey yavrum, ne yapıyorsun?
+n18_dostum|Hey dostum, uzun zaman oldu.
+n19_optik|Fiber optik kablo döşendi.
+n20_kuber|Hey Kübra, çay ister misin?
+n21_haber|Hey, haberin var mı?
+n22_ferhat|Hey Ferhat, buraya gel.
+n23_fiyat|Fiyatlar yine artmış.
+n24_hey_sen|Hey sen, oradaki!
+n25_super_lig|Süper Lig maçı akşam başlıyor.
+n26_furuzan|Hey Füruzan, telefonun çalıyor.
+n27_uber_eats|Uber Eats siparişi geldi.
+n28_hey_babo|Hey babo, kolay gelsin.
+n29_toplu|Bugün toplantıda bütçeyi konuşacağız.
+n30_fubar|Hey, bir bakar mısın şuna?

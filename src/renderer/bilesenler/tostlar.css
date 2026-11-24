@@ -1,0 +1,65 @@
+/* ── Tost alanı (TostAlani.tsx; Görev 20b düzeltme turu 2) ─────────────────────────────────────────────────────────────────
+   Panonun üst ortasında, çentiğin (40 px) hemen altında; sayfanın ÜSTÜNDE bir katman — sayfa alanı hiç değişmez (yerleşim kayması
+   yok). Çentikten iner gibi girer (üstten aşağı, hafif büyüyerek). En çok 2 tost × 38 px + 4 px ara = pencerede y 52…132: sayfaların
+   ilk denetimi (Ayarlar akordeonu 145, Hafıza sekmeleri 155) bu şeridin altında kalır.
+   Genişlik en çok 520 px; dar pencerede (1080) 404 px — Sohbetler'in sol sütununa ("Yeni", sohbet listesi; x ≤ 359) taşmaz.
+   Opak yüzey (--ipucu): altından kayan içerik yazıyı bulandırmasın; üç temada yazı ≥ 4.5:1, simge ≥ 3:1, düğmeler 32 px. */
+.tostlar {
+  position: absolute; top: 44px; left: 50%; z-index: 60; transform: translateX(-50%);
+  width: min(520px, calc(100% - 600px)); display: grid; gap: 4px; pointer-events: none;
+}
+/* B8 (son düzeltme): her tost sabit 38 px'lik yuvada. Üstüne gelince/odakta açılan tost yuvadan TAŞAR ve öteki tostun üstüne biner
+   (eskiden yüksekliği artıp ikinci tostu sayfanın denetimlerinin üstüne itiyordu). Birinci yuvadaki aşağı, ikincideki yukarı açılır;
+   en çok 3 satır = 78 px ≤ iki tostluk şerit (2 × 38 + 4): açılan tost da şeritten çıkmaz (ozellik-denetimi açılmış hâli ölçer). */
+.tost-yuva { position: relative; height: 38px; }
+.tost-yuva > .tost { position: absolute; top: 0; left: 0; right: 0; }
+.tost-yuva:nth-child(2) > .tost { top: auto; bottom: 0; transform-origin: 50% 100%; }
+.tost-yuva > .tost:hover, .tost-yuva > .tost:focus-within { z-index: 2; }
+/* Çentiğe katlanmış kalıcı tostlar (hatırlatıcı, onay): çentiğin içinde, logonun sağında "+N" hapı; tıklayınca açılır. Çentiğin akışında
+   (logoyu örtmez, çentik onunla genişler — kanatları da kayar); düğme kuralı gereği 32 px (çentik 40 px). */
+.tost-katli {
+  display: inline-flex; align-items: center; gap: 4px; height: 32px; margin-right: -12px; padding: 0 11px 0 9px;
+  border: 0; border-radius: 99px; background: var(--dolgu-3); box-shadow: inset 0 0 0 1px var(--cizgi-2); color: var(--ink);
+  font-size: var(--yazi-en-kucuk); font-weight: 650; font-variant-numeric: tabular-nums; cursor: pointer; -webkit-app-region: no-drag;
+  animation: tost-in 220ms var(--yay-cikis);
+}
+.tost-katli:hover { background: var(--dolgu-2); }
+.tost-katli svg { color: var(--ada-dikkat); }
+.tost-katli:focus-visible { outline: 2px solid var(--odak); outline-offset: 1px; }
+.tost {
+  position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 38px; padding: 3px 3px 3px 12px;
+  border-radius: 14px; background: var(--ipucu); color: var(--ink); font-size: 13.5px; line-height: 20px; overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--cizgi-2), var(--kart-golge), 0 14px 32px -18px rgb(0 0 0 / 0.45);
+  pointer-events: auto; -webkit-app-region: no-drag; /* sürükleme şeridinin (başlık) üstünde de tıklanır */
+  transform-origin: 50% 0; animation: tost-in 260ms var(--yay-cikis);
+}
+@keyframes tost-in { from { opacity: 0; transform: translateY(-10px) scale(0.96); } }
+.tost__simge { flex: none; display: grid; place-items: center; width: 20px; height: 20px; color: var(--ink-2); }
+.tost__simge[data-tur='hatirlatma'], .tost__simge[data-tur='onay'] { color: var(--ada-dikkat); }
+.tost__simge[data-tur='hata'] { color: var(--yazi-hata); }
+/* Tek satır; uzun metin "…" ile biter. Üstüne gelince/odaklanınca en çok 3 satır (B8: iki tostluk şeride sığar): o an imleç zaten tostta. */
+.tost__icerik { flex: 1; min-width: 0; padding: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tost:hover .tost__icerik, .tost:focus-within .tost__icerik {
+  white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.tost__baslik { font-weight: 600; }
+.tost__baslik + .tost__metin { margin-left: 6px; color: var(--ink-3); }
+.tost__fazla {
+  flex: none; padding: 0 7px; border-radius: 99px; background: var(--dolgu-3); box-shadow: inset 0 0 0 1px var(--cizgi-2);
+  color: var(--ink-2); font-size: var(--yazi-en-kucuk); font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums;
+}
+.tost .dgm { flex: none; }
+.tost__kapat {
+  flex: none; display: grid; place-items: center; width: var(--dokunma); height: var(--dokunma); border: 0; border-radius: 10px;
+  background: transparent; color: var(--ink-3); transition: background var(--sure-hiz), color var(--sure-hiz);
+}
+.tost__kapat:hover { background: var(--dolgu-2); color: var(--ink); }
+/* "Geri al" (K2): altta kalan süreyi gösteren ince çizgi; grubu duraklatılınca (üstünde/odakta) durur. */
+.tost[data-tur='geri-al'] { padding-right: 4px; }
+.geri-al__sure { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ink-3); transform-origin: left; animation: geri-al-sure linear both; }
+.tost[data-durakli] .geri-al__sure { animation-play-state: paused; }
+@keyframes geri-al-sure { from { transform: scaleX(var(--baslangic, 1)); } to { transform: scaleX(0); } }
+/* Hareketi azalt: giriş anında (genel kural), süre çizgisi hiç çizilmez (akmayan çizgi bilgi vermez); metin ve düğme kalır. */
+@media (prefers-reduced-motion: reduce) {
+  .geri-al__sure { display: none; }
+}

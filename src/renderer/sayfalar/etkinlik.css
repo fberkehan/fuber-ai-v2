@@ -1,0 +1,48 @@
+/* ── Etkinlik sayfası (sayfalar/Etkinlik.tsx; 0.10 Görev 1, Karar D1; 0.13 T15: tek sütun akış) ────────────────────────────────────────
+   KAYDIRMASIZ tek ekran: sayfa kaymaz (scrollHeight = clientHeight; 1080×680 ve 1440×900, üç temada); yalnız Akış kendi içinde kayar.
+   TEK sütun: "Şu an" kartı + Akış (düz cümleler, en yenisi üstte). "Parçalar" ve "Yapay zekâ/Motorlar" kartları kalktı. Başlık öteki sayfalarla
+   aynı (.sayfa__bas, 1120 px). Renkler yalnız belirteçlerden; hareket yalnız girişte ve "Şu an" noktasının nabzında — azaltılmış harekette hiçbiri. */
+.etkinlik { position: absolute; inset: 0; overflow: hidden; padding: calc(var(--ust) + 26px) 26px 26px; }
+.etkinlik__sayfa { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+.etkinlik__sayfa > .sayfa__bas { margin-bottom: 18px; }
+.etkinlik__govde { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 16px; width: 100%; max-width: 820px; min-width: 0; min-height: 0; }
+/* 0.14 T31: başlığın satır yüksekliği büyük harf ve kuyruklu harflere yer bırakır; Akış boşken kart boş alanı doldurmaz (ölü alan yok). */
+.etkinlik .sayfa__bas .t-dev { line-height: 1.25; }
+.etkinlik[data-bos] .etkinlik__govde { grid-template-rows: auto auto; align-content: start; }
+
+/* Kart: başlık satırı + (gerekirse kendi içinde kayan) liste. */
+.etk-kart { display: grid; grid-template-rows: auto minmax(0, 1fr); align-content: start; gap: 10px; min-height: 0; padding: 16px 18px; }
+.etk-kart__bas { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; }
+.etk-kart__not { color: var(--ink-4); font-size: 12px; }
+.etk-liste { min-height: 0; margin: 0 -10px; padding: 0 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; list-style: none; }
+.etk-bos { margin: 0; color: var(--ink-4); font-size: 13px; line-height: 1.5; text-wrap: pretty; }
+
+/* ── Şu an: genel hâl + neyin çalıştığı. Boyu durumla değişmez (alt satır iki satır yer tutar). ── */
+.etk-simdi { display: flex; flex-direction: column; gap: 4px; }
+.etk-simdi__etiket { display: flex; align-items: center; gap: 7px; }
+.etk-simdi__etiket::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-4); }
+.etk-simdi:not([data-zihin='bos']) .etk-simdi__etiket::before { background: oklch(from var(--vurgu) clamp(var(--vurgu-l-taban), l, var(--vurgu-l-tavan)) c h); animation: etk-nabiz 1.4s ease-in-out infinite; }
+@keyframes etk-nabiz { 50% { transform: scale(1.35); opacity: 0.7; } }
+.etk-simdi__baslik { margin-top: 4px; color: var(--ink); font-size: clamp(22px, 2vw, 28px); line-height: 1.2; letter-spacing: -0.03em; font-weight: var(--w-baslik); }
+.etk-simdi__alt { display: -webkit-box; min-height: calc(2 * 1.4em); overflow: hidden; color: var(--ink-3); font-size: 13.5px; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+/* ── Akış: saat (tabular, ink-3) | hata noktası | olay (üst cümle + alt özellik). Satır sarılabilir (kesilmez). ── */
+.etk-olay { display: grid; grid-template-columns: 62px 8px minmax(0, 1fr); align-items: start; gap: 8px; padding: 7px 0; border-top: 1px solid var(--cizgi); animation: gir 300ms var(--yay-cikis); }
+.etk-olay:first-child { border-top: 0; }
+.etk-olay__saat { padding-top: 1px; color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.etk-olay__nokta { display: grid; place-items: center; height: 18px; }
+.etk-olay__metin { display: grid; min-width: 0; }
+.etk-olay__metin b { color: var(--ink-2); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.etk-olay__metin small { color: var(--ink-4); font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.etk-olay[data-hata] .etk-olay__metin b { color: var(--yazi-hata); }
+
+/* En küçük pencerenin altında (ekran yakınlaştırma): sayfa yalnız o zaman kayar. */
+@media (max-width: 900px) {
+  .etkinlik { overflow-y: auto; }
+  .etkinlik__sayfa { height: auto; }
+  .etkinlik__govde { grid-template-rows: auto; }
+  .etk-liste { max-height: 360px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .etk-simdi .etk-simdi__etiket::before, .etk-olay { animation: none !important; }
+}

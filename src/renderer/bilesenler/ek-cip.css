@@ -1,0 +1,17 @@
+/* Sohbet ekleri (analiz 11 Kas bulgu 8–9): belge/video çipi, ilerleme çubuğu (yalnız transform), sürükle-bırak vurgusu (yalnız opacity). */
+.yazici__dosyalar { display: flex; flex-wrap: wrap; gap: 6px; }
+.ek-cip { position: relative; display: inline-flex; align-items: center; gap: 6px; max-width: 320px; min-height: 30px; padding: 0 4px 0 9px; border-radius: 10px; background: var(--dolgu-2); box-shadow: inset 0 0 0 1px var(--cizgi-2); font-size: 12.5px; color: var(--metin); overflow: hidden; animation: ek-cip-gir 160ms var(--yay-cikis) both; }
+.ek-cip[data-durum='hazirlaniyor'] { color: var(--ink-2); }
+.ek-cip__ad { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; }
+.ek-cip__bilgi { flex: none; font-size: 12px; color: var(--ink-3); white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+.ek-cip button { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--ink-2); font-size: 15px; line-height: 1; cursor: pointer; }
+.ek-cip button:hover { color: var(--metin); }
+.ek-cip__cubuk { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: color-mix(in srgb, var(--mavi-2) 18%, transparent); }
+.ek-cip__cubuk i { display: block; height: 100%; background: var(--mavi-2); transform-origin: left center; transition: transform 240ms var(--yay-cikis); }
+.mesaj__ekler { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-top: 4px; }
+.mesaj__ekler .ek-cip { padding-right: 10px; animation: none; }
+.yazici[data-suruklenen] .yazici__kutu { position: relative; }
+.yazici[data-suruklenen] .yazici__kutu::after { content: 'Bırak: görsel, belge ya da video'; position: absolute; inset: 0; display: grid; place-items: center; border-radius: inherit; background: color-mix(in srgb, var(--kart, #000) 82%, transparent); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mavi-2) 70%, transparent); color: var(--metin); font-size: 13px; font-weight: 650; pointer-events: none; animation: ek-birak 120ms ease-out both; }
+@keyframes ek-cip-gir { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes ek-birak { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ek-cip, .yazici[data-suruklenen] .yazici__kutu::after { animation: none !important; } .ek-cip__cubuk i { transition: none; } }

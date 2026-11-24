@@ -1,0 +1,14 @@
+/* Görev onay kartı (0.11 G10): genel onay kartının (.onay, tasarim.css) çerçevesi üstünde alan listesi. Renkler yalnız belirteçlerden; yazılar ≥ 12 px.
+   Uzun alanlar MetinKirp ile en çok 2–3 satır (tamamı ipucunda); kartın içinde kaydırma yok (ada içinde .ada__kaydir kendi payını yönetir). */
+.onay-gorev__baslik { min-width: 0; font-size: 15px; line-height: 1.35; }
+.onay-gorev__amac { font-size: 13px; line-height: 1.45; color: var(--ink-2); min-width: 0; }
+.onay-gorev__liste { display: grid; gap: 7px; margin: 2px 0 0; padding: 0; min-width: 0; }
+.onay-gorev__alan { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; align-items: baseline; min-width: 0; }
+.onay-gorev__alan > dt { margin: 0; font-size: 12px; line-height: 1.4; font-weight: 600; color: var(--ink-3); }
+.onay-gorev__alan > dd { margin: 0; min-width: 0; font-size: 13px; line-height: 1.4; color: var(--metin); overflow-wrap: anywhere; }
+.onay-gorev__izinler { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.onay-gorev__izinler > li { position: relative; min-width: 0; padding-left: 12px; }
+.onay-gorev__izinler > li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--onem); }
+/* Dar kartta (telefon genişliği, dar sohbet) etiket üstte, değer altta. */
+@container (max-width: 340px) { .onay-gorev__alan { grid-template-columns: minmax(0, 1fr); gap: 1px; } }
+@media (max-width: 420px) { .onay-gorev__alan { grid-template-columns: minmax(0, 1fr); gap: 1px; } }

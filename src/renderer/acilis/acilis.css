@@ -1,0 +1,66 @@
+/* ── Açılış örtüsü (0.11 G11, spec §9) ─────────────────────────────────────────────────────────────────────────────────────────────
+   Sakin ve cömert: tek bir işaret, tek bir yazı, tek bir erime. Parçacık, süs gradyanı, zıplama/aşma YOK. Renkler yalnız belirteçlerden
+   (üç tema); eğriler uygulamanın kendi eğrileri (--yay-cikis) ya da standart anahtar sözcükler. HİÇBİR süre burada yazılı değil: hepsi
+   shared/acilis.ts ACILIS'ten `--a-*` değişkeni olarak gelir (Acilis.tsx, acilisSureleri); tests/acilis.test.ts bu dosyada süre literali
+   bulunmadığını denetler. Zemin = panonun kendi zemini: erime, uygulamanın boş panosundan içeriğe geçiş gibi okunur.
+   Örtü bir katmandır: pointer-events:none (hiçbir şeyi beklemez/engellemez). Tıklama örtüyü atlatır ve o tıklama TÜKETİLİR (alttaki,
+   görünmeyen denetime geçmez; örtünün üstündeki pencere düğmeleri hariç); tuşlar geçer (Acilis.tsx).
+   Kare sırası (tam): işaret (mini logo) alttan yukarı tüy gibi açılır + ölçeklenir; alt gövdesi (2. yol: ilmek ve kase) erkenden yavaşça belirir; FUBER harfleri sırayla; sahne söner,
+   örtü erir. Azaltılmış hareket: işaret ve yazı durağan, kısa bekler, ~300 ms solar. */
+@property --acilis-ileri { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+
+.acilis {
+  position: fixed; inset: 0; z-index: 1050; display: grid; place-items: center;
+  /* Pencere düğmeleri (z 1100) örtünün üstünde kalır: kapat/küçült her an çalışır. */
+  pointer-events: none;
+  background: var(--pano-zemin); color: var(--ink);
+}
+/* Şeffaf temada (0.13 T13) pano zemini yarı saydamdır; örtü her temada OPAK olmalı (altındaki uygulama sızmasın) ve BÜTÜN pencereyi kaplar (kural:
+   kurulum ve açılış şeffaf olmaz). Bunu burada ayrı kural değil, tasarim.css yapar: `.acilis` cam temada koyu opak belirteçleri yeniden kurar,
+   yani yukarıdaki --pano-zemin orada opak panodur. */
+
+.acilis__sahne { display: grid; justify-items: center; gap: clamp(24px, 4vh, 36px); transform: translateY(-2vh); }
+.acilis__isaret { line-height: 0; opacity: 0; }
+.acilis__isaret svg { height: clamp(76px, 12vh, 104px) !important; overflow: visible; }
+.acilis__yazi { line-height: 0; color: var(--ink-2); }
+.acilis__yazi svg { height: clamp(15px, 2.2vh, 20px) !important; overflow: visible; }
+.acilis__yazi path { opacity: 0; transform-box: fill-box; }
+.acilis__isaret path { transform-box: fill-box; transform-origin: center; }
+
+/* ── Tam kip ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
+.acilis--tam { animation: acilis-erit var(--a-erit-sure) ease-in-out var(--a-erit-bas) both; }
+/* Erirken işaret ve yazı zeminden ÖNCE söner (uygulamanın üstünde hayalet kalmasın); uygulama, boş bir panonun erimesiyle ortaya çıkar. */
+.acilis--tam .acilis__sahne { animation: acilis-sahne-git var(--a-sahne-sure) linear var(--a-sahne-bas) both; }
+.acilis--tam .acilis__isaret {
+  animation: acilis-isaret var(--a-isaret-gel) var(--yay-cikis) both, acilis-ac var(--a-isaret-ac) ease-in-out both;
+  /* Tüy kenarlı alttan-yukarı açılma maskesi: yalnız alfa önemli (opak durak: --ink, tüm temalarda opak belirteç). */
+  -webkit-mask-image: linear-gradient(to top, var(--ink) calc(var(--acilis-ileri) - 28%), transparent var(--acilis-ileri));
+  mask-image: linear-gradient(to top, var(--ink) calc(var(--acilis-ileri) - 28%), transparent var(--acilis-ileri));
+}
+/* Mini logonun alt gövdesi (2. yol: ilmek ve kase; 1. yol üst çerçeve) süpürmeyle birlikte erkenden, yavaşça belirir. */
+.acilis--tam .acilis__isaret path:nth-of-type(2) { opacity: 0; animation: acilis-parca var(--a-parca-sure) var(--yay-cikis) var(--a-parca-bas) both; }
+/* FUBER: beş harf, --a-harf-aralik arayla, her biri --a-harf-sure sürer. */
+.acilis--tam .acilis__yazi path { animation: acilis-harf var(--a-harf-sure) var(--yay-cikis) both; animation-delay: calc(var(--a-yazi-bas) + var(--i, 0) * var(--a-harf-aralik)); }
+.acilis--tam .acilis__yazi path:nth-of-type(2) { --i: 1; }
+.acilis--tam .acilis__yazi path:nth-of-type(3) { --i: 2; }
+.acilis--tam .acilis__yazi path:nth-of-type(4) { --i: 3; }
+.acilis--tam .acilis__yazi path:nth-of-type(5) { --i: 4; }
+
+@keyframes acilis-isaret { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes acilis-ac { from { --acilis-ileri: 0%; } to { --acilis-ileri: 128%; } }
+@keyframes acilis-parca { from { opacity: 0; transform: scale(0.86); } to { opacity: 1; transform: none; } }
+@keyframes acilis-harf { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes acilis-erit { from { opacity: 1; } to { opacity: 0; } }
+@keyframes acilis-sahne-git { from { opacity: 1; } to { opacity: 0; } }
+
+/* ── Azaltılmış hareket: durağan işaret + yazı, kısa bekleme, ~300 ms solma ───────────────────────────────────────────────── */
+.acilis--kisa .acilis__isaret, .acilis--kisa .acilis__yazi path { opacity: 1; }
+.acilis--kisa { animation: acilis-erit var(--a-kisa-sure) ease-in-out var(--a-kisa-bekle) both; }
+.acilis--kisa .acilis__sahne { animation: acilis-sahne-git var(--a-kisa-sahne-sure) linear var(--a-kisa-sahne-bas) both; }
+/* Genel "hareketi azalt" kuralı (tasarim.css) bütün süreleri 1 ms yapar; örtünün solması kasıtlı olarak kısa ama görünür kalır. */
+@media (prefers-reduced-motion: reduce) {
+  .acilis.acilis--kisa { animation-duration: var(--a-kisa-sure) !important; }
+  .acilis.acilis--kisa .acilis__sahne { animation-duration: var(--a-kisa-sahne-sure) !important; }
+}
+/* Bekleme: opak zemin, işaret yok (soru sürerken boş kare görünmesin). */
+.acilis--bekliyor .acilis__isaret, .acilis--bekliyor .acilis__yazi path { opacity: 0; }

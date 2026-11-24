@@ -1,0 +1,228 @@
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   FUBER ARAYÜZ KÜTÜPHANESİ (0.11 G3) — kokpit, sohbet kartları, yapılacaklar ve görevler bu parçalarla kurulur.
+   Gerçek ve kaliteli bir arayüz kütüphanesi (metinler bazen taşıyordu). macOS widget'ı gibi: tek büyük birincil değer,
+   ikincil bilgi soluk ve küçük, cömert iç boşluk, kart içinde kaydırma çubuğu yok, hareket ölçülü (hareketi azalt desteklenir),
+   klavye odağı görünür. Renkler YALNIZ tasarim.css belirteçlerinden (koyu, açık, buzlu cam); yazı ≥ 12 px ve ≥ 4,5:1 (devre dışı
+   dahil), düğme ≥ 32 px.
+   TAŞMA KURALI: her metnin satır sınırı var. Bilinçli kırpma [data-kirp] + -webkit-line-clamp (… ile biter; tek satır da clamp'tir,
+   white-space: nowrap + ellipsis değil — yatay taşma hiç oluşmaz); uzun sözcük overflow-wrap: anywhere ile bölünür; esnek/ızgara
+   çocukları min-width: 0; sayılar tabular. scripts/dev/tasma.mjs [data-kirp] dışındaki her kırpılan/taşan metni hata sayar.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* Yalnız ekran okuyucu (görsel olarak gizli). */
+.ui-gizli { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ── Kırpma (MetinKirp, Satir, Isaret, Rozet, Dugme) ──────────────────────────────────────────────────────── */
+.ui-kirp {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--kirp-satir, 1);
+  min-width: 0; margin: 0; overflow: hidden; overflow-wrap: anywhere;
+  font: inherit; color: inherit; letter-spacing: inherit;
+}
+/* [data-kirp] satır sınırını taşır ("1", "2", …). Tek satırda kesim karakterden olur (sistemdeki "…" gibi): satıra sığmayan uzun sözcük
+   (dosya adı, adres) bütünüyle gizli ikinci satıra itilip satır "Aç:…" diye boş kalmasın. Çok satırda sözcükler bölünmez (anywhere yeter). */
+[data-kirp='1'] { -webkit-line-clamp: 1; word-break: break-all; }
+.ui-kirp:focus-visible { outline: 2px solid var(--odak); outline-offset: 2px; border-radius: 4px; }
+/* Tam metin ipucu (klavye odağında; kirp.tsx): açılır panel malzemesi, ekranın içinde. */
+.ui-ipucu {
+  position: fixed; z-index: 1000; max-width: min(420px, calc(100vw - 16px)); padding: 8px 11px; border-radius: var(--r-kucuk);
+  background: var(--acilir); box-shadow: inset 0 0 0 1px var(--cizgi-2), var(--acilir-golge); color: var(--ink);
+  font-size: 12.5px; line-height: 1.45; font-weight: 500; letter-spacing: 0; white-space: pre-line; overflow-wrap: anywhere;
+  pointer-events: none; animation: ui-belir var(--sure-hiz) var(--yay-cikis);
+}
+@keyframes ui-belir { from { opacity: 0; transform: translateY(-2px); } }
+
+/* ── Kart ────────────────────────────────────────────────────────────────────────────────────────────────── */
+/* Zemin/çizgi/ışık .kart'tan. Gövde overflow: visible — satırların hover zemini kartın iç boşluğuna taşabilsin; kartın kendisi keser. */
+.ui-kart { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; padding: 16px 20px 18px; }
+.ui-kart--yogun { gap: 8px; padding: 12px 14px 14px; border-radius: var(--r-panel); }
+.ui-kart__bas { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; min-height: var(--dokunma); }
+.ui-kart__baslik, .ui-kart__bosluk { flex: 1 1 auto; min-width: 0; }
+.ui-kart__baslik { font-size: 13.5px; font-weight: 650; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink-2); }
+.ui-kart__eylem { flex: none; display: flex; align-items: center; max-width: 60%; min-width: 0; margin: -4px 0; }
+/* Hayalet düğmenin (zeminsiz) iç boşluğu kartın iç boşluğuna taşar: yazısı/simgesi içerik kenarıyla hizalı durur. Zeminli öğe
+   (rozet, ikincil düğme) kenarda kalır. Pay sarmalayıcıya verilir (düğmeye verilirse esnek kutu düğmeyi o kadar sıkıştırır, etiket kesilir). */
+.ui-kart__eylem:has(> .dgm--hayalet) { margin-right: -14px; }
+.ui-kart__eylem:has(> .dgm--hayalet.dgm--simge) { margin-right: -8px; }
+/* Yoğun kartta iç boşluk 14 px: odak halkası (2 + 2 px) kartın kesmesine takılmasın. */
+.ui-kart--yogun .ui-kart__eylem:has(> .dgm--hayalet) { margin-right: -10px; }
+.ui-kart--yogun .ui-kart__eylem:has(> .dgm--hayalet.dgm--simge) { margin-right: -6px; }
+.ui-kart__govde { flex: 1 1 auto; display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+
+/* ── Satır ───────────────────────────────────────────────────────────────────────────────────────────────── */
+/* Satırın yazı ve boy ölçüleri TEK kaynakta: Satir ve onun yerini tutan Iskelet aynı değerlerden okur (inceleme K5: veri gelince kart
+   zıplamasın — alt satırlı ve iki satır başlıklı satırlar dahil). */
+.ui-satir, .ui-iskelet {
+  --ui-baslik-yazi: 13.5px; --ui-baslik-satir: 1.35; --ui-alt-yazi: 12px; --ui-alt-satir: 1.4;
+  --ui-satir-boy: 40px; --ui-satir-ic: 7px; --ui-satir-ara: 1px;
+}
+.ui-satir {
+  display: flex; align-items: center; gap: 12px; width: calc(100% + 20px); min-height: var(--ui-satir-boy); margin: 0 -10px; padding: var(--ui-satir-ic) 10px;
+  border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; text-align: left;
+}
+button.ui-satir { cursor: pointer; transition: background var(--sure-hiz); }
+button.ui-satir:hover { background: var(--dolgu-2); }
+button.ui-satir:active { background: var(--dolgu-3); }
+/* Odak halkası içeride: kartın kesmesine takılmaz. */
+.ui-satir:focus-visible, .ui-isaret:focus-visible { outline: 2px solid var(--odak); outline-offset: -2px; border-radius: 12px; }
+.ui-satir__sol {
+  flex: none; display: grid; place-items: center; min-width: 24px; max-width: 30%;
+  color: var(--ink-3); font-size: 12.5px; font-weight: 600; line-height: 1.3; font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+}
+/* Yazı (saat, gün) solda hizalı ve sabit genişlikte: satırların başlıkları alt alta aynı yerden başlar. */
+.ui-satir__sol:not(:has(svg, img)) { min-width: 46px; place-items: center start; }
+.ui-satir__ana { flex: 1 1 auto; display: grid; gap: var(--ui-satir-ara); min-width: 0; }
+.ui-satir__baslik { font-size: var(--ui-baslik-yazi); line-height: var(--ui-baslik-satir); font-weight: 550; color: var(--metin); }
+.ui-satir__alt { font-size: var(--ui-alt-yazi); line-height: var(--ui-alt-satir); color: var(--ink-4); }
+button.ui-satir:hover .ui-satir__alt { color: var(--ink-3); }
+.ui-satir__sag {
+  flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 6px; max-width: 45%; min-width: 0;
+  color: var(--ink-3); font-size: 12px; line-height: 1.3; font-variant-numeric: tabular-nums;
+}
+.ui-satir--soluk .ui-satir__baslik { color: var(--ink-3); }
+.ui-satir--soluk .ui-satir__sol { color: var(--ink-4); }
+
+/* ── Liste ───────────────────────────────────────────────────────────────────────────────────────────────── */
+.ui-liste-kap { display: grid; gap: 4px; min-width: 0; }
+.ui-liste { display: grid; gap: 2px; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.ui-liste > li { min-width: 0; }
+/* "Tümü" hayalet düğmesinin yazısı satırların yazısıyla hizalı (iç boşluğu 14 px sola taşar). Yoğun kartta iç boşluk 14 px: 4 px
+   bırakılır ki odak halkası (2 + 2 px) kartın kesmesine takılmasın (inceleme K2). */
+.ui-liste__alt { display: flex; align-items: center; gap: 4px; min-width: 0; margin-left: -14px; }
+.ui-kart--yogun .ui-liste__alt { margin-left: -10px; }
+.ui-liste__kalan { flex: none; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ui-liste__not { margin: 2px 0 0; }
+
+/* ── Rozet ───────────────────────────────────────────────────────────────────────────────────────────────── */
+.ui-rozet {
+  --ton: var(--ink-4);
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; height: 22px; padding: 0 9px;
+  border-radius: var(--r-hap); background: var(--dolgu-3); box-shadow: inset 0 0 0 1px var(--cizgi);
+  color: var(--ink-2); font-size: 12px; font-weight: 600; line-height: 16px; letter-spacing: 0; vertical-align: middle;
+}
+.ui-rozet__nokta { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--ton); }
+.ui-rozet__metin { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; min-width: 0; overflow: hidden; overflow-wrap: anywhere; }
+.ui-rozet[data-ton='iyi'] { --ton: var(--onem-olumlu); color: var(--yazi-basari); }
+.ui-rozet[data-ton='uyari'] { --ton: var(--onem-dikkat); color: var(--yazi-uyari); }
+.ui-rozet[data-ton='hata'] { --ton: var(--onem-acil); color: var(--yazi-hata); }
+.ui-rozet:is([data-ton='iyi'], [data-ton='uyari'], [data-ton='hata']) {
+  background: color-mix(in srgb, var(--ton) 10%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ton) 26%, transparent);
+}
+.ui-rozet[data-ton='bilgi'] { --ton: var(--mavi-2); }
+
+/* ── Düğme (.dgm üstüne) ─────────────────────────────────────────────────────────────────────────────────── */
+/* Düğme esnek satırda sıkışmaz (etiket "Ek…" olmasın); yalnız kabından uzun etiket tek satırda "…" ile kırpılır. */
+.ui-dugme { flex-shrink: 0; max-width: 100%; min-width: 0; }
+/* Kart gövdesinde (dikey esnek kutu) düğme ve rozet içeriği kadar kalır, satırı boydan boya kaplamaz. */
+.ui-kart__govde > .ui-dugme, .ui-kart__govde > .ui-rozet, .ui-kart__govde > .ui-sekmeler { align-self: flex-start; }
+/* Hap sekmeler (Sekme.tsx; biçem tasarim.css .sekmeler): kabından geniş olamaz. */
+.ui-sekmeler { max-width: 100%; min-width: 0; }
+/* Vurgu rengiyle yazı ve simge (0.14 T29 düzeltme turu 1): ton korunur, açıklık tema sınırında — yazı ≥ 4,5:1, simge ≥ 3:1 (tasarim.css). */
+.ui-vurgu-yazi { color: oklch(from var(--vurgu) clamp(var(--vurgu-yazi-l-taban), l, var(--vurgu-yazi-l-tavan)) min(c, var(--vurgu-yazi-c-tavan)) h); }
+.ui-vurgu-simge { color: oklch(from var(--vurgu) clamp(var(--vurgu-l-taban), l, var(--vurgu-l-tavan)) c h); }
+.ui-dugme > svg { flex: none; }
+.ui-dugme__metin { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; min-width: 0; overflow: hidden; overflow-wrap: anywhere; white-space: normal; line-height: 1.3; }
+
+/* ── Boş / hata ──────────────────────────────────────────────────────────────────────────────────────────── */
+.ui-bos { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 96px; padding: 10px 8px; text-align: center; }
+.ui-bos__baslik { max-width: 100%; font-size: 13.5px; font-weight: 600; line-height: 1.35; color: var(--ink-2); }
+.ui-bos__metin { max-width: min(100%, 36ch); font-size: 12.5px; line-height: 1.45; color: var(--ink-3); }
+.ui-bos__eylem { display: flex; justify-content: center; max-width: 100%; min-width: 0; margin-top: 8px; }
+.ui-bos__karakter { display: block; line-height: 0; }
+/* 11 Kas: gözler siyah sahnede (beyaz göz, siyah kapak); Sade işareti zeminsiz kalır. */
+.ui-bos__karakter:has(> .gozler) { border-radius: 22px; background: var(--goz-sahne); overflow: hidden; }
+
+/* ── İskelet ─────────────────────────────────────────────────────────────────────────────────────────────── */
+/* Satır satır Satir'in kutusu: aynı iç boşluk, aynı en az boy, başlık ve alt satırları aynı satır yüksekliğinde (Liste'nin 2 px
+   aralığı dahil) — çizgiler bu satır kutularının ortasında. */
+.ui-iskelet { position: relative; display: grid; gap: 2px; min-width: 0; }
+.ui-iskelet__satir { display: grid; align-content: center; gap: var(--ui-satir-ara); min-height: var(--ui-satir-boy); padding: var(--ui-satir-ic) 0; }
+.ui-iskelet__bas { display: grid; }
+.ui-iskelet__b { display: flex; align-items: center; height: calc(var(--ui-baslik-yazi) * var(--ui-baslik-satir)); }
+.ui-iskelet__a { display: flex; align-items: center; height: calc(var(--ui-alt-yazi) * var(--ui-alt-satir)); }
+/* Parıltı (0.14 T29: hareket yalnız transform ve opacity): çizgi düz dolgu, üstündeki ikinci dolgu katmanı (::after) yalnız saydamlıkla
+   nefes alır — kutudan taşan kayan şerit yok (taşma denetimi onu kesilen içerik sayar). */
+.ui-iskelet__cizgi { position: relative; display: block; height: 10px; border-radius: 5px; background: var(--dolgu-2); }
+.ui-iskelet__cizgi::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--dolgu-3); opacity: 0; animation: ui-iskelet 1.6s ease-in-out infinite; }
+.ui-iskelet__a .ui-iskelet__cizgi { height: 8px; }
+@keyframes ui-iskelet { 50% { opacity: 1; } }
+
+/* ── İlerleme ────────────────────────────────────────────────────────────────────────────────────────────── */
+.ui-ilerleme { display: grid; gap: 7px; min-width: 0; }
+.ui-ilerleme__ust { display: flex; align-items: baseline; gap: 10px; min-width: 0; font-size: 12.5px; line-height: 1.35; }
+.ui-ilerleme__etiket { flex: 1 1 auto; min-width: 0; font-weight: 550; color: var(--ink-2); }
+.ui-ilerleme__deger { flex: none; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ui-ilerleme__cubuk { height: 6px; border-radius: var(--r-hap); background: var(--dolgu-3); overflow: hidden; }
+/* Dolgu ekranın vurgusunu taşır (0.14 T29, tek vurgu; üç temada ≥ 3:1) ve genişlikle değil kaydırmayla dolar (--oran 0–1, Ilerleme.tsx yazar).
+   0.14 T35 (T29 M2): dolgu tam genişlikte, oranı kadar görünecek biçimde sola kaydırılır; kap yuvarlak ve overflow: hidden olduğundan sol ucu kap
+   kırpar, sağ ucu dolgunun kendi yuvarlağıyla kalır (scaleX yuvarlak ucu eziyordu). Yalnız transform canlanır. Ölçüm araçları (tasma.mjs,
+   okunurluk.mjs) kırpılmış kutuyu sayar: kaydırılan dolgu "kartın dışına taşıyor" sayılmaz. */
+.ui-ilerleme__dolgu {
+  display: block; width: 100%; height: 100%; border-radius: inherit; background: oklch(from var(--vurgu) clamp(var(--vurgu-l-taban), l, var(--vurgu-l-tavan)) c h);
+  transform: translateX(calc((var(--oran, 0) - 1) * 100%)); transition: transform var(--sure-orta) var(--yay);
+}
+
+/* ── Sayı ────────────────────────────────────────────────────────────────────────────────────────────────── */
+/* Nusa (0.14 T29): rakamlar tabular ve sıkı; iri değer (.ui-deger) dolgun ağırlıkta, aralık iki kat sıkı. */
+.ui-sayi { font-variant-numeric: tabular-nums; letter-spacing: var(--sayi-aralik); white-space: nowrap; }
+.ui-sayi__birim--ayri { font-size: max(var(--yazi-en-kucuk), 0.6em); font-weight: 500; letter-spacing: 0; color: var(--ink-3); }
+/* Büyük birincil değer (Hava'nın sıcaklığı, kurun değeri): kabın genişliğini (100cqi) karakter sayısına (--hane, Sayi yazar) böler —
+   karakter başına ~0,6 em payla yazı kaba sığar; kısa değer 48 px'te durur ("18°"), uzun değer küçülür (14 px tabanı, okunurluk ≥ 12 px).
+   Satır yüksekliği yazı tipinin üst/alt payını (≈ 1,13 em) taşır: kutu metni tam sarar. */
+/* Kap ölçüsü (container-type) içsel genişliği 0 yapar: .ui-deger genişliğini her zaman yerleşimden alır — blokta tam genişlik,
+   esnek satırda ([simge][değer][durum]) kalan genişlik (flex: 1 1 0; komşular kendi boylarını korur). İnceleme K1: esnek satırda 0'a
+   çöküp sayıyı 14 px'e düşürüyordu. */
+.ui-deger { container-type: inline-size; width: 100%; flex: 1 1 0; min-width: 0; }
+.ui-deger .ui-sayi {
+  display: inline-block; font-size: clamp(14px, calc(100cqi / (var(--hane, 4) * 0.6)), 48px);
+  font-weight: var(--sayi-agirlik); line-height: 1.2; letter-spacing: calc(var(--sayi-aralik) * 2); color: var(--ink);
+}
+
+/* ── İşaret ──────────────────────────────────────────────────────────────────────────────────────────────── */
+.ui-isaret {
+  display: flex; align-items: flex-start; gap: 12px; width: calc(100% + 20px); min-height: 40px; margin: 0 -10px; padding: 9px 10px;
+  border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
+  transition: background var(--sure-hiz);
+}
+.ui-isaret:hover { background: var(--dolgu-2); }
+.ui-isaret__kutu {
+  flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px;
+  box-shadow: inset 0 0 0 1.5px var(--ink-4); color: var(--ters-ink);
+  transition: background var(--sure-hiz) var(--yay), box-shadow var(--sure-hiz) var(--yay);
+}
+.ui-isaret__kutu svg { opacity: 0; transform: scale(0.6); transition: opacity var(--sure-hiz) var(--yay), transform var(--sure-hiz) var(--yay); }
+.ui-isaret[aria-checked='true'] .ui-isaret__kutu { background: var(--ters); box-shadow: inset 0 0 0 1.5px var(--ters); }
+.ui-isaret[aria-checked='true'] .ui-isaret__kutu svg { opacity: 1; transform: none; }
+.ui-isaret__ana { flex: 1 1 auto; display: grid; gap: 1px; min-width: 0; }
+/* Çizgi YALNIZ işaretlide vardır (inceleme K3: hep var + saydam renk, yüksek karşıtlık modunda yazı rengine zorlanıp işaretsiz maddeyi
+   de üstü çizili gösteriyordu). İşaretlenince çizgi saydamdan yazı rengine 160 ms'de belirir (text-decoration-line canlandırılamaz;
+   kural uygulandığı an çalışan bir kerelik canlandırma), renk 160 ms'de soluklaşır. */
+.ui-isaret__metin {
+  font-size: 13.5px; line-height: 1.45; font-weight: 550; color: var(--metin);
+  text-decoration-thickness: 1.5px;
+  transition: color var(--sure-hiz) var(--yay);
+}
+.ui-isaret[aria-checked='true'] .ui-isaret__metin {
+  color: var(--ink-3); text-decoration-line: line-through; text-decoration-color: currentColor;
+  animation: ui-cizgi var(--sure-hiz) var(--yay);
+}
+@keyframes ui-cizgi { from { text-decoration-color: transparent; } }
+.ui-isaret__alt { font-size: 12px; line-height: 1.4; color: var(--ink-4); }
+
+/* ── Ayraç ───────────────────────────────────────────────────────────────────────────────────────────────── */
+.ui-ayrac { flex: none; width: 100%; height: 1px; margin: 2px 0; border: 0; background: var(--cizgi); }
+
+/* ── Yüksek karşıtlık (Windows forced-colors): gölgeler çizilmez, renkler sistemden. İşaret kutusu çerçeveyle, işaretli hâli
+   sistemin vurgu rengiyle (kutuya özel renk ayarı: forced-color-adjust: none). Çizgi zaten yalnız işaretlide. ───────────────────── */
+@media (forced-colors: active) {
+  .ui-isaret__kutu { forced-color-adjust: none; border: 1.5px solid CanvasText; background: Canvas; color: Canvas; box-shadow: none; }
+  .ui-isaret[aria-checked='true'] .ui-isaret__kutu { border-color: Highlight; background: Highlight; color: HighlightText; box-shadow: none; }
+  /* Zemin rengi orada Canvas'a zorlanır: ilerleme dolgusu görünmez olurdu. */
+  .ui-ilerleme__cubuk { border: 1px solid CanvasText; }
+  .ui-ilerleme__dolgu { forced-color-adjust: none; background: Highlight; }
+}
+
+/* ── Hareketi azalt: geçiş ve parıltı yok, hâl anında değişir ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ui-isaret, .ui-isaret *, button.ui-satir, .ui-ilerleme__dolgu, .ui-ipucu { transition: none !important; animation: none !important; }
+  .ui-iskelet__cizgi::after { animation: none !important; opacity: 0; }
+}

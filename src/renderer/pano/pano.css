@@ -1,0 +1,442 @@
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   KOKPİT KARTLARI (Görev 24 → 0.11 G5) — gündem bandı, doldurucular (hava, haberler, döviz, öneriler, hızlı işler), kullanıcı kartları,
+   "Tümü" levhası ve sohbetin boş hâli. Kartların kabuğu kütüphanedendir (src/renderer/ui/ui.css: .ui-kart, .ui-satir, .ui-liste …);
+   burada yalnız kartların İÇ yerleşimi. macOS widget'ı gibi: başlık sakin ve solda, tek eylem sağda, tek büyük birincil değer, ikincil
+   bilgi soluk ve küçük, cömert iç boşluk; kartta kaydırma çubuğu YOK (sigdir.ts ölçer, fazlası "Tümü"). Renkler YALNIZ belirteçlerden (üç
+   tema); yazı ≥ 12 px ve ≥ 4,5:1; düğme ≥ 32 px. Veri gelince kayma yok: kartın kutusu ızgaradan, iskelet son içeriğin yerinde.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+:root, .koyu-bolge, [data-tema-kutu] {
+  --hv-gunes: #ffc23d;
+  --hv-ay: #dfe3ee;
+  --hv-bulut: #d4d9e3;
+  --hv-bulut-2: #858d9e;
+  --hv-yagmur: #5aa9ff;
+  --hv-kar: #f2f6ff;
+  --hv-kar-cizgi: #9fb6d8;
+  --hv-simsek: #ffc93d;
+  --iskelet: rgb(255 255 255 / 0.06);
+  --iskelet-isik: rgb(255 255 255 / 0.1);
+  /* Gündem bandı sabit yükseklikte (veri gelince değişmez): iki satırlık üç kayıt + başlık sığar. */
+  --gundem-boy: 212px;
+}
+:root[data-tema='acik'], [data-tema-kutu='acik'] {
+  --hv-gunes: #f0a000;
+  --hv-ay: #8790a6;
+  --hv-bulut: #9aa3b2;
+  --hv-bulut-2: #cdd2db;
+  --hv-yagmur: #2f7fe0;
+  --hv-kar: #ffffff;
+  --hv-kar-cizgi: #6f8fbd;
+  --hv-simsek: #e09a00;
+  --iskelet: rgb(0 0 0 / 0.05);
+  --iskelet-isik: rgb(0 0 0 / 0.08);
+}
+
+/* Görünen alan satırlara tam bölünsün diye alt pay biraz kısa (1440 × 900'de bantların altına dört satır sığar). */
+.kokpit > .kokpit__alan { padding-bottom: 22px; }
+/* Aşağıda devam eden kart (ekran doluyken doldurucular) alt kenarda yumuşakça söner: kesik kutu gibi görünmez. Maske kaydırılan
+   içeriğe değil kutuya bağlıdır; sona kaydırınca söndürülen yalnız alt pay olur. */
+.kokpit > .kokpit__alan { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 22px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 22px), transparent); }
+/* "Yerleşimi Fuber seçti" notu panonun alttaki ışık süzmesi üstünde: ink-4 açık temada 4,0:1 kalıyordu. */
+.izgara-not.t-kucuk { color: var(--ink-3); }
+
+/* ── Ortak: dipnot (kaynak + yaş; atıf zorunlu), sağ sütun, iskelet ─────────────────────────────────────────────────── */
+.pano-dipnot { flex: none; min-width: 0; font-size: 12px; line-height: 1.4; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ui-kart__govde > .pano-dipnot { margin-top: auto; }
+.kk-sag { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.kk-sag > .ui-rozet, .kk-sag > .ui-dugme { flex: none; }
+.kk-sag [data-yakin] { color: var(--yazi-uyari); }
+.iskelet { position: relative; height: 13px; border-radius: 6px; background: var(--iskelet); overflow: hidden; }
+.iskelet::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--iskelet-isik), transparent); transform: translateX(-100%); animation: iskelet-isik 1.5s ease-in-out infinite; }
+@keyframes iskelet-isik { to { transform: translateX(100%); } }
+.iskelet--ince { height: 10px; }
+/* Veri iskeletin yerine geçerken yalnız opaklık (konum/ölçü değişmez). */
+.hava, .gundem__govde, .hafta, .haberler .ui-liste, .piyasa .ui-liste { animation: pano-gir 260ms var(--yay-cikis) both; }
+@keyframes pano-gir { from { opacity: 0; } }
+
+/* ── Gündem bandı: iki yarı (bugün | gündemde), sabit yükseklik ────────────────────────────────────────────────────── */
+/* Adlı kap: bandın tek sütuna inmesi BANDIN genişliğine bakar (bölümlerin kendi kabına değil). Bölüm içi sorgular adsız. */
+.izgara > .gundem-kart.ui-kart.kk { padding: 0; gap: 0; container: gundem-bandi / inline-size; }
+/* Zihin bandı (selamlama): iç boşluğu kendi yerleşiminden (tasarim.css .zihin). */
+.izgara > .zihin-kart.ui-kart.kk { padding: 0; gap: 0; }
+.gundem { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); height: var(--gundem-boy); }
+.gundem__bolum { position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; min-height: 0; padding: 13px 20px 11px; container-type: inline-size; }
+.gundem__sag::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 1px; background: var(--cizgi); }
+.gundem__bas { display: flex; align-items: center; gap: 8px; height: 26px; flex: none; min-width: 0; }
+.gundem__bolum-adi { flex: none; margin: 0; font-size: 13.5px; font-weight: 650; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink-2); }
+.gundem__sayi { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: var(--dolgu-3); color: var(--ink-2); font-size: 12px; font-weight: 650; }
+.gundem__not { flex: 0 1 auto; margin-left: auto; min-width: 0; font-size: 12px; line-height: 1.4; color: var(--ink-3); text-align: right; }
+/* Kayıtların alanı bandın kalanı kadar: sığmayan kayıt ölçümle bırakılır (sigdir.ts), kesilmez. */
+.gundem__govde { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 2px; }
+.gundem__govde .ui-satir__sol { min-width: 64px; }
+.gundem__govde [data-gecikti] .ui-satir__sol { color: var(--yazi-hata); }
+.gundem__daha { flex: none; margin: 2px 0 0 76px; font-size: 12px; line-height: 1.4; color: var(--ink-3); }
+
+/* Takvim boşken: günün ilerleyişi + tek dokunuşla plan. İlerleme çizgisi ve bilgi satırı bölümün dibine yaslanır. */
+.acik-gun { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; }
+.acik-gun__baslik { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -0.015em; line-height: 1.3; color: var(--ink); }
+.acik-gun__alt { margin: 0; font-size: 12.5px; color: var(--ink-3); line-height: 1.4; }
+.acik-gun__cipler { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; min-width: 0; }
+/* F1 düzeltme turu 2 (KK-1): Gizli modda çiplerin (hepsi araç ister) yerinde kalan tek nötr cümle — çip satırıyla aynı yükseklik. */
+.acik-gun__not { display: flex; align-items: center; min-height: 32px; font-size: 13px; line-height: 1.35; color: var(--ink-2); }
+.acik-gun__alt-blok { display: grid; gap: 6px; margin-top: auto; }
+.acik-gun__cizgi { position: relative; height: 4px; border-radius: 99px; background: var(--dolgu-3); overflow: hidden; }
+.acik-gun__cizgi span { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--ink-3); }
+.acik-gun__bilgi { display: flex; flex-wrap: wrap; gap: 4px 14px; height: 17px; overflow: hidden; font-size: 12px; line-height: 17px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+@container (max-width: 420px) {
+  .acik-gun__alt { display: none; }
+  .acik-gun__cipler .ui-dugme > svg { display: none; }
+  .acik-gun__hafta { display: none; }
+  .gundem__not-on { display: none; }
+}
+
+/* Bu hafta: 7 gün; bugün ters renkte. */
+.hafta { list-style: none; margin: auto 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.hafta__gun { display: grid; justify-items: center; gap: 4px; padding: 8px 0 9px; border-radius: 12px; }
+.hafta__gun[data-bugun] { background: var(--ters); color: var(--ters-ink); }
+.hafta__ad { font-size: 12px; color: var(--ink-3); text-transform: capitalize; }
+.hafta__gun[data-bugun] .hafta__ad { color: inherit; }
+.hafta__no { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.hafta__isaret { display: flex; gap: 3px; height: 5px; }
+.hafta__isaret i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); }
+.hafta__gun[data-bugun] .hafta__isaret i { background: var(--ters-ink); }
+
+@container gundem-bandi (max-width: 520px) {
+  .gundem { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .gundem__bolum { height: var(--gundem-boy); }
+  .gundem__sag::before { left: 20px; right: 20px; top: 0; bottom: auto; width: auto; height: 1px; }
+}
+
+/* ── Hava: başlık şehrin adı; büyük sıcaklık + simge, durum, en yüksek/en düşük; sonraki saatler; (uzunsa) günler, güneş ────── */
+.hava { display: flex; flex-direction: column; gap: 12px; flex: 1 0 auto; min-width: 0; }
+.hava__ust { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.hava__sol { flex: 1 1 auto; display: grid; gap: 2px; min-width: 0; }
+/* Apple Hava gibi: büyük sıcaklık ince yazıyla (kütüphanenin değeri boyu kabın genişliğine göre ayarlar, en çok 48 px). */
+.hava .ui-deger .ui-sayi { font-weight: 450; letter-spacing: -0.045em; }
+.hava__simge { flex: none; display: grid; place-items: center; width: 48px; height: 48px; margin: 2px -4px 0 0; }
+.hava__durum { min-width: 0; font-size: 13.5px; font-weight: 600; line-height: 1.35; color: var(--ink-2); }
+.hava__uclar { display: flex; flex-wrap: wrap; gap: 0 12px; margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--ink-3); }
+.hava__uclar .ui-sayi { color: var(--ink-2); font-weight: 600; }
+.hava__saatlik { list-style: none; margin: 0; padding: 10px 0 0; border-top: 1px solid var(--cizgi); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; flex: none; }
+.hava__saat { display: grid; justify-items: center; gap: 4px; min-width: 0; }
+.hava__saat-ad { font-size: 12px; line-height: 1.3; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.hava__saat-derece { font-size: 13px; line-height: 1.3; font-weight: 600; color: var(--ink); }
+@container kart (max-width: 300px) { .hava__saatlik { grid-template-columns: repeat(5, minmax(0, 1fr)); } .hava__saat:nth-child(n + 6) { display: none; } }
+@container kart (max-width: 236px) { .hava__saatlik { grid-template-columns: repeat(4, minmax(0, 1fr)); } .hava__saat:nth-child(n + 5) { display: none; } }
+.hava__gunluk { list-style: none; margin: 0; padding: 6px 0 0; border-top: 1px solid var(--cizgi); display: grid; gap: 0; flex: none; }
+.hava__gun { display: grid; grid-template-columns: 44px 22px 36px minmax(28px, 1fr) 36px; align-items: center; gap: 8px; height: 30px; font-size: 13px; }
+.hava__gun-ad { color: var(--metin); text-transform: capitalize; }
+.hava__gun-d { color: var(--ink-3); text-align: right; }
+.hava__gun-y { color: var(--ink); text-align: right; font-weight: 600; }
+.hava__cubuk { position: relative; height: 4px; border-radius: 99px; background: var(--dolgu-3); }
+.hava__cubuk i { position: absolute; top: 0; bottom: 0; border-radius: inherit; background: linear-gradient(90deg, var(--hv-yagmur), var(--hv-gunes)); }
+.hava__gunes { display: flex; flex-wrap: wrap; gap: 4px 16px; padding-top: 8px; border-top: 1px solid var(--cizgi); font-size: 12.5px; line-height: 1.4; color: var(--ink-2); font-variant-numeric: tabular-nums; flex: none; }
+.hava__gunes span { display: inline-flex; align-items: center; gap: 6px; }
+.hava__gunes svg { color: var(--ink-3); }
+.hava > .pano-dipnot { margin-top: auto; }
+/* Ağsız hava kartı kartın boyuna yayılır (saat üstte, gün ışığı ortada, dipnot dipte): uzun kartta ortası boş kalmaz. */
+.hava--yerel { justify-content: space-between; }
+.hava--yerel > .pano-dipnot { margin-top: 0; }
+/* Gün ışığı çizelgesi (ağsız hava kartı): doğuştan batışa çubuk, güneşin şu anki yeri. */
+.hava__isik { display: grid; gap: 8px; flex: none; }
+.hava__isik-ust { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px 10px; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.hava__isik-cubuk { position: relative; height: 6px; margin: 0 6px; border-radius: 3px; background: var(--dolgu-3); }
+.hava__isik-dolu { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: color-mix(in srgb, var(--ink) 55%, transparent); }
+.hava__isik-nokta { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--kart); }
+.hava__derece-iskelet { width: 76px; height: 50px; border-radius: 12px; margin-bottom: 6px; }
+.hava__simge-iskelet { width: 44px; height: 44px; border-radius: 50%; flex: none; }
+.hava__kucuk-iskelet { width: 20px; height: 20px; border-radius: 50%; }
+.hava__saatlik .iskelet--ince { margin: 2px 0; }
+/* 0.13 T14: geniş hava kartı (≥ 500 px; tam ekranda 12 sütunun üçte biri ≈ 540 px). Tam ekranda hava kartı garip görünüyordu:
+   her şey genişliyor, boşluklar anlamsızlaşıyordu. Sol sütunda şimdiki durum + saatlik, sağda günlük tahmin YAN YANA (tek sütunda altı saat
+   500 px'e yayılıp aralar açılıyor, günlük liste de sığmıyordu); güneş satırı ve dipnot altta tam genişlik. Günlük sığmayıp kalkınca (kısa
+   kart) kural uygulanmaz: eski tek sütun. */
+@container kart (min-width: 500px) {
+  .hava:has(.hava__gunluk) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto auto 1fr; column-gap: 28px; align-content: start; }
+  .hava:has(.hava__gunluk) > .hava__ust { grid-area: 1 / 1 / 2 / 2; }
+  .hava:has(.hava__gunluk) > .hava__saatlik { grid-area: 2 / 1 / 3 / 2; }
+  .hava:has(.hava__gunluk) > .hava__gunluk { grid-area: 1 / 2 / 3 / 3; align-content: center; padding: 0 0 0 28px; border-top: 0; border-left: 1px solid var(--cizgi); }
+  .hava:has(.hava__gunluk) > .hava__gunes { grid-area: 3 / 1 / 4 / 3; }
+  .hava:has(.hava__gunluk) > .pano-dipnot { grid-area: 4 / 1 / 5 / 3; align-self: end; }
+}
+
+/* ── Haberler: iki satırlık başlıklar, kaynak · saat; geniş kartta iki sütun ─────────────────────────────────────────── */
+.haberler { min-width: 0; }
+.haberler .ui-liste { column-gap: 28px; row-gap: 4px; }
+/* İki sütun: eşik JS’te (HABER_IKI_SUTUN_PX) — kart kaç başlık göstereceğini sütun sayısına göre seçer (iki sütunda çift sayı). */
+.haberler[data-iki-sutun] .ui-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Manşet (uzun kart; sığma planının en zengin adımı) — Apple Haberler'in büyük widget'ı gibi: tek sütun, ilk başlık büyük yazıyla ve
+   iki satıra dek, altında kalan dört başlık. Satırlar doğal aralıkla üstten dizilir (araya yayılmaz); kısa kartta sığmaz, sığma iki
+   sütunlu dört başlığa iner. Renk yine metin rengi (vurgu rengi yok). */
+.haberler[data-manset] .ui-liste > li:first-child { padding-bottom: 6px; }
+.haberler[data-manset] .ui-liste > li:first-child .ui-satir__baslik { font-size: 20px; line-height: 1.3; font-weight: 600; letter-spacing: -0.01em; }
+
+/* ── Döviz: kod + adı · (genişse) son 30 günün çizgisi · değer ve değişim ─────────────────────────────────────────── */
+.piyasa { min-width: 0; }
+.piyasa .ui-satir__baslik { font-weight: 650; letter-spacing: 0.02em; }
+.piyasa .ui-satir__sag { max-width: 72%; }
+.kur { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.kur__cizgi { flex: none; width: 60px; height: 20px; color: var(--ink-3); }
+@container kart (max-width: 310px) { .kur__cizgi { display: none; } }
+/* 0.13 T14: geniş döviz kartı (≥ 500 px): kurlar iki sütunda — tek sütunda kod solda, değer 500 px ötede sağda kalıp arası boş duruyordu
+   ("borsa çok garip"). Sütun ~240 px: çizgi yalnız kart ≥ 660 px iken (sütun ≥ 300 px) sığar. */
+@container kart (min-width: 500px) { .piyasa .ui-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; } }
+@container kart (min-width: 500px) and (max-width: 659px) { .kur__cizgi { display: none; } }
+.kur__sayilar { display: grid; justify-items: end; gap: 1px; min-width: 0; }
+.kur__deger { font-size: 14px; line-height: 1.3; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kur__degisim { font-size: 12px; line-height: 1.35; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kur__degisim[data-yon='artis'] { color: var(--yazi-basari); }
+.kur__degisim[data-yon='dusus'] { color: var(--yazi-hata); }
+
+/* ── Öneri listeleri: "Fuber’e sorabilirsin" (sade satırlar) ve "Hızlı işler" (yumuşak kutucuklar) ───────────────────────────── */
+/* Satırlar kartın gövdesini doldurur (uzun kartta boş alan kalmaz; I7). Sığmayan satır ölçümle "Tümü"ye iner. */
+.oneri-listesi { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+/* Liste kabını esnek sütunla doldurur (flex: 1 1 0): yüksekliği BELİRLİ olur, satırlar kalan yeri paylaşır. Kabın ızgarasında gerilen
+   liste belirsiz yükseklik sayılıyor, satırlar en büyük boylarına çıkıp kartı taşırıyordu (ölçüm de satır bırakıyordu). */
+.oneri-listesi > .ui-liste-kap, .kk-liste > .ui-liste-kap { flex: 1 1 0; display: flex; flex-direction: column; min-height: 0; }
+.oneri-listesi .ui-liste, .kk-liste .ui-liste { flex: 1 1 0; min-height: 0; }
+.oneri-listesi .ui-liste { grid-auto-rows: minmax(min-content, 1fr); align-content: stretch; }
+.oneri-listesi .ui-liste > li { display: grid; }
+.oneri-listesi .ui-satir__sol { color: var(--ink-2); }
+.ipuclari .ui-liste { grid-auto-rows: minmax(min-content, 64px); align-content: start; }
+/* 0.13 T14: geniş öneri kartı (≥ 560 px) iki sütun: kısa tek satırlık öneriler 800 px'e yayılıp sağı boş bırakmasın. */
+@container kart (min-width: 560px) { .ipuclari .ui-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; } }
+/* Hızlı işler: auto-fit (0.13 T14) — boş sütun kalmasın, kutucuklar kartın genişliğine yayılsın (auto-fill ile yedi kutucuk sol yarıda kalıyordu). */
+.hizli .ui-liste { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); grid-auto-rows: minmax(min-content, 1fr); gap: 8px; }
+.hizli .ui-satir { width: 100%; margin: 0; padding: 8px 14px; border-radius: 14px; background: var(--dolgu-1); box-shadow: inset 0 0 0 1px var(--cizgi); }
+.hizli button.ui-satir:hover { background: var(--dolgu-2); }
+.hizli .ui-satir__alt { color: var(--ink-3); }
+/* Dar kutucukta (Kısayollar widget'ı gibi) yalnız simge + ad: kısa açıklama "…" ile kesilmesin diye hiç gösterilmez. */
+.hizli .ui-liste > li { container-type: inline-size; }
+@container (max-width: 219px) { .hizli .ui-satir__alt { display: none; } }
+
+/* ── Liste kartları (hatırlatıcılar, e-posta, öneriler …): kayıt az, kart uzunsa satırlar yere eşit yayılır (satır başına en çok 84 px;
+   macOS widget'ı gibi düzenli aralık — başlığa yığılıp altı boş kalmaz). Liste kabı yukarıdaki esnek sütun kuralıyla. ─────────────── */
+.kk-liste { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.kk-liste .ui-liste { grid-auto-rows: minmax(min-content, 84px); align-content: start; }
+.kk-liste .ui-liste > li { display: grid; }
+.hatirlaticilar .ui-satir__sol { color: var(--ink-2); }
+/* Yapılacaklar (G4 kartı) alt şeritle: az madde kartın başlığıyla şeridin arasında ortalanır (tek madde başlığa yapışıp altında boşluk
+   bırakmasın); sığmazsa kartın kendi ölçümü madde bırakır. */
+.izgara > [data-kart='plan'] .yapilacak:has(~ .kk__altlik) { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: safe center; }
+/* Satır + kendi düğmesi (öneriyi kapat): satır sağda düğmeye kadar uzanır, ikisi üst üste binmez. */
+.eylemli-satir { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px; min-width: 0; }
+.eylemli-satir > .ui-satir { width: calc(100% + 10px); margin-right: 0; }
+.eylemli-satir > .ui-dugme { margin-right: -6px; }
+
+/* ── Görevler kartı (0.11 G10): satır = [başlık + durum cümlesi + rozet | Durdur / Sürdür], altında son adım özeti (+ "N gönderim"). Hepsi
+   kütüphanenin Satir / Rozet / MetinKirp / Dugme'siyle; burada yalnız özet satırı ve boş ipucu. Renkler belirteçlerden. ───────────────── */
+.gorev-satir { display: grid; min-width: 0; }
+.gorev-satir .eylemli-satir > .ui-dugme { min-width: max-content; white-space: nowrap; }
+.gorev-ozet { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0 0 8px; font-size: 12.5px; line-height: 1.35; color: var(--ink-3); }
+.gorev-ozet__metin { flex: 1 1 auto; min-width: 0; }
+.gorev-ozet > .ui-rozet { flex: none; }
+/* 0.14 T31: süren görevin Durdur hapında ekranın tek vurgusu (yalnız simge; yazı nötr). Yazı sınırıyla (≥ 4,5:1), simge için fazlasıyla yeter. */
+.gorev-satir [data-gorev-eylem='durdur'] > svg { color: oklch(from var(--vurgu) clamp(var(--vurgu-yazi-l-taban), l, var(--vurgu-yazi-l-tavan)) min(c, var(--vurgu-yazi-c-tavan)) h); }
+/* İlk kullanımda bir kez: kartsız tek satır, ızgaranın üstünde sakin (boş kart yok). */
+.gorev-ipucu { margin: 0 4px 12px; display: flex; align-items: baseline; gap: 10px; min-width: 0; font-size: 13px; line-height: 1.4; color: var(--ink-3); }
+.gorev-ipucu__baslik { flex: none; font-weight: 600; color: var(--ink-2); }
+.gorev-ipucu__metin { flex: 1 1 auto; min-width: 0; }
+
+/* Sürümün "yeni" kartı — 0.12’de yeni (0.11 G12b, 0.12 H6): ızgaranın üstünde tek seferlik kütüphane kartı. Dar kokpitte tek sütun, geniş kokpitte iki sütun (satırlar kısa kalır,
+   kart kokpiti az iter). Satırlar sakin: simge soluk, metin en çok 2 satır (MetinKirp/Satir). */
+.yenilik { margin-bottom: 14px; container-type: inline-size; }
+.yenilik .ui-liste { grid-template-columns: minmax(0, 1fr); column-gap: 28px; }
+.yenilik .ui-satir { --ui-satir-boy: 34px; --ui-satir-ic: 5px; }
+.yenilik .ui-satir__sol { color: var(--ink-3); }
+@container (min-width: 700px) { .yenilik .ui-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Liste kartının alt şeridi: kayıt az, yer çoksa özet + tek eylem kartın dibinde. */
+.kk__altlik { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--cizgi); flex: none; min-width: 0; container-type: inline-size; }
+.kk__altlik-ozet { flex: 1 1 auto; min-width: 0; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* Dar kartta özet yazısı gizlenir (eylem kalır; sayı zaten listede). */
+@container (max-width: 300px) { .kk__altlik-ozet { display: none; } }
+.mini-hafta { display: flex; gap: 4px; flex: 1; min-width: 0; }
+/* 11 Kas (bulgu 13): kısa gün adları (Pzt, Sal…) — tek harfte üç P vardı. */
+.mini-hafta span { display: grid; justify-items: center; gap: 3px; min-width: 22px; font-size: 12px; line-height: 1; color: var(--ink-3); }
+.mini-hafta span[data-bugun] { color: var(--ink); font-weight: 650; }
+.mini-hafta i { width: 5px; height: 5px; border-radius: 50%; background: transparent; }
+.mini-hafta i[data-var] { background: var(--ink-3); }
+@container (max-width: 360px) { .mini-hafta { display: none; } }
+
+/* ── Gün kaydı, öğreniyor, özel kart ──────────────────────────────────────────────────────────────────────────────── */
+.gun-kaydi { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.gun-kaydi__ust { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.gun-kaydi__bugun { flex: 1 1 auto; min-width: 0; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.gun-kaydi__ajanlar { display: flex; flex: none; gap: 5px; align-items: center; }
+.gun-kaydi__bos { margin: 0; font-size: 12.5px; color: var(--ink-3); }
+.gun-kaydi__eslik { min-width: 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-3); font-style: italic; }
+.ice-aktarma { display: grid; gap: 12px; justify-items: start; min-width: 0; }
+.ice-aktarma__durum { min-width: 0; max-width: 100%; font-size: 14px; line-height: 1.45; color: var(--metin); }
+.ozel { flex: 1 0 auto; display: grid; gap: 10px; align-content: safe center; min-width: 0; }
+/* Büyük rakamlar eşit sütunlarda; rakamın boyu kartın genişliğine göre 20–30 px (dar kartta üç değer de sığsın), adı en çok iki satır. */
+.ozel-metrikler { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 0 16px; min-width: 0; }
+.ozel-metrik { min-width: 0; }
+.ozel-metrik__deger { font-size: clamp(20px, 9cqi, 30px); line-height: 1.25; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.tumu .ozel-metrik__deger { font-size: 30px; }
+.ozel-metrik__ad { font-size: 12px; line-height: 1.4; color: var(--ink-3); }
+.ozel__metin { min-width: 0; font-size: 13.5px; line-height: 1.5; color: var(--metin); }
+
+/* "Bugünün özeti"nden gelinen kart kısa süre işaretlenir. */
+.kk[data-isaret] { animation: kart-isaret 1500ms var(--yay-cikis); }
+@keyframes kart-isaret {
+  0%, 30% { box-shadow: inset 0 0 0 1.5px var(--ink-3), 0 0 0 4px var(--dolgu-3), var(--kart-golge); }
+}
+
+/* ── "Tümü" levhası: kartta sığmayan kayıtların tamamı (aria-modal; levhanın kendisi kayar) ───────────────────────────── */
+.tumu { position: fixed; inset: 0; z-index: 85; display: grid; place-items: center; padding: calc(var(--ust) + 14px) 24px 24px; -webkit-app-region: no-drag; }
+.tumu__perde { position: absolute; inset: 0; background: var(--tur-perde); animation: tumu-perde 200ms ease-out both; }
+.tumu__levha {
+  position: relative; display: flex; flex-direction: column; width: min(560px, 100%); max-height: 100%; overflow: hidden;
+  border-radius: 20px; background: var(--tur-kart); color: var(--ink); box-shadow: inset 0 0 0 1px var(--cizgi-2), var(--acilir-golge);
+  animation: tumu-gir 300ms var(--yay-cikis) both;
+}
+:root[data-tema='cam'] .tumu__levha { backdrop-filter: blur(24px) saturate(1.1); }
+.tumu__bas { display: flex; align-items: flex-start; gap: 12px; padding: 18px 14px 12px 24px; border-bottom: 1px solid var(--cizgi); flex: none; }
+.tumu__baslik { flex: 1 1 auto; min-width: 0; padding-top: 4px; }
+.tumu__baslik h2 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.3; overflow-wrap: anywhere; }
+.tumu__baslik p { margin: 2px 0 0; font-size: 12.5px; line-height: 1.4; color: var(--ink-3); overflow-wrap: anywhere; }
+.tumu__govde { display: grid; gap: 12px; overflow-y: auto; overscroll-behavior: contain; padding: 10px 24px 18px; }
+.tumu__metin { font-size: 13.5px; line-height: 1.55; color: var(--metin); overflow-wrap: anywhere; }
+@keyframes tumu-perde { from { opacity: 0; } }
+@keyframes tumu-gir { from { opacity: 0; transform: translateY(8px) scale(0.985); } }
+
+/* ── Kokpit sohbetinin boş hâli: bildirim / hazır kartı, Bugünün özeti, sorulabilecekler, son sohbetler (kütüphanenin yoğun Kart'ı) ──── */
+.sohbet-bas { display: grid; gap: 12px; align-content: start; user-select: none; }
+.sohbet-bas__kart.ui-kart--yogun { gap: 8px; padding: 12px 14px 12px; }
+.sohbet-bas__kur { background: linear-gradient(180deg, var(--dolgu-2), var(--kart) 80%); box-shadow: inset 0 0 0 1px var(--cizgi-2), var(--kart-golge); }
+.sohbet-bas__kur-ust { display: flex; align-items: center; gap: 10px; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); }
+.sohbet-bas__kur-simge { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: var(--ters); color: var(--ters-ink); flex: none; }
+.sohbet-bas__metin { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-3); }
+/* 0.10 Görev 2: motor bildirimi — kırmızı yalnız çalışan bağlantı koptuysa / erişim kapalıysa (nötr hâl yukarıdaki sakin kart). Kısa sütunda
+   (A-36, 1080×680) tek satır: simge + kısa metin + düğme. */
+.sohbet-bas__kur[data-seviye='kirmizi'] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--onem-acil) 45%, transparent), var(--kart-golge); }
+.sohbet-bas__kur[data-seviye='kirmizi'] .sohbet-bas__kur-simge { background: color-mix(in srgb, var(--onem-acil) 16%, var(--kart)); color: var(--yazi-hata); }
+.sohbet-bas__kur[data-kisa].ui-kart--yogun { padding: 9px 10px 9px 12px; }
+.sohbet-bas__kur-satir { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sohbet-bas__kur-kisa { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 650; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); }
+/* H3c düzeltme turu 1 (P14 K1): iki AÇIK seçimli kısa kart ("Yeniden indir" · "Fuber’le devam et") — metin tek satırı tutar, düğmeler altta. */
+.sohbet-bas__kur-satir--iki { flex-wrap: wrap; row-gap: 8px; }
+.sohbet-bas__kur-satir--iki > .sohbet-bas__kur-kisa { flex: 1 1 calc(100% - 40px); }
+/* Düzeltme turu 2: kısa kartın görünür tek satırı (açıklama yalnız ipucunda kalmaz) ve düğmeler (ya da boyutlu onay) — başlığın hizasında. */
+.sohbet-bas__kur-alt { flex: 1 1 calc(100% - 40px); min-width: 0; margin: -6px 0 0 40px; font-size: 12.5px; line-height: 1.4; color: var(--ink-3); }
+.sohbet-bas__kur-dugmeler { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1 1 calc(100% - 40px); min-width: 0; margin-left: 40px; }
+.sohbet-bas__dugmeler { display: flex; flex-wrap: wrap; gap: 8px; }
+.sohbet-bas__cipler { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.sohbet-bas__cip > svg { color: var(--ink-3); }
+.sohbet-bas .ui-satir__sol { color: var(--ink-3); }
+/* 0.11 G7: boş (taslak) sohbetin hazır önerileri — dar kokpit panelinde uzun öneri taşmasın: düğme satır kırar, en az 32 px. */
+.sohbet__oneriler { margin: auto 0; display: grid; gap: 10px; justify-items: start; min-width: 0; }
+.hap.sohbet__oneri { border: 0; height: auto; min-height: 32px; max-width: 100%; padding: 6px 12px; cursor: pointer; text-align: left; line-height: 1.35; white-space: normal; overflow-wrap: anywhere; }
+/* ── 0.11 G7: kokpit sohbet seçici (SohbetSecici.tsx): panelin başlık şeridi [başlık ▾] [Yeni sohbet] [Tümü]; açılır liste; çip satırı ──── */
+/* Tost şeridi (bilesenler/tostlar.css): çentiğin altında, pano genişliğinin ortasında, `min(520px, P − 600px)` genişliğinde (P = pano genişliği =
+   100vw − 76 px: ray 68 + sağ kenar 8), y 52…132; "hiçbir denetimin üstüne binmez" kuralı (ozellik-denetimi tost-yerlesimi). Sohbet sütunu
+   panonun sağında (genişlik C = clamp(360px, 31vw, 480px)) ve tost şeridi sütunun sol kenarına `C − max((P − 520)/2, 300)` kadar girer
+   (1080 px: 60, 1440 px: 24). Başlık şeridinin ve çip satırının denetimleri bu payın sağından başlar (--tost-payi); sütunun üst-solu
+   (pencere başlığı bölgesi) boş kalır. */
+.sohbet-secici { --tost-payi: max(0px, calc(clamp(360px, 31vw, 480px) - max(calc((100vw - 596px) / 2), 300px))); display: grid; min-width: 0; flex: none; }
+.sohbet__ust.sohbet-secici__ust { position: relative; gap: 6px; padding-inline: calc(var(--tost-payi) + 8px) 10px; container: sohbet-ust / inline-size; }
+/* Başlık (tetik) her genişlikte en az ~120 px kalsın (ölçülür: pano-onizle 'başlık satırı genişlik taraması'): şerit genişliği (kap) için
+   tetik = kap − hap − Yeni sohbet − Tümü − boşluklar. Hesap (düğme adı ≈ 120, Tümü ≈ 58, boşluk 18–24, hap: nokta ≈ 29 / yazılı ≈ 90):
+   · kap < 360 px: "Yeni sohbet" yalnız simge (1080 px: ~280 px; adı ve ipucu düğmede kalır) → tetik ≥ kap − 137;
+   · kap < 420 px: etkinlik hapı yalnız nokta, yazısı ekran okuyucuya kalır → tetik ≥ 130; yazılı hapla en az 128. */
+@container sohbet-ust (max-width: 359.98px) {
+  .sohbet-secici__yeni { width: 32px; padding: 0; }
+  .sohbet-secici__yeni .ui-dugme__metin { display: none; }
+}
+@container sohbet-ust (max-width: 419.98px) {
+  .sohbet-secici__durum-metin { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+.sohbet-secici__tetik {
+  display: inline-flex; align-items: center; gap: 4px; flex: 1 1 auto; min-width: 0; height: 32px; padding: 0 8px; border: 0; border-radius: var(--r-hap);
+  background: transparent; color: var(--ink); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-align: left; cursor: pointer; transition: background var(--sure-hiz);
+}
+.sohbet-secici__tetik:hover, .sohbet-secici__tetik[aria-expanded='true'] { background: var(--dolgu-2); }
+.sohbet-secici__baslik { flex: 0 1 auto; min-width: 0; }
+.sohbet-secici__ok { flex: none; color: var(--ink-3); transition: transform var(--sure-hiz); }
+.sohbet-secici__tetik[aria-expanded='true'] .sohbet-secici__ok { transform: rotate(180deg); }
+.sohbet-secici__yeni, .sohbet-secici__ust > .dgm--hayalet { flex: none; }
+/* Açılır liste: şeridin altında, panelin genişliğinde; arka plan açılır panel malzemesi (buzlu camda da okunur). Yüksekliği pencereye göre
+   sınırlı, aşarsa listenin kendisi kayar. */
+.sohbet-secici__panel {
+  position: absolute; z-index: 40; top: calc(100% + 4px); left: 8px; right: 8px; display: grid; gap: 4px; max-height: min(560px, calc(100vh - 130px)); overflow-y: auto; overscroll-behavior: contain;
+  padding: 8px 12px; border-radius: 16px; background: var(--acilir); color: var(--ink); box-shadow: inset 0 0 0 1px var(--cizgi-2), var(--acilir-golge);
+  animation: sohbet-secici-ac var(--sure-orta) var(--yay-cikis) both;
+}
+:root[data-tema='cam'] .sohbet-secici__panel { backdrop-filter: blur(24px) saturate(1.1); }
+.sohbet-secici__liste { display: grid; gap: 2px; min-width: 0; }
+/* Seçili satır (panelde açık sohbet): zemin biraz koyu; soluk önizleme bir ton koyu (zeminde 4,5:1'i tutsun). */
+.sohbet-secici__liste [role='option'][aria-selected='true'] { background: var(--dolgu-3); }
+.sohbet-secici__liste [role='option'][aria-selected='true'] .ui-satir__alt { color: var(--ink-3); }
+.sohbet-secici__sag { display: grid; justify-items: end; gap: 3px; min-width: 0; }
+.sohbet-secici__tumu { justify-content: flex-start; width: 100%; }
+.sohbet-secici__panel .ui-ayrac { margin: 2px 0; }
+/* Çip satırı yalnız çip varken vardır (ana sohbete mesaj gelince): etkinlik hapı başlık satırında olduğundan tur başı/sonu liste kaymaz. */
+.sohbet-secici__serit { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px 14px 0 calc(var(--tost-payi) + 14px); }
+.sohbet-secici__cip { min-width: 0; max-width: 100%; }
+.sohbet-secici__durum { flex: none; display: inline-flex; }
+@keyframes sohbet-secici-ac { from { opacity: 0; transform: translateY(-4px); } }
+/* A-36: özet listesi sütunun dibinde kesik görünmesin — kayan listenin altı yumuşakça söner (kaydırma yoksa sis 0). */
+.kokpit__sohbet .sohbet__liste {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--alt-sis)), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--alt-sis)), transparent 100%);
+  animation: govde-sis linear both;
+  animation-timeline: scroll(self);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kk[data-isaret] { animation: none !important; box-shadow: inset 0 0 0 1.5px var(--ink-3), var(--kart-golge); }
+  .iskelet::after { animation: none !important; display: none; }
+  .hava, .gundem__govde, .hafta, .haberler .ui-liste, .piyasa .ui-liste, .tumu__perde, .tumu__levha, .sohbet-secici__panel { animation: none !important; }
+  .sohbet-secici__ok { transition: none; }
+}
+
+/* ── 0.14 T30: kokpit Nusa dilinde ──────────────────────────────────────────────────────────────────────────────────────────────────────
+   Ekranın tek vurgusu kökten gelir (Kokpit.tsx vurguStili('kokpit')); vurgu yalnız işaretlerde (etkinlik noktası), yazı rengi olarak değil.
+   Sayılar büyük ve sıkı (--sayi-agirlik / --sayi-aralik), seçili gün ve sayaçlar hap, sohbet sütununun zemini derin siyah (degrade yok).
+   Hareket yok; yalnız mevcut geçişler. */
+.kokpit > .kokpit__sohbet { background: none; }
+.hafta__gun { border-radius: var(--r-hap); }
+.hafta__no { font-size: 17px; font-weight: var(--sayi-agirlik); letter-spacing: var(--sayi-aralik); }
+.gundem__sayi { border-radius: var(--r-hap); font-weight: var(--sayi-agirlik); }
+.kur__deger, .ozel-metrik__deger { font-weight: var(--sayi-agirlik); letter-spacing: var(--sayi-aralik); }
+.kokpit .nokta--mavi { background: oklch(from var(--vurgu) clamp(var(--vurgu-l-taban), l, var(--vurgu-l-tavan)) c h); box-shadow: 0 0 10px color-mix(in srgb, var(--vurgu) 60%, transparent); }
+
+/* ── 0.14 T30 düzeltme turu 1: büyük ekranda (1280×800 … 2560×1440) kart içi ölü alan yok ─────────────────────────────────────────────────
+   Doldurucu satırlar görünen alanı doldurmak için uzar (shared/pano-duzen.ts satirPikselleri); içerik üstte toplanıp altı boş kalıyordu
+   (pano-onizle "kart içi büyük boşluk"). Kural: artan yükseklik bölümler ARASINA eşit dağılır (Apple widget'ı gibi), kutucuklar uzun hücrede
+   dikey widget olur, sohbet sütunu uzun pencerede satır nefesini açar. Ölçüt gevşetilmedi. */
+/* Selamlama: büyük "İ" noktası ve "ş" çengeli 1,15 satırın kutusundan 2 px taşıyordu (görünür kırpma yok; ölçüm gürültüsü). */
+.zihin .zihin__selam { line-height: 1.2; }
+/* Hava: bölümler (şimdi, saatlik, günlük, güneş, kaynak) arası eşit; kaynak dipte kalır. */
+.hava { justify-content: space-between; }
+.hava > .pano-dipnot { margin-top: 0; }
+@container kart (min-width: 500px) {
+  .hava:has(.hava__gunluk) { grid-template-rows: auto auto auto auto; align-content: space-between; }
+}
+/* Haberler: başlıklar kartın boyuna eşit aralıkla yayılır (en çok 5 başlık kuralı aynı). */
+/* Büyür ama içeriğinin altına küçülmez: sığmayan başlık sığma ölçümüne (sigdir) taşma olarak görünür, dipnotun üstüne binmez. */
+.haberler:has(.ui-liste) { flex: 1 0 auto; display: flex; flex-direction: column; }
+.haberler > .ui-liste-kap { flex: 1 0 auto; grid-template-rows: 1fr; }
+.haberler .ui-liste { align-content: space-evenly; }
+/* Fuber'e sorabilirsin: geniş kartta (iki sütun) satırlar kartın boyunu paylaşır; açıklama satırı (ipucu) sığdıkça görünür. */
+@container kart (min-width: 560px) { .ipuclari .ui-liste { grid-auto-rows: auto; align-content: space-evenly; } }
+/* Hızlı işler: kutucuklar uzun hücrede dikey widget (simge üstte, ad ve açıklama dipte). Tek sırada yedi kutucuk (≥ 1224 px) ya da hücre
+   çok uzunsa dört sütun iki sıra. Kabın boyu sorgulanır (size): kap kart gövdesini doldurur (flex), kendi içeriğinden boy almaz. */
+.oneri-listesi.hizli { container: hizli / size; }
+@container hizli (min-width: 1224px) and (min-height: 110px) {
+  .hizli .ui-satir { flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 14px 16px; }
+  .hizli .ui-satir__ana { flex: none; }
+}
+@container hizli (min-width: 560px) and (min-height: 250px) {
+  .hizli .ui-liste { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .hizli .ui-satir { flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 14px 16px; }
+  /* Uzun kutucukta simge üstte, ad ortada, açıklama dipte (üç parça arası eşit). */
+  .hizli .ui-satir__ana { display: contents; }
+  .hizli .ui-satir__baslik { font-size: 15px; }
+}
+/* Kokpitin sohbet sütunu uzun pencerede (≥ 1100 px): "Bugünün özeti" ve öneri satırları nefes alır (altı yarı boş kalmaz). */
+@media (min-height: 1100px) {
+  .sohbet-bas { gap: 16px; }
+  .sohbet-bas .ui-satir { --ui-satir-boy: 52px; }
+}

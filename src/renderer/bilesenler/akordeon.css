@@ -1,0 +1,29 @@
+/* ── Akordeon (Akordeon.tsx): kart + başlık düğmesi + ızgara yüksekliğiyle açılan gövde. Renkler yalnız belirteçlerden. ────
+   Kapalıyken gövde visibility: hidden (kapanış canlandırması bitince); açıkken hemen görünür. İçerik kenarlardan 20 px içeride,
+   başlıkla arasında kıl payı çizgi. Az hareket tercihinde ve `data-aninda`da geçiş yok. */
+.akordeon { border-radius: 18px; }
+.akordeon__kap { margin: 0; font: inherit; }
+.akordeon__bas {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 62px; padding: 12px 18px 12px 20px;
+  border: 0; border-radius: inherit; background: transparent; color: inherit; text-align: left; transition: background var(--sure-hiz);
+}
+.akordeon__bas:hover { background: var(--dolgu-1); }
+.akordeon__bas:focus-visible { outline-offset: -3px; border-radius: 18px; }
+.akordeon__simge { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 9px; background: var(--kart-3); box-shadow: inset 0 0 0 1px var(--cizgi-2); color: var(--ink-2); }
+.akordeon__metin { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.akordeon__baslik { font-size: 15px; font-weight: 620; letter-spacing: -0.015em; color: var(--ink); }
+.akordeon__aciklama { font-size: 12.5px; line-height: 1.4; color: var(--ink-4); }
+.akordeon__ozet { flex: none; max-width: 42%; font-size: 12.5px; color: var(--ink-3); text-align: right; overflow-wrap: anywhere; }
+.akordeon__ok { flex: none; color: var(--ink-3); transition: transform 240ms var(--yay-cikis); }
+.akordeon[data-acik='true'] .akordeon__ok { transform: rotate(180deg); }
+.akordeon__govde {
+  display: grid; grid-template-rows: 0fr; visibility: hidden;
+  transition: grid-template-rows 240ms var(--yay-cikis), visibility 0s linear 240ms;
+}
+.akordeon[data-acik='true'] > .akordeon__govde { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows 240ms var(--yay-cikis), visibility 0s; }
+.akordeon__ic { min-height: 0; overflow: hidden; }
+.akordeon__icerik { margin: 0 20px; padding: 2px 0 6px; border-top: 1px solid var(--cizgi); }
+.akordeon[data-aninda] > .akordeon__govde, .akordeon[data-aninda] .akordeon__ok { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .akordeon__govde, .akordeon[data-acik='true'] > .akordeon__govde, .akordeon__ok { transition: none !important; }
+}

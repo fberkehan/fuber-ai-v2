@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' fuber:; img-src 'self' data:" />
+  <title>Fuber imleci</title>
+  <style>
+    @font-face { font-family: 'Manrope'; src: url('fuber://app/kaynak/fonts/Manrope-Variable.woff2') format('woff2'); font-weight: 200 800; }
+    html, body { margin: 0; height: 100%; background: transparent !important; overflow: hidden; user-select: none; font-family: 'Manrope', 'Segoe UI', sans-serif; }
+    /* Kontrol sürerken ekran kenarında ince soğuk ışık + üstte şerit */
+    .kenar { position: fixed; inset: 0; border-radius: 12px; pointer-events: none; opacity: 0; transition: opacity .45s ease;
+      box-shadow: inset 0 0 0 2px rgba(205, 218, 255, .55), inset 0 0 38px rgba(140, 170, 255, .28); }
+    .serit { position: fixed; top: 10px; left: 50%; transform: translate(-50%, -8px); opacity: 0; transition: all .45s cubic-bezier(.2,.8,.2,1);
+      display: flex; align-items: center; gap: 10px; padding: 7px 16px 7px 12px; border-radius: 999px; background: rgba(6, 6, 8, .86);
+      color: #fff; font-size: 13px; font-weight: 500; letter-spacing: .005em; box-shadow: 0 0 0 1px rgba(255, 255, 255, .18); white-space: nowrap; }
+    .serit b { font-weight: 700; }
+    .serit i { width: 8px; height: 8px; border-radius: 50%; background: #4c85ff; box-shadow: 0 0 10px #4c85ff; animation: nabiz 1.2s ease-in-out infinite; }
+    body.acik .kenar, body.acik .serit { opacity: 1; }
+    body.acik .serit { transform: translate(-50%, 0); }
+    /* Yapay zekâ imleci: büyük gümüş ok + mavi hale + "Fuber" etiketi; ucu (0,0) tam hedef noktada */
+    .imlec { position: fixed; left: 0; top: 0; width: 0; height: 0; opacity: 0; transition: opacity .25s ease; will-change: transform; }
+    .imlec.gorunur { opacity: 1; }
+    .imlec svg { position: absolute; left: -3px; top: -2px; width: 34px; height: 40px; filter: drop-shadow(0 0 8px rgba(110, 150, 255, .85)) drop-shadow(0 2px 3px rgba(0, 0, 0, .5)); }
+    .imlec .ad { position: absolute; left: 24px; top: 30px; padding: 3px 9px; border-radius: 999px; background: #0b0b0d; color: #fff; font-size: 12px; font-weight: 700;
+      letter-spacing: .02em; box-shadow: 0 0 0 1px rgba(255, 255, 255, .28), 0 0 14px rgba(110, 150, 255, .5); white-space: nowrap; }
+    .imlec .ad::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #4c85ff; vertical-align: 1px; }
+    .rozet { position: fixed; padding: 4px 10px; border-radius: 999px; background: #fff; color: #000; font-size: 12px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.35);
+      opacity: 0; transform: translateY(4px); transition: all .2s ease; white-space: nowrap; pointer-events: none; }
+    .rozet.gorunur { opacity: 1; transform: none; }
+    .halka { position: fixed; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid rgba(160, 190, 255, .95);
+      box-shadow: 0 0 12px rgba(110, 150, 255, .9); animation: halka .55s cubic-bezier(.2,.8,.2,1) forwards; pointer-events: none; }
+    .halka.sag { border-color: rgba(255, 210, 150, .95); box-shadow: 0 0 12px rgba(255, 190, 120, .8); }
+    @keyframes halka { from { transform: scale(.6); opacity: 1; } to { transform: scale(3.4); opacity: 0; } }
+    @keyframes nabiz { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="kenar"></div>
+  <div class="serit"><i></i>Fuber bilgisayarını kullanıyor · durdurmak için <b id="acil">Alt+Shift+Q</b></div>
+  <div class="imlec" id="imlec">
+    <svg viewBox="0 0 34 40" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#c9d1e6" /></linearGradient></defs>
+      <path d="M3 2 L3 33 L11.5 25.5 L17 38 L22.5 35.6 L17.2 23.4 L29 23.2 Z" fill="url(#g)" stroke="#0b0b0d" stroke-width="2" stroke-linejoin="round" />
+    </svg>
+    <span class="ad">Fuber</span>
+  </div>
+  <div class="rozet" id="rozet"></div>
+  <script type="module" src="./imlec.ts"></script>
+</body>
+</html>

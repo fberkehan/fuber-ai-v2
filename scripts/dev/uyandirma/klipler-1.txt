@@ -1,0 +1,25 @@
+p01_hey_fuber|Hey Fuber.
+p02_hey_fuber_soru|Hey Fuber, yarın sabah ne var?
+p03_hey_fuber_unlem|Hey Fuber!
+p04_hey_virgul_fuber|Hey, Fuber.
+p05_yavas|<prosody rate='slow'>Hey Fuber.</prosody>
+p06_hizli|<prosody rate='fast'>Hey Fuber, saat kaç?</prosody>
+p07_kalin|<prosody pitch='low'>Hey Fuber.</prosody>
+p08_ince|<prosody pitch='high'>Hey Fuber, bana bir hatırlatıcı kur.</prosody>
+p09_fyuber|Hey Fyuber.
+p10_fubir|Hey Fubır.
+n01_hava|Bugün hava çok güzel.
+n02_cooper|Hey Cooper.
+n03_uber|Hey, Uber çağırır mısın?
+n04_fiber|Fiber internet paketimi yükselttim.
+n05_gidi|Hey gidi günler hey.
+n06_super|Süper bir fikir bu.
+n07_toplanti|Toplantı saat onda başlıyor.
+n08_bakar|Hey, bakar mısın bir saniye?
+n09_fuar|Fuar alanına yarın gidiyoruz.
+n10_kahve|Kahve içelim mi biraz?
+n11_hey_ad|Hey Deniz, nasılsın?
+n12_hey_bebek|Hey bebek, gel buraya.
+n13_haber|Haberleri açar mısın?
+n14_hey_siri|Hey Siri.
+n15_hey_google|Hey Google.

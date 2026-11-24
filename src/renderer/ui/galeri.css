@@ -1,0 +1,60 @@
+/* Arayüz kütüphanesi galerisi (0.11 G3; yalnız test derlemesi). Pano gibi: çerçeveden 8 px içeride, köşesi yuvarlak, kendi içinde kayar
+   (body kaymaz). Üst şerit pencereyi sürükler; içerik pencere düğmelerinin altından başlamaz. Renkler yalnız belirteçlerden. */
+.galeri {
+  position: fixed; inset: 8px; overflow: auto; scrollbar-gutter: stable; border-radius: var(--r-sahne);
+  background: var(--pano-zemin); box-shadow: inset 0 0 0 1px var(--pano-cizgi); color: var(--ink);
+}
+.galeri__surukle { position: fixed; top: 0; left: 0; right: 0; height: var(--ust); z-index: 1; }
+.galeri__ic { display: grid; gap: 40px; max-width: 1180px; margin: 0 auto; padding: calc(var(--ust) + 30px) 28px 48px; }
+.galeri__bas { display: grid; gap: 10px; justify-items: start; }
+.galeri__bas .t-baslik { margin: 0; }
+.galeri__bas .ust-etiket, .galeri__giris { margin: 0; }
+/* .ust-etiket'in --ink-4'ü açık temada panonun ışık süzmesi üstünde 4,0:1 kalıyor: burada --ink-3. */
+.galeri__etiket.ust-etiket { color: var(--ink-3); }
+.galeri__giris { max-width: 70ch; }
+.galeri__bolum { display: grid; gap: 14px; }
+.galeri__bolum-bas { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.galeri__bolum-baslik { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -0.02em; }
+.galeri__not { margin: 0; font-size: 13px; color: var(--ink-3); }
+.galeri__ikili { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px; }
+.galeri__sutun { display: grid; gap: 14px; align-content: start; flex: none; }
+.galeri__sutun > [data-galeri-ornek] { min-width: 0; }
+.galeri__olcu { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* Ekran vurguları (0.14 T29): her satır kendi --vurgu'sunu taşır. Galeri Şeffaf'ta panonun yerini tutar: fintech anahtarı panodaki gibi camın
+   vurgu sınırını okur (fintech.css :root[data-tema='cam'] .pano ile aynı eşleme). */
+:root[data-tema='cam'] .galeri { --ft-vurgu-l-taban: var(--vurgu-l-taban); --ft-vurgu-l-tavan: var(--vurgu-l-tavan); }
+.g-vurgular { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.g-vurgu { display: grid; gap: 2px; min-width: 0; }
+.g-vurgu__yazi { font-size: 12.5px; font-weight: 600; line-height: 1.4; }
+
+/* Örnek içerik */
+.g-metin { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--metin); }
+.g-metin--soluk { font-size: 12.5px; color: var(--ink-3); }
+.g-sira { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.g-sabit { height: 198px; }
+.g-kirp { min-width: 0; font-size: 13.5px; line-height: 1.45; color: var(--metin); }
+.g-kirp--baslik { font-size: 15px; font-weight: 650; letter-spacing: -0.015em; line-height: 1.3; color: var(--ink); }
+.g-kirp--soluk { color: var(--ink-3); font-size: 12.5px; }
+.g-ikili-deger { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.g-ikili-deger > div { min-width: 0; }
+.g-dipnot { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* Esnek satırda büyük değer: [simge][.ui-deger][durum] — .ui-deger kalan genişliği alır (0'a çökmez). */
+.g-esnek { display: flex; align-items: center; gap: 12px; min-width: 0; color: var(--ink-2); }
+.g-esnek > svg { flex: none; }
+.g-esnek__durum { flex: 0 1 auto; min-width: 0; font-size: 13px; color: var(--ink-3); }
+
+/* Hava (örnek): şehir küçük, sıcaklık büyük, durum ve uçlar soluk; saatler beş eşit sütun. */
+.g-hava { display: grid; gap: 2px; min-width: 0; }
+.g-hava__sehir { min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.g-hava__durum { min-width: 0; margin-top: 4px; font-size: 13px; color: var(--ink-2); }
+.g-hava__uclar { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 0; font-size: 12.5px; color: var(--ink-3); }
+.g-hava__saatler { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; }
+.g-hava__saatler li { display: grid; justify-items: center; gap: 4px; min-width: 0; }
+.g-hava__saat { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.g-hava__derece { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+/* Piyasa (örnek): değer üstte, değişim rozeti altta (borsa widget'ı gibi). */
+.g-piyasa__sag { display: grid; justify-items: end; gap: 3px; min-width: 0; }
+.g-piyasa__deger { font-size: 13.5px; font-weight: 600; color: var(--ink); }

@@ -1,0 +1,58 @@
+/* ── Bağlantılar (sayfalar/Baglantilar.tsx; 0.14 T31, Nusa dili) ───────────────────────────────────────────────────────────────────────
+   Tek sütun, sakin kartlar (ortak Kart: başlık solda, tek eylem sağda). Ekranın TEK vurgusu kökten (vurguStili('baglantilar'), yeşil): anahtarlarda
+   ve açık/bağlı servisin simgesinde (yazı sınırıyla, üç temada ≥ 4,5:1). Servisler sessiz araçlardır: küçük nötr simge, ad, tek satır, durum —
+   marka logosu ya da tanıtım kartı yok. Kaydırma kutusu pencerenin başlık şeridinin ALTINDAN başlar: kaydırılan yazı pencere düğmelerinin
+   ve çentiğin altına girmez. Renkler yalnız belirteçlerden. */
+.baglantilar {
+  position: relative; height: calc(100% - var(--ust)); margin-top: var(--ust); overflow-y: auto; scrollbar-gutter: stable;
+  padding: 22px 26px 40px;
+}
+.baglantilar__sayfa { display: grid; gap: 14px; max-width: 860px; margin: 0 auto; }
+.baglantilar__bas { margin: 0 0 8px; }
+.baglantilar__baslik { margin: 0; font-size: 40px; line-height: 1.25; letter-spacing: -0.04em; font-weight: var(--w-baslik); }
+.baglantilar__bas .t-giris { margin: 2px 0 0; }
+
+.baglantilar__not, .baglantilar__bos { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-3); text-wrap: pretty; }
+.baglantilar__metin { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-2); text-wrap: pretty; }
+.baglantilar__liste, .baglantilar__aday, .baglantilar__son { display: grid; gap: 2px; min-width: 0; }
+
+/* Satır: ortak Satir + (gerekirse) altında tam metinli not (sınama sonucu, bağlanma hatası). */
+.baglanti-satir { display: grid; min-width: 0; }
+.baglanti-satir__eylem { display: flex; align-items: center; gap: 6px; flex: none; }
+.baglanti-satir__not { margin: -2px 0 6px 42px; font-size: 12.5px; line-height: 1.45; color: var(--ink-3); overflow-wrap: anywhere; }
+.baglanti-satir__not[data-ton='iyi'] { color: var(--yazi-basari); }
+.baglanti-satir__not[data-ton='hata'] { color: var(--yazi-hata); }
+.servis__simge {
+  display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--kart-3); box-shadow: inset 0 0 0 1px var(--cizgi-2);
+  color: var(--ink-2);
+}
+.servis__simge[data-acik], .baglanti-satir[data-mcp-durum='bagli'] .servis__simge {
+  color: oklch(from var(--vurgu) clamp(var(--vurgu-yazi-l-taban), l, var(--vurgu-yazi-l-tavan)) min(c, var(--vurgu-yazi-c-tavan)) h);
+}
+
+/* stdio servisinin komut onayı (ürün kararı: komut başlamadan önce). */
+.baglanti-onay { display: grid; gap: 8px; margin: 2px 0 8px; padding: 12px 14px; border-radius: 14px; background: var(--dolgu-1); box-shadow: inset 0 0 0 1px var(--cizgi-2); }
+.baglanti-onay__dugmeler { display: flex; justify-content: flex-end; gap: 8px; }
+.baglantilar__kod { font-size: 12.5px; padding: 6px 10px; border-radius: 8px; background: var(--kod); white-space: pre-wrap; word-break: break-all; }
+
+/* Düzeltme turu 1 (I1): "Hesaplar ve cihazlar" — E-posta, WhatsApp, Fuber Cep servis satırları gibi. Bir grubun ayrıntısı (kayıtlı hesaplar,
+   form, QR, eşleştirme) satırın altında, simge sütunu hizasından girintili; birincil düğme yok, WhatsApp simgesi nötr kutuda sönük. */
+.baglanti-grup { display: grid; gap: 2px; min-width: 0; }
+.baglanti-satir--ic, .baglanti-ic { margin-left: 42px; }
+.baglanti-ic { display: grid; gap: 10px; min-width: 0; padding: 4px 0 10px; }
+.baglanti-qr { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 16px; }
+
+/* Developer mode: kendi MCP sunucuları. */
+.mcp-satir { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 48px; padding: 6px 0; border-top: 1px solid var(--cizgi); }
+.mcp-satir__ana { display: grid; gap: 2px; min-width: 0; }
+.mcp-satir__baslik { font-size: 13.5px; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.mcp-satir__adres { font-weight: 400; color: var(--ink-3); }
+.mcp-satir__alt { font-size: 12px; line-height: 1.4; color: var(--ink-3); overflow-wrap: anywhere; }
+.mcp-satir__her { display: inline-flex; align-items: center; gap: 8px; margin-right: 4px; padding: 5px 3px; /* anahtarın dokunma payı (::before) kutuda kalır */ font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+
+/* Öğretme klasörü */
+.baglantilar__klasor { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+/* 11 Kas (bulgu 7): tam yol yerine klasörün adı — eş aralıklı kod kutusu değil, sakin bir hap (simge + ad). */
+.baglantilar__yol { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; padding: 6px 10px; border-radius: 8px; background: var(--dolgu-2); box-shadow: inset 0 0 0 1px var(--cizgi); color: var(--ink-2); font-size: 13px; font-weight: 550; overflow-wrap: anywhere; }
+.baglantilar__sayac { margin: 0; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.baglantilar__zaman { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }

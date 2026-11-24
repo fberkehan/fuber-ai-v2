@@ -1,0 +1,41 @@
+/* ── Klasör güven kartı (son dalga B, I1): claudecode/KlasorGuveni.tsx ─────────────────────────────────────────────────────── */
+/* Çalışma alanının ortasında; onay kartının (kehribar) dilini kullanır. Soru ve karar düğmeleri HEP görünür: kart kullanılabilir yüksekliğe
+   sığar, yalnız ayrıntılar (dosya listesi, iki seçenek, not) kartın içinde kayar (sayfa kaymaz). */
+.cc-guven-govde { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px clamp(14px, 3%, 30px); overflow: hidden; }
+.cc-izin.cc-guven.onay { display: flex; flex-direction: column; flex: 0 1 auto; min-height: 0; max-width: 760px; gap: 10px; padding: 14px 16px; }
+.cc-guven > .cc-izin__ust { flex: none; }
+.cc-guven__icerik { flex: 1 1 auto; min-height: 0; display: grid; gap: 10px; align-content: start; overflow-y: auto; overscroll-behavior: contain; }
+.cc-guven:focus { outline: none; }
+.cc-guven:focus-visible { outline: 2px solid var(--odak, var(--ink)); outline-offset: 3px; }
+.cc-guven .onay__baslik { align-items: flex-start; font-size: 15px; line-height: 1.45; }
+.cc-guven .onay__baslik > svg { margin-top: 2px; color: var(--cc-uyari-yazi); }
+.cc-guven .onay__baslik > span { min-width: 0; overflow-wrap: anywhere; }
+.cc-guven__yol { min-width: 0; overflow-wrap: anywhere; font-family: var(--cc-mono); font-size: 12px; color: var(--ink-3); }
+
+.cc-guven__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cc-guven__oge {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 2px 10px;
+  padding: 8px 12px; border-radius: 12px; background: var(--dolgu-1); box-shadow: inset 0 0 0 1px var(--cizgi);
+}
+.cc-guven__tur { grid-row: span 2; font-size: 12px; font-weight: 650; color: var(--ink-3); min-width: 92px; }
+.cc-guven__ad { font-family: var(--cc-mono); font-size: 13px; font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.cc-guven__ozet { font-size: 13px; line-height: 1.45; color: var(--ink-2); overflow-wrap: anywhere; }
+
+.cc-guven__ikili { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+.cc-guven__secenek { display: grid; gap: 4px; align-content: start; padding: 10px 12px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--cizgi); }
+.cc-guven__secenek b { font-size: 13px; font-weight: 650; color: var(--ink); }
+.cc-guven__secenek span { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.cc-guven__not { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-3); }
+.cc-guven__degisti { flex: none; margin: 0; font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--cc-uyari-yazi); }
+.cc-guven .cc-izin__dugmeler { flex: none; padding-top: 10px; border-top: 1px solid var(--cizgi); }
+.cc-guven > .cc-izin__hata { flex: none; }
+
+/* Ayarlar → Klasör güveni listesi */
+.cc-guven-kararlar { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cc-guven-kararlar li { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 0; border-top: 1px solid var(--cizgi); }
+.cc-guven-kararlar li:first-child { border-top: 0; }
+.cc-guven-kararlar__klasor { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.cc-guven-kararlar__klasor b { font-size: 13px; font-weight: 650; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-guven-kararlar__yol { font-family: var(--cc-mono); font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-guven-kararlar .cc-hal { flex: none; }
+.cc-guven-kararlar .dgm { flex: none; }

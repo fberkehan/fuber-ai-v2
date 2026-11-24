@@ -1,0 +1,357 @@
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   ADA — üst ortadan inen çentik (A · Çentik). Pencere 720×460 × ölçek, saydam; yalnız biçim (.ada-bicim) çizilir, .ada__sekil tıklama alır.
+   1. Malzeme (0.13): her temada saf siyah ada; Açık temada ince dış gölge (drop-shadow: omuzlarıyla tek parça), kenar yok. Kök `.koyu-bolge` taşır
+      (Ada.tsx): yazı ve düğme belirteçleri açık temada da koyu kalır, siyah üstüne siyah yazı olmaz; bu yüzden burada temaya göre renk düzeltmesi yok.
+      Üst kenar ekranın kenarıdır: omuzlar (12 px ters köşe) şekli ekranın kenarına kaynaştırır. Gölge pencerenin içinde kalır.
+   2. Hareket (0.14 T19, R15; tests/centik-hareket-kurali.test.ts): YALNIZ transform ve opacity. Biçim dokuz dilimdir (CentikSekli.tsx): parçalar aynı
+      süre ve eğriyle (`--centik-sure`, `--centik-egri`) transform'la geçer — hal değişince yaylı (cubic-bezier(.32,1.25,.4,1), 420 ms); akan yanıtın
+      büyümesi yaysız ve kısa; geri çekilme hızlı (240 ms, useAsistan CEKILME_MS). En, boy ve köşe yarıçapı canlandırılmaz; imleç kutusu (.ada__sekil)
+      anında yerleşir. İçerik katmanları biçim büyürken gecikmeli solarak girer, eski katman solarak çıkar.
+      Açık panel (0.14 T23; panel.css): aynı yay; sayfa gövdesi kısa bir kaymayla solar. Boşta çizim yok: sonsuz animasyon yalnız konuşma ve
+      dinleme hâllerinde durabilir (bugün hiçbiri gerekmiyor); düşünme ve çalışma göstergeleri birkaç tur atıp durur.
+   3. Az hareket (R16): kökte `data-az-hareket` (Windows'un animasyon tercihi ya da Görünüm → "Az hareket"; Ada.tsx). Zıplama yok (ease, ≤ 160 ms),
+      yalnız solma; ışık, nabız ve parıltı durur. Hover'ın açtığı hâllerde biçim hiç geçiş yapmaz, yalnız içerik solar.
+   4. Yazı ≥ 12 px, düğme ≥ 32 px; renkler tasarim.css belirteçlerinden (yalnız ada malzemesi burada tanımlıdır).
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+.ada {
+  --ada-zemin: #000;
+  --ada-golge: none; /* biçimin filtresi (drop-shadow): omuzlar ve köşelerle tek parça gölge */
+  --ada-dikkat: var(--onem-dikkat); /* hatırlatma saati ve zili */
+  --ada-yay: cubic-bezier(0.32, 1.25, 0.4, 1);
+  --ada-sisme-egri: cubic-bezier(0.2, 0.9, 0.3, 1.2); /* hover'ın ilk karesindeki şişme (0.14 çentik cilası) */
+  --ada-sure: 380ms; /* 0.14 çentik cilası: 420 → 380 ms (açılış daha çevik; yay aynı) */
+  --centik-dolgu: var(--ada-zemin);
+  --centik-sure: var(--ada-sure);
+  --centik-egri: var(--ada-yay);
+  position: fixed; inset: 0; overflow: hidden; pointer-events: none; color: var(--ink);
+}
+/* Açık: aynı siyah ada; açık masaüstünde ince gölgeyle ayrılır (kenar çizgisi yok). tasarim.css'teki ada malzemesiyle aynı renk. */
+:root[data-tema='acik'] .ada {
+  --ada-zemin: #000;
+  --ada-golge: drop-shadow(0 5px 8px rgb(0 0 0 / 0.38));
+}
+
+/* ── Şekil: imleç kutusu (anında yerleşir) + dokuz dilim biçim (CentikSekli.tsx; yalnız transform) ── */
+.ada__sekil {
+  position: absolute; top: 0; left: 50%; pointer-events: auto;
+  transform: translateX(-50%); transform-origin: 50% 0;
+  transition: transform 160ms var(--yay-cikis);
+}
+/* Aynı halde içerik büyüyor (akan yanıt, açılan araç özeti): yaysız ve kısa, ada sallanmasın. */
+.ada__sekil[data-gecis='akis'] { --centik-sure: 260ms; --centik-egri: var(--yay-cikis); }
+/* Geri çekilme: üst kenara hızlı ve yumuşak toplanır (çıkış girişten hızlı). */
+.ada[data-cekik] .ada__sekil { --centik-sure: 240ms; --centik-egri: cubic-bezier(0.32, 0.72, 0, 1); }
+.ada-bicim { position: absolute; left: 50%; top: 0; width: 0; height: 0; pointer-events: none; filter: var(--ada-golge); }
+.ada-bicim__parca {
+  position: absolute; left: 0; top: 0; display: block; transform-origin: 0 0; background: var(--centik-dolgu);
+  transition: transform var(--centik-sure) var(--centik-egri);
+}
+/* Parçalar yalnız sol yarı için (CentikSekli.tsx yariParcalari); sağ yarı aynı parçaların DURAĞAN aynası (canlandırılmaz): iki yanın dış kenarları tek
+   öteleme değerinden geçer, şekil yapı gereği simetrik (0.14 T28 düzeltme turu 1). */
+.ada-bicim__yari { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
+.ada-bicim__yari--ayna { transform: scaleX(-1); }
+.ada-bicim__govde { width: 100px; height: 100px; }
+.ada-bicim__kose { width: 64px; height: 64px; border-bottom-left-radius: 100%; }
+.ada-bicim__omuz { width: 13px; height: 12px; /* 12 px ters köşe + gövdeye binen 1 px (dikiş yok) */ background: radial-gradient(circle at 0 100%, transparent 11.5px, var(--centik-dolgu) 12px); }
+/* Tıklanabilir ada (bildirim hapı): üstüne gelince hafifçe aydınlanır (renk anında; geçiş yok), basınca kıl payı içe çöker. Boştaki çentik (dinlenme, Kapalı)
+   aydınlanmaz: yanıtı açık paneldir (0.14 T23), 120 ms'lik ara gri kare çizilmez. */
+.ada:not([data-ada-hal='sessiz']):not([data-ada-hal='dinlenme']) .ada__sekil:has(> .ada__katman > button.ada__satir:hover) { --centik-dolgu: color-mix(in srgb, var(--ada-zemin) 93%, var(--ink)); }
+.ada__sekil:has(> .ada__katman > button.ada__satir:active) { transform: translateX(-50%) scale(0.975); }
+
+/* ── İçerik katmanları (hedef enle çizilir; biçim büyürken gecikmeli solarak girer) ─────────── */
+.ada__katman {
+  position: absolute; left: 50%; display: flex; transform: translateX(-50%); transform-origin: 50% 0;
+  animation: ada-gir 220ms var(--yay-cikis) 50ms backwards; /* 0.14 çentik cilası: 110 → 50 ms gecikme (hover → panel içeriği ≤ 120 ms'de) */
+  transition: opacity 220ms ease-out 90ms;
+}
+.ada__katman--icerik { flex-direction: column; max-height: 440px; overflow: hidden; }
+.ada__katman--cikan { animation: ada-cik 150ms ease-out forwards; pointer-events: none; }
+/* Çıkan katman içeriğin yeniden takılmış kopyasıdır: girişler orada yeniden oynamaz (`backwards` yazıyı ilk karede siler, şekilde tek başına ışık kalırdı). */
+.ada__katman--cikan .panel *, .ada__katman--cikan .ada__nokta--mesaj { animation: none; }
+.ada[data-cekik] .ada__katman { opacity: 0; transition: opacity 100ms ease-out; }
+@keyframes ada-gir { from { opacity: 0; transform: translateX(-50%) scale(0.97); } }
+@keyframes ada-cik { to { opacity: 0; transform: translateX(-50%) scale(0.97); } }
+
+/* ── Tek satırlık haller ───────────────────────────────────────────────────── */
+.ada__satir {
+  display: flex; align-items: center; gap: 10px; width: 100%; height: 100%; min-width: 0; margin: 0; padding: 0 16px;
+  border: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: default;
+}
+button.ada__satir { cursor: pointer; }
+/* Odak halkası düğmenin kendisinde (biçim parçalara bölündü; hap biçimini izlesin diye yuvarlak). */
+button.ada__satir:focus-visible { outline: 2px solid var(--odak); outline-offset: -4px; border-radius: 999px; }
+.ada__satir--orta { justify-content: center; gap: 9px; }
+.ada__ad { font-size: 13px; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); }
+.ada__baslik { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; font-weight: 650; letter-spacing: -0.012em; color: var(--ink); }
+.ada__onizleme { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--ink-3); }
+.ada__sag { display: inline-flex; align-items: center; gap: 8px; flex: none; margin-left: auto; }
+.ada__zaman { font-size: 12px; font-weight: 600; color: var(--ink-4); font-variant-numeric: tabular-nums; }
+.ada__zaman[data-tur='hatirlatma'] { color: var(--ada-dikkat); }
+.ada__simge { display: grid; place-items: center; flex: none; color: var(--ink-2); }
+.ada__simge[data-tur='hatirlatma'] { color: var(--ada-dikkat); }
+.ada__sayac { flex: none; padding: 0 7px; border-radius: var(--r-hap); background: var(--dolgu-3); color: var(--ink-2); font-size: 12px; font-weight: 650; line-height: 19px; font-variant-numeric: tabular-nums; }
+.ada__tus { flex: none; margin-left: auto; font-size: 12px; font-weight: 500; color: var(--ink-4); white-space: nowrap; }
+/* Ekranda (340 px): başlık ve "Durdur: Alt+Shift+Q" kesilmeden sığsın diye satır biraz daha sıkı. */
+.ada__ekranda { gap: 8px; padding: 0 14px; }
+.ada__ekranda .ada__baslik { font-size: 13px; flex: none; }
+/* Görev hapı (0.11 G10): nokta · "Görev: <başlık>" (uzunsa …) · [+N] · [Acil: Alt+Shift+Q — yalnız ekran kontrolü sürerken] · Durdur. Durdur düğmesi ≥ 32 px,
+   hapın sağ kenarına 8 px payla oturur; başlık kalan yeri alır ve kısalır (tamamı title'da). */
+.ada__gorev { gap: 10px; padding: 0 8px 0 16px; }
+.ada__gorev .ada__baslik { flex: 1 1 auto; font-size: 13px; white-space: normal; text-overflow: clip; }
+.ada__gorev .ada__tus { margin-left: 0; }
+.ada__gorev-durdur { flex: none; }
+/* 0.14 T22 sistem uyarı hapı (300×36): simge · metin · [düzey çubuğu]. Çubuğun izi tam boy durur; dolgu soldan `transform: scaleX` ile (genişlik canlanmaz);
+   art arda ses tuşunda aynı katman yerinde güncellenir, dolgu 120 ms'de kayar. Karakter yok (Sade modda da aynı). */
+.ada__uyari { gap: 9px; padding: 0 16px 0 14px; }
+.ada__uyari .ada__baslik { font-size: 13px; font-variant-numeric: tabular-nums; }
+.ada__duzey { position: relative; flex: 1 1 auto; min-width: 48px; height: 4px; margin-left: 4px; border-radius: 2px; background: var(--dolgu-3); overflow: hidden; }
+.ada__duzey i { position: absolute; inset: 0; border-radius: inherit; background: var(--ink); transform-origin: left center; transition: transform 120ms ease-out; }
+.ada[data-az-hareket] .ada__duzey i { transition: none; }
+/* Durdur IPC'si düştüyse hapta tek satır hata (5 sn; başlığın yerinde): kırmızı belirteç, tek satır, … ile biter (tamamı title'da). `.ada__gorev .ada__baslik`
+   (0,2,0) `.ada__gorev-hata`yı (0,1,0) eziyordu: başlığın `white-space: normal; text-overflow: clip` kuralı hata satırını ekran kontrolünde ("Acil: …" ipucuyla)
+   iki satıra sarıp 44 px hapı taşırıyordu — özgüllük eşitlenip sonraya yazıldı. */
+.ada__gorev .ada__gorev-hata { color: var(--yazi-hata); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 0.14 T23 (11 Kas gözler) hâller: hâlin küçük gözleri (GorunenGoz; Sade'de nötr işaret) kendi kutusunda. */
+.ada__hal-karakter { position: relative; display: block; flex: none; overflow: visible; }
+.ada__hal-karakter > svg, .ada__hal-karakter > .mod-gecisi { position: absolute; left: 0; top: 0; }
+/* Çalışıyor (400×44): halka (kipin vurgusunda) · karakter (şapka düzeltme) · "Adım N" · süren işin etiketi · Durdur. Halkanın yayı birkaç tur döner ve durur
+   (sonsuz döngü yok; yalnız transform). */
+.ada__calisiyor { gap: 9px; padding-left: 7px; }
+.ada__halka { position: relative; display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--halka-vurgu) 35%, transparent); }
+.ada__halka::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--halka-vurgu); animation: ada-halka 1.1s linear 8; }
+@keyframes ada-halka { to { transform: rotate(360deg); } }
+.ada__adim { flex: none; font-size: 13px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ada__calisiyor .ada__calisiyor-etiket { color: var(--ink-3); font-weight: 550; }
+/* Yanıtın karakter satırı: küçük yüz + ad. Hata satırında hata yüzü. */
+.ada__karakter { display: flex; align-items: center; gap: 7px; }
+.ada__hata { display: flex; align-items: flex-start; gap: 8px; }
+/* Onay: düşünen yüz kartın sağ üstünde; sayaç onun solunda. */
+.ada__onay-karakter { position: absolute; top: 10px; right: 14px; }
+.ada__onay:has(> .ada__onay-karakter) > .ada__sayac { right: 56px; }
+
+/* Işık ve noktalar (mavi yalnız bu küçük durum ışığında). 0.14 T19 (Hafiflik): ışık durağan; düşünürken birkaç nefes alıp durur, çalışma noktası üç nabız
+   atar (sonsuz döngü yok). */
+.ada__isik { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--mavi-2); box-shadow: 0 0 10px color-mix(in srgb, var(--mavi-2) 70%, transparent); }
+.ada__isik--canli { animation: ada-nefes 1.2s ease-in-out 8; }
+@keyframes ada-nefes { 50% { transform: scale(0.68); opacity: 0.5; } }
+.ada__nokta { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+.ada__nokta--calisiyor { position: relative; background: var(--mavi-2); }
+.ada__nokta--calisiyor::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--mavi-2); opacity: 0; animation: ada-nabiz 1.6s ease-out 3; }
+@keyframes ada-nabiz { from { transform: scale(1); opacity: 0.6; } to { transform: scale(2.75); opacity: 0; } }
+.ada__nokta--acil { background: var(--onem-acil); box-shadow: 0 0 10px color-mix(in srgb, var(--onem-acil) 65%, transparent); }
+/* 0.10 Görev 2: hiç bağlanmamış / hesap onay bekliyor — sakin, nötr nokta (kırmızı değil). */
+.ada__nokta--notr { background: var(--ink-3); }
+/* 0.13: Fuber'in mesajı bekliyor: sessiz çentiğin sağında küçük beyaz nokta (yanıp sönmez); üzerine gelince mesaj açılır. */
+.ada__nokta--mesaj { position: absolute; top: 50%; right: 14px; width: 6px; height: 6px; margin-top: -3px; background: var(--ink); animation: ada-nokta-gir 360ms var(--ada-yay) backwards; }
+@keyframes ada-nokta-gir { from { opacity: 0; transform: scale(0.2); } }
+/* "Düşünüyorum…": eskiden sonsuz kayan parıltıydı (background-position); şimdi birkaç tur hafifçe solup durur. */
+.ada__parilti { font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-2); animation: ada-parilti 1.8s ease-in-out 6; }
+@keyframes ada-parilti { 50% { opacity: 0.55; } }
+
+/* Dinliyor: solda ne duyduğu (uzun metinde sonu görünür), sağda 24 çubuklu dalga. */
+.ada__dinle { gap: 16px; padding: 0 20px; }
+.ada__metinler { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.ada__metinler .ada__baslik { font-size: 13px; }
+.ada__kismi { direction: rtl; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 1.4; color: var(--ink-3); }
+.ada__kismi > span { direction: ltr; unicode-bidi: isolate; }
+.ada__dalga { display: flex; align-items: center; gap: 3px; height: 30px; flex: none; }
+/* Çubuk 30 px sabit; düzey satır içi scaleY (Ada.tsx) — yükseklik canlandırılmaz. */
+.ada__dalga i { width: 3px; height: 30px; border-radius: 3px; background: var(--ink); transform: scaleY(0.133); transition: transform 90ms linear, opacity 90ms linear; }
+
+/* Sor: adanın kendisi yazı alanıdır. */
+.ada__sor { display: flex; align-items: center; gap: 8px; width: 100%; height: 100%; padding: 0 10px 0 20px; }
+.ada__sor input { flex: 1; min-width: 0; height: 36px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 15px; letter-spacing: -0.01em; user-select: text; }
+.ada__sor input::placeholder { color: var(--ink-4); }
+.ada__sor input:focus-visible { outline: none; }
+.ada__yuvarlak { flex: none; width: 36px; height: 36px; }
+/* B10: yazarken bekleyen onay/bildirim çipi (kutuyu örtmez). */
+.ada__bekleyen { flex: none; display: inline-flex; align-items: center; gap: 5px; max-width: 46%; overflow: hidden; text-overflow: ellipsis; padding: 0 9px; border-radius: var(--r-hap); background: color-mix(in srgb, var(--onem-dikkat) 16%, transparent); color: var(--ada-dikkat); font-size: 12px; font-weight: 650; line-height: 22px; white-space: nowrap; }
+
+/* ── İçerik boyundaki haller: kayan gövde + sabit alt şerit ─────────────────── */
+.ada__kaydir { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.ada__alt { display: flex; align-items: center; gap: 8px; flex: none; padding: 12px 12px 14px 16px; }
+.ada__alt--kart { padding: 12px 18px 16px; }
+/* H3c düzeltme turu 2: "hazır değil" kartının sürümlü düğmeleri ve boyutlu onayı satır kırar. */
+.ada__alt--sarmal { flex-wrap: wrap; row-gap: 8px; }
+.ada__bosluk { flex: 1; }
+.ada__durum { display: inline-flex; align-items: center; gap: 8px; padding-right: 6px; font-size: 12px; color: var(--ink-4); }
+
+.ada__kart { display: grid; gap: 6px; align-content: start; padding: 14px 18px 0; }
+.ada__ust { display: flex; align-items: center; gap: 7px; min-height: 20px; font-size: 12px; font-weight: 550; color: var(--ink-4); font-variant-numeric: tabular-nums; }
+.ada__kart-baslik { font-size: 15px; font-weight: 650; line-height: 1.35; letter-spacing: -0.018em; color: var(--ink); text-wrap: pretty; }
+.ada__md { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); user-select: text; }
+.ada__kart[data-soz] .ada__md { font-size: 14px; color: var(--metin); }
+/* G1 (F2, taşma): bildirimin kartı en çok 4 satır (paragraf ve listelerde de); fazlası "…" ile biter, tamamı ana sohbette ("Aç").
+   Uzun kendiliğinden mesaj (proaktifBildir 600 karaktere dek) kartı büyütüp kutudan taşırmaz; ada-onizle.mjs görünen satırları sayar. */
+.ada__kart .ada__md { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+
+/* Motor kartı (Görev 14; 0.10 Görev 2): başlık + açıklama + tek düğme; Geliştirici'de ek "Kendi anahtarımla bağla" (shared/motor-durumu.ts motorBildirimi). */
+.ada__motor { display: grid; gap: 6px; align-content: start; padding: 14px 18px 0; }
+.ada__motor-ust { display: flex; align-items: center; gap: 10px; min-height: 20px; }
+.ada__motor-metin { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+/* A2: boşta hap (204×32; yalnız kırmızı hâller): "● Bağlantı koptu" / "● Kullanım hakkın doldu" tek satırda, kesilmeden. */
+.ada__motor-hap { gap: 8px; padding: 0 14px; white-space: nowrap; }
+.ada__motor-hap .ada__nokta--acil { box-shadow: 0 0 6px color-mix(in srgb, var(--onem-acil) 60%, transparent); }
+
+.ada__yanit { display: grid; gap: 12px; align-content: start; padding: 14px 16px 0; }
+.ada__soru {
+  justify-self: end; max-width: 86%; padding: 7px 13px 8px; border-radius: 16px 16px 5px 16px;
+  background: var(--balon-ben); color: var(--balon-ben-ink); box-shadow: var(--balon-ben-golge);
+  font-size: 13.5px; font-weight: 500; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text;
+}
+.ada__araclar { display: grid; gap: 8px; }
+.ada__araclar:empty { display: none; } /* İş'te gizlenen adım (başarısız kart_goster) tek içerikse boş sarmalayıcı boşluk bırakmasın */
+.ada__karakter { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; color: var(--ink-3); margin-bottom: -6px; }
+.ada__cevap { font-size: 14px; line-height: 1.6; color: var(--metin); }
+.ada__hata { font-size: 13px; line-height: 1.5; color: var(--yazi-hata); }
+
+/* Onay: adanın kendisi onay kartıdır (OnayKarti'nın sıkı hâli: kendi çerçevesi ve parıltısı yok). Karar senden: ada
+   ana sohbetteki onay kartı gibi kehribar (yüksek tehlikede kırmızı) bir tülle belirir. 0.14 T19: tül içerik katmanında (biçim parçalara bölündü; alttaki
+   28 px köşelere varmadan saydamlaşır); kıl payı kenar kalktı — onayın yeni dili T23'te. */
+.ada[data-ada-hal='onay'] { --ada-onem: var(--onem-dikkat); }
+.ada[data-ada-hal='onay'][data-tehlike='yuksek'] { --ada-onem: var(--onem-acil); }
+.ada[data-ada-hal='onay'] .ada__katman:not(.ada__katman--cikan) {
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--ada-onem) 11%, transparent), transparent 72%);
+}
+.ada__onay { position: relative; padding: 14px 18px 16px; }
+.ada__onay > .ada__sayac { position: absolute; top: 14px; right: 18px; }
+.ada .onay { gap: 9px; padding: 0; border-radius: 0; background: none; box-shadow: none; animation: none; }
+.ada .onay__onizleme { max-height: 150px; }
+
+/* Birincil hapın dış parıltısı adanın kenarına taşıp hale bırakıyordu: adada yalnız kendi kenarı. */
+.ada .dgm--beyaz, .ada .dgm--beyaz:hover { box-shadow: 0 0 0 1px var(--ters); }
+
+/* Ada içinde paylaşılan bileşenlerin küçük yazıları da ≥ 12 px. */
+.ada .onay__etiket { font-size: 12px; letter-spacing: 0.08em; }
+.ada .atif { width: 12px; height: 12px; }
+
+/* Az hareket (R16; kökte data-az-hareket: Windows'un tercihi ya da Görünüm → "Az hareket"). Zıplama yok: kısa ve düz geçiş; içerik yalnız solar; ışık,
+   nabız ve parıltı durur. Karakterin kendi az hareket kuralı (yalnız göz kırpma) Karakter'e `azHareket` olarak gider. */
+.ada[data-az-hareket] .ada__sekil { --centik-sure: 160ms !important; --centik-egri: ease !important; transition-duration: 160ms; transition-timing-function: ease; }
+.ada[data-az-hareket] .ada__katman { animation: ada-sol-gir 140ms ease backwards !important; }
+.ada[data-az-hareket] .ada__katman--cikan { animation: ada-sol-cik 120ms ease forwards !important; }
+.ada[data-az-hareket] .ada__isik, .ada[data-az-hareket] .ada__nokta--calisiyor::after, .ada[data-az-hareket] .ada__parilti { animation: none !important; }
+.ada[data-az-hareket] .ada__sekil:has(> .ada__katman > button.ada__satir:active) { transform: translateX(-50%); }
+/* 0.13: hover'ın açtığı her hâlde (0.14 T23: açık panel; noktadaki mesaj: bildirim, kart) ve boşa dönüşte (dinlenme, Kapalı) biçim hiç geçiş yapmaz: anında yerine
+   oturur, içerik katmanı solar (ada-sol-gir). */
+.ada[data-az-hareket][data-ada-hal='panel'] .ada-bicim__parca, .ada[data-az-hareket][data-ada-hal='dinlenme'] .ada-bicim__parca, .ada[data-az-hareket][data-ada-hal='sessiz'] .ada-bicim__parca,
+.ada[data-az-hareket][data-ada-hal='bildirim'] .ada-bicim__parca, .ada[data-az-hareket][data-ada-hal='kart'] .ada-bicim__parca { transition: none !important; }
+.ada[data-az-hareket] .ada__halka::after { animation: none !important; }
+.ada[data-az-hareket] .ada__nokta--mesaj { animation: ada-sol-gir 140ms ease backwards !important; }
+@keyframes ada-sol-gir { from { opacity: 0; } }
+@keyframes ada-sol-cik { to { opacity: 0; } }
+
+/* ── 0.14 T19: dinlenme ve Kapalı hap ───────────────────────────────────────── */
+/* Dinlenme (132×30; 11 Kas "Pamuk"): 16 px boyunda göz çifti çentiğin ortasında (svg tasarımın 100×40 kutusu: 61,5 × 24,6 px). Kırpma yok; göz siyah
+   çentiğin üstünde beyaz, kapak ve yanak siyah. Sade modda aynı yerde kipin vurgu renkli noktası. */
+.ada__dinlenme { padding: 0; }
+.centik-yuz { position: relative; display: grid; place-items: center; flex: none; width: 62px; height: 30px; }
+/* Düzeltme turu 1: Sade'de mod geçişi noktanın kendi boyunda ve yerinde (8 px; iki nokta çapraz solar). */
+.centik-yuz__sade-gecis { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+.centik-yuz__yer-tutucu { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--ink-3); }
+/* Kapalı hap (200×32): solda saat (kalın, eşit genişlikli rakam), sağda simge — Fuber'in mesaj noktası ya da medya. */
+.ada__kapali { gap: 10px; padding: 0 16px; }
+.ada__saat { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ada__medya { display: grid; place-items: center; color: var(--ink-2); }
+
+/* Görev 28 düzeltme 3: hatırlatıcı soru kutusunda gömülmez — kendi çipi (başlığıyla), tıklanınca açılır. */
+button.ada__bekleyen { border: 0; min-height: 32px; cursor: pointer; font-family: inherit; }
+.ada__bekleyen > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ada__bekleyen--hatirlatma { background: color-mix(in srgb, var(--ada-dikkat) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ada-dikkat) 45%, transparent); }
+.ada__bekleyen--hatirlatma:hover { background: color-mix(in srgb, var(--ada-dikkat) 30%, transparent); }
+.ada__bekleyen--hatirlatma svg { flex: none; }
+.ada__motor-ust .ada__bekleyen { margin-left: auto; }
+
+/* ══ 0.14 çentik cilası (5 Kas; hedef: bol ışık geçişleri, hafif ışıklandırılmış görüntü, Apple cihazı hissi; hover geç tetikleniyordu;
+   müzik varken ona göre animasyon; odaklanma açıksa ona göre hareket) ══════════════════════════════════════════════════════════════════════════════
+   Kural aynı: YALNIZ transform ve opacity canlanır; parıltılar önceden çizilmiş degrade katmanlardır (filter, box-shadow canlandırılmaz). Boşta çizim yok:
+   süzülme tek atımlık, Odak çizgisi adımlı tek animasyon (Odak sürerken), eşitleyici yalnız medya ÇALARKEN (data-medya-caliyor) sonsuzdur; az harekette
+   (data-az-hareket: Görünüm → Az hareket ya da Windows'un tercihi) süs hareketi yok. */
+.ada-isik {
+  position: absolute; top: 0; left: 50%; overflow: hidden; pointer-events: none; transform: translateX(-50%);
+  /* Biçim yayla büyürken kutu hedef ölçüdedir: biçim büyüdükten sonra solarak girer (ışık siyah şeklin dışına taşmasın). */
+  animation: ada-isik-gir 220ms ease-out 300ms backwards; /* yay ~300 ms’de yerine oturur (video karesi: daha erken girince kenar şeklin dışında çiziliyordu) */
+}
+@keyframes ada-isik-gir { from { opacity: 0; } }
+.ada-isik > i { position: absolute; display: block; pointer-events: none; }
+/* Kenar: alt kenarda kıl payı iç parlama, yanlarda daha da sönük (durağan; canlanmaz). */
+.ada-isik__kenar { inset: 0; border-radius: inherit; box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.11), inset 0 0 0 0.5px rgb(255 255 255 / 0.05); }
+/* Vurgu parıltısı: kipin vurgusunda alttan yumuşak ışık (--ada-vurgu: Ada.tsx, ui/goz/vurgu.ts KIP_VURGUSU). Durağanken sönük; hover'da açılır ve hafif yükselir. */
+.ada-isik__parilti {
+  left: 8%; right: 8%; bottom: -70%; height: 130%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--ada-vurgu, #fff) 42%, transparent), transparent);
+  opacity: 0.22; transform: translateY(0); transition: opacity 140ms ease-out, transform 220ms var(--yay-cikis);
+}
+/* Süzülme: hâl değişince (açılış, uyarı hapı, onay, kart…) tek ışık bandı soldan sağa bir kez geçer (Ada.tsx anahtarla yeniden takar). */
+.ada-isik__suzulme {
+  top: 0; bottom: 0; left: 0; width: 42%;
+  background: linear-gradient(100deg, transparent 0%, rgb(255 255 255 / 0.13) 50%, transparent 100%);
+  opacity: 0; transform: translateX(-110%);
+  animation: ada-suzul 820ms cubic-bezier(0.4, 0, 0.2, 1) 320ms 1 both;
+}
+@keyframes ada-suzul { 0% { opacity: 0; transform: translateX(-110%); } 22% { opacity: 1; } 100% { opacity: 0; transform: translateX(260%); } }
+.ada[data-ada-hal='onay'] .ada-isik__suzulme { background: linear-gradient(100deg, transparent 0%, color-mix(in srgb, var(--ada-onem) 34%, transparent) 50%, transparent 100%); }
+.ada[data-ada-hal='uyari'] .ada-isik__suzulme { background: linear-gradient(100deg, transparent 0%, rgb(255 255 255 / 0.18) 50%, transparent 100%); }
+/* Odak kenar ışığı: alt kenarda ilerleyen 2 px çizgi. Süre ve başlangıç satır içi (animation-duration = toplam, animation-delay = −geçen; Ada.tsx). Adımlı eğri:
+   25 dk'da 300 adım (5 sn'de bir) — sürekli kare çizilmez. Duraklamada satır içi durağan scaleX. */
+.ada-isik__odak {
+  background: var(--odak-renk, #30D158); /* mola yeşili (panel.css Odak sayfası); Odak'ta satır içi --odak-renk (sayfa vurgusu) */
+  left: 22%; right: 22%; bottom: 0; height: 2px; border-radius: 1px; opacity: 0.9; transform-origin: 0 50%; transform: scaleX(0);
+}
+.ada-isik__odak[data-akiyor] { animation-name: ada-odak-ilerle; animation-timing-function: steps(300, end); animation-fill-mode: both; animation-iteration-count: 1; }
+@keyframes ada-odak-ilerle { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Hover'ın ilk karesi (gecikmesiz; CSS :hover, React beklenmez): boştaki çentik hafifçe şişer ve vurgu ışığı açılır — panel HOVER_GECIKME_MS sonra açılır. */
+.ada:is([data-ada-hal='dinlenme'], [data-ada-hal='sessiz']) .ada__sekil:hover { transform: translateX(-50%) scale(1.045, 1.1); transition: transform 110ms var(--ada-sisme-egri); }
+.ada:is([data-ada-hal='dinlenme'], [data-ada-hal='sessiz']) .ada__sekil:hover .ada-isik__parilti { opacity: 0.75; transform: translateY(-8%); }
+.ada[data-ada-hal='panel'] .ada-isik__parilti { opacity: 0.32; }
+
+/* Medya çalarken (R13: yalnız çalarken): Kapalı haptaki ve panelin üst satırındaki eşitleyici çubuklar (yalnız scaleY).
+   0.15 sürüm doğrulaması: Kapalı hap BOŞTUR — müzik başka bir uygulamada saatlerce çalabilir; sonsuz döngü 15 sn'de ~1100 kare ve çentik işleyicisinde
+   %5–7 tek çekirdek harcıyordu (bosta-islemci kuralı: boşta 0 kare). Hapta çubuklar durağan farklı boylarda durur ("çalıyor" bilgisi biçimde), hap
+   açılırken bir kez yükselir (420 ms, tek sefer). Sonsuz döngü yalnız AÇIK panelde: kullanıcı çentiğe bakıyor; az harekette orada da yok. */
+.ada__esitleyici { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.ada__esitleyici i { width: 2.5px; height: 12px; border-radius: 1.25px; background: var(--ada-vurgu, var(--ink-2)); transform-origin: 50% 100%; transform: scaleY(0.35); }
+.ada__esitleyici i:nth-child(2) { transform: scaleY(0.7); }
+.ada__esitleyici i:nth-child(3) { transform: scaleY(0.5); }
+.ada__esitleyici i:nth-child(4) { transform: scaleY(0.85); }
+.ada[data-medya-caliyor]:not([data-az-hareket]) .ada__esitleyici i { animation: ada-esit-gir 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 1 both; }
+.ada[data-medya-caliyor]:not([data-az-hareket]) .ada__esitleyici i:nth-child(2) { animation-delay: 40ms; }
+.ada[data-medya-caliyor]:not([data-az-hareket]) .ada__esitleyici i:nth-child(3) { animation-delay: 80ms; }
+.ada[data-medya-caliyor]:not([data-az-hareket]) .ada__esitleyici i:nth-child(4) { animation-delay: 120ms; }
+@keyframes ada-esit-gir { from { transform: scaleY(0.15); } }
+.ada[data-ada-hal='panel'][data-medya-caliyor]:not([data-az-hareket]) .panel__medya i { animation: ada-esit 780ms ease-in-out infinite alternate; }
+.ada[data-ada-hal='panel'][data-medya-caliyor]:not([data-az-hareket]) .panel__medya i:nth-child(2) { animation-duration: 560ms; animation-delay: -220ms; }
+.ada[data-ada-hal='panel'][data-medya-caliyor]:not([data-az-hareket]) .panel__medya i:nth-child(3) { animation-duration: 690ms; animation-delay: -410ms; }
+@keyframes ada-esit { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
+/* Medya çalarken Kapalı hapın vurgu parıltısı biraz daha canlı (durağan). */
+.ada[data-medya-caliyor][data-ada-hal='sessiz'] .ada-isik__parilti { opacity: 0.36; }
+
+/* Az hareket: süzülme ve şişme yok (ışık durağan kalır), eşitleyici durağan. */
+.ada[data-az-hareket] .ada-isik, .ada[data-az-hareket] .ada-isik__suzulme { animation: none !important; }
+.ada[data-az-hareket] .ada-isik__suzulme { opacity: 0; }
+.ada[data-az-hareket] .ada-isik__parilti { transition: none; }
+.ada[data-az-hareket]:is([data-ada-hal='dinlenme'], [data-ada-hal='sessiz']) .ada__sekil:hover { transform: translateX(-50%); }
+
+/* ── İş izi (11 Kas): iş hapı ve açık listesi ──────────────────────────────────────────────────────────────────────────────────
+   Hap: halkalı işaret (karakter; Sade'de Fuber işareti) + çevresinde paralel iş sayısı kadar yörünge noktası (is-izi.css; yalnız transform) + canlı fiil + süre.
+   Birden çok iş varken yörünge halkanın kendi yay döndürücüsünün yerine geçer (aynı anda tek döngü). Liste: en çok 3 satır, satır işin yerine götürür. */
+.ada__halka[data-yorunge]::after { content: none; }
+.ada__halka--is { color: var(--ink); }
+.ada__is-hap { gap: 10px; padding: 0 14px 0 8px; }
+.ada__is-hap .ada__baslik { flex: 1 1 auto; font-size: 13px; }
+.ada__is-hap > .ikon, .ada__is-hap > svg { flex: none; color: var(--ink-3); }
+.ada__is-sure { flex: none; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ada__baslik .is-fiil { display: grid; }
+.ada__is-acik { display: flex; flex-direction: column; width: 100%; padding-bottom: 8px; }
+.ada__is-ust { height: 44px; flex: none; display: flex; }
+.ada__is-liste { display: grid; gap: 2px; padding: 2px 8px 0; border-top: 1px solid var(--cizgi); }
+.ada__is-liste .is-seridi__ana { padding: 6px 8px; }
+.ada__is-liste button.is-seridi__ana:hover { background: var(--dolgu-2); }
+.ada__is-kalan { all: unset; padding: 4px 8px 0 34px; font-size: 12px; color: var(--ink-3); cursor: pointer; }
+.ada__is-kalan:hover { color: var(--ink); }
+.ada[data-az-hareket] .is-isaret__yorunge, .ada[data-az-hareket] .is-yorunge__halka, .ada[data-az-hareket] .is-isaret__nokta { animation: none !important; }
+.ada[data-az-hareket] .is-seridi, .ada[data-az-hareket] .is-fiil__metin--giren, .ada[data-az-hareket] .is-isaret__tik { animation: ada-is-soluk-gir 120ms ease both !important; }
+.ada[data-az-hareket] .is-fiil__metin--cikan { animation: ada-is-soluk-cik 120ms ease both !important; }
+@keyframes ada-is-soluk-gir { from { opacity: 0; } }
+@keyframes ada-is-soluk-cik { to { opacity: 0; } }

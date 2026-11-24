@@ -1,0 +1,17 @@
+/* ── Sol ray kip anahtarı (KipAnahtari.tsx): iki parçalı, ince çizgili sakin kutu ─────────────────────────────────────────────
+   Hızlı denetimlerle (hizli-denetimler.css) aynı dil: seçili parça rayın etkin sayfası gibi dolgulu ve parlak, öteki sessiz (--ink-4).
+   Renkler yalnız belirteçlerden; üç temada okunur. */
+.kip-anahtari {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; margin-bottom: 4px;
+  border-radius: 13px; background: var(--dolgu-1); box-shadow: inset 0 0 0 1px var(--cizgi);
+}
+.kip-anahtari__dgm {
+  position: relative; display: grid; place-items: center; width: 22px; height: 30px; padding: 0; border: 0; border-radius: 10px;
+  background: transparent; color: var(--ink-4); transition: color var(--sure-hiz), background var(--sure-hiz);
+}
+.kip-anahtari__dgm:hover, .kip-anahtari__dgm:focus-visible { color: var(--ink); background: var(--dolgu-2); }
+.kip-anahtari__dgm[aria-pressed='true'] { color: var(--ink); background: var(--dolgu-3); box-shadow: inset 0 0 0 1px var(--cizgi-2); }
+/* 11 Kas (bulgu 5): ipucu rayın ipucuyla aynı (tasarim.css .ray__ipucu); kip anahtarı rayın ortasında olduğundan sol kenarı düğmenin sağında. */
+.kip-anahtari__ipucu { left: 34px; }
+.kip-anahtari__dgm[data-kip='gelistirici'] .kip-anahtari__ipucu { left: 26px; }
+.kip-anahtari__dgm:hover .ray__ipucu, .kip-anahtari__dgm:focus-visible .ray__ipucu { opacity: 1; transform: none; }

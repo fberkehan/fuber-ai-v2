@@ -1,0 +1,80 @@
+# Fuber AI — Windows kurulumu iki katlıdır (Görev 17, K8):
+#  1) electron-builder İÇ NSIS paketini üretir: release/Fuber AI Paket <sürüm>.exe — tek tık, kullanıcıya özel, sessiz kurulur;
+#     elle açılmak için değildir (açılırsa NSIS'in küçük ilerleme penceresiyle kurar, uygulamayı açmaz).
+#  2) scripts/kurulum-paketle.mjs onu markalı başlatıcıya (native/fuber-kurulum) gömer: release/Fuber AI Kurulum <sürüm>.exe —
+#     DAĞITILAN dosya budur. Başlatıcı paketi `/S /D=<kayıtlı kurulum yeri>` ile çalıştırır (yükseltme aynı yere), bitince uygulamayı açar.
+#  `npm run dist` ikisini sırayla yapar. The build is unsigned (no code-signing certificate is configured).
+# resources/ (yazı tipi, Vosk modeli, uyandırma WASM'ı ve modeli, fuber-girdi.exe, fuber-olay.exe (0.14 T22: olay güdümlü yerel yardımcı), ikonlar, lisanslar) asar DIŞINA "kaynak" olarak kopyalanır;
+# main süreç paketliyken process.resourcesPath/kaynak yolunu kullanır (src/main/yollar.ts).
+# Kullanıcı verisi (hafıza, sohbetler, anahtarlar) %APPDATA%\Fuber AI içindedir; güncellemede hiç dokunulmaz, kullanıcının başlattığı
+# kaldırmada sorulur (varsayılan Hayır; build/kurulum.nsh, 0.11 G2).
+appId: ai.fuber.masaustu
+productName: Fuber AI
+copyright: Copyright 2026 Fuber AI
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - package.json
+  - "!**/*.map"
+  # Agent SDK'nın kendi Claude Code ikilisi (~285 MB) pakete GİRMEZ: Fuber kullanıcının kurulu claude.exe'sini kullanır
+  # (pathToClaudeCodeExecutable; Görev 27, K17).
+  - "!node_modules/@anthropic-ai/claude-agent-sdk-*/**"
+extraResources:
+  - from: resources
+    to: kaynak
+    filter:
+      - "**/*"
+      - "!medya/beyin-yan.webp"
+      - "!medya/zihin.*"
+asar: true
+compression: normal
+# 0.12 H6: Electron sigortaları (fuses) — exe'nin içine yazılır, çalışırken değiştirilemez. electron-builder win-unpacked'daki exe'yi NSIS'ten
+# ÖNCE çevirir: kurulum dosyasındaki exe ile win-unpacked'daki aynıdır. Kırılma denetimi ve kararlar: tests/sigortalar.test.ts başı.
+#  · runAsNode false: uygulama kendi exe'sini Node olarak çalıştırmaz (alt süreçlerin hiçbiri ELECTRON_RUN_AS_NODE'a dayanmaz; tek test
+#    kancası FUBER_TEST_PIPER kurulu uygulamada ortam kapısında yok sayılır — shared/ortam-kapisi.ts).
+#  · enableNodeOptionsEnvironmentVariable / enableNodeCliInspectArguments false: NODE_OPTIONS ve --inspect* yok sayılır. Playwright ana sürece
+#    --inspect ile bağlandığı için paketli testler (kurulu-duman, uçtan uca) DAĞITILMAYAN bir test kopyasında koşar: scripts/paket-test-kopyasi.mjs
+#    (yalnız bu sigortası açık; exe'nin geri kalanı ve app.asar bayt bayt aynı).
+#  · enableCookieEncryption true, enableEmbeddedAsarIntegrityValidation + onlyLoadAppFromAsar true (asar bütünlüğü exe'deki kaynağa yazılır;
+#    kaynak/ asar dışıdır), loadBrowserProcessSpecificV8Snapshot false, grantFileProtocolExtraPrivileges false (arayüz fuber:// ile yüklenir).
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  loadBrowserProcessSpecificV8Snapshot: false
+  grantFileProtocolExtraPrivileges: false
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+  executableName: Fuber AI
+  requestedExecutionLevel: asInvoker
+nsis:
+  # Sihirbaz yok: arayüzü başlatıcı çizer. Klasör seçimi yok; yer NSIS'in kayıtlı kurulum yeri ya da Programlar\Fuber AI (/D=).
+  oneClick: true
+  perMachine: false
+  allowElevation: false
+  # İkon ailesi: scripts/ikon-uret.mjs (0.12: mini logo). Uygulama/kaldırıcı = uygulama ikonu; iç paket = kurulum ikonu (rozetli).
+  installerIcon: build/kurulum.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/kurulum.ico
+  installerLanguages:
+    - tr_TR
+  language: "1055"
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Fuber AI
+  # Uygulamayı başlatıcı açar (kurulum bitince, kendi "Fuber AI açılıyor…" ekranıyla).
+  runAfterFinish: false
+  # Veri klasörü electron-builder'ın bayrağıyla silinmez; kaldırıcı eki (0.11 G2) güncellemede hiçbir şey yapmaz, kullanıcının başlattığı
+  # kaldırmada sorar (varsayılan Hayır → "Tekrar hoş geldin" işareti), uygulamanın "Kaldır"ı (--verileri-sil) sormadan siler.
+  include: build/kurulum.nsh
+  deleteAppDataOnUninstall: false
+  artifactName: "Fuber AI Paket ${version}.${ext}"

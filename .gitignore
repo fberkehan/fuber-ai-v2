@@ -1,0 +1,28 @@
+node_modules/
+dist/
+release/
+*.log
+
+# Local build output of the native helpers (build them with `node native/derle.mjs`)
+resources/bin/*.exe
+resources/bin/*.dll
+resources/bin/*.pdb
+
+# Large generated or downloaded assets
+.uretim/
+
+# Editor / tool working files
+.claude/
+.playwright-mcp/
+.superpowers/
+
+# Python cache
+__pycache__/
+
+# Local environment and secrets (never commit)
+.env
+.env.*
+*.pfx
+*.p12
+*.pem
+*.key

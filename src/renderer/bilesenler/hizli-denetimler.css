@@ -1,0 +1,55 @@
+/* ── Sol ray hızlı denetimleri (HizliDenetimler.tsx): mikrofon, ada, sürekli dinleme, rahatsız etme ────────────────────────
+   Rayın en altında, ince çizgili sakin bir kutu. Açık hâl rayın öteki simgeleri gibi sessiz (--ink-4); kapalı hâl üstü çizili simge
+   + hafif dolgu ve daha parlak simge: bir şeyin kapatıldığı ilk bakışta görülür. Süreli durumda (1 saat gizle, rahatsız etme,
+   duraklatma) küçük kehribar nokta. Renkler yalnız belirteçlerden; üç temada okunur (ada-onizle.mjs ölçer). */
+.ray__hizli-grup {
+  display: grid; gap: 2px; justify-items: center; padding: 3px; margin-top: 2px;
+  border-radius: 15px; background: var(--dolgu-1); box-shadow: inset 0 0 0 1px var(--cizgi);
+}
+.ray__hizli-sar { position: relative; }
+.ray__hizli {
+  position: relative; display: grid; place-items: center; width: 38px; height: 36px; padding: 0; border: 0; border-radius: 11px;
+  background: transparent; color: var(--ink-4); transition: color var(--sure-hiz), background var(--sure-hiz);
+}
+.ray__hizli:hover, .ray__hizli:focus-visible { color: var(--ink); background: var(--dolgu-2); }
+.ray__hizli[data-kapali] { color: var(--ink-2); background: var(--dolgu-3); }
+.ray__hizli[data-kapali]:hover { color: var(--ink); }
+/* Mikrofon kapalıyken sürekli dinleme açılamaz: üstü çizili, dolgusuz, tıklanmaz (ipucu nedenini söyler). */
+.ray__hizli[aria-disabled='true'] { color: var(--ink-4); background: transparent; cursor: default; }
+.ray__hizli-nokta {
+  position: absolute; top: 5px; right: 6px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--yazi-uyari); box-shadow: 0 0 0 1.5px var(--bg);
+}
+.ray__hizli:hover .ray__ipucu, .ray__hizli:focus-visible .ray__ipucu { opacity: 1; transform: none; }
+.ray__hizli[aria-expanded='true'] .ray__ipucu { opacity: 0; }
+.ray__ipucu--hizli { left: 50px; display: grid; gap: 1px; width: max-content; max-width: 280px; white-space: normal; line-height: 1.35; text-align: left; }
+.ray__ipucu--hizli b { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.ray__ipucu--hizli span { font-size: 12px; color: var(--ink-3); }
+
+/* Ada menüsü: düğmenin sağında, alttan hizalı (rayın dibinde yukarı doğru açılır). */
+.hizli-menu {
+  position: absolute; left: 50px; bottom: -4px; z-index: 40; width: 272px; padding: 6px; display: grid; gap: 2px;
+  border-radius: 14px; background: var(--ipucu); box-shadow: inset 0 0 0 1px var(--cizgi-2), var(--kart-golge), 0 18px 40px -18px rgb(0 0 0 / 0.5);
+  animation: gir 220ms var(--yay-cikis);
+}
+.hizli-menu__baslik { padding: 6px 10px 4px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.hizli-menu__oge {
+  display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border: 0; border-radius: 9px;
+  background: transparent; color: var(--ink); font-size: 13px; text-align: left;
+}
+.hizli-menu__oge:hover { background: var(--dolgu-2); }
+.hizli-menu__oge:focus-visible { outline: none; background: var(--dolgu-3); box-shadow: inset 0 0 0 1px var(--cizgi-3); }
+.hizli-menu__isaret { display: grid; place-items: center; width: 16px; flex: none; color: var(--ink); }
+.hizli-menu__ek { margin-left: auto; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* "Boştayken göster" bir aç/kapa: sağda Ayarlar'daki anahtarın küçük kopyası (yalnız gösterge; tıklama satırın). */
+.hizli-menu__anahtar { display: inline-block; margin-left: auto; pointer-events: none; }
+.hizli-menu__ayrac { height: 1px; margin: 4px 8px; background: var(--cizgi); }
+.hizli-menu__not { margin: 4px 10px 6px; font-size: 12px; line-height: 1.45; color: var(--ink-4); text-wrap: pretty; }
+
+/* Kısa pencere (en küçük 680 px): ray sıkışır, hızlı denetimler sığar (düğmeler yine ≥ 32 px). */
+@media (max-height: 780px) {
+  .ray { gap: 4px; }
+  /* 0.13: kip anahtarı rayı uzattı; Developer'da yedi sayfa + alt grup en küçük pencerede belgeyi taşırıyordu (696/682 px). */
+  .ray__dgm { width: 38px; height: 36px; }
+  .ray__hizli { height: 34px; }
+}

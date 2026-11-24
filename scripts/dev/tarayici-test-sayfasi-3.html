@@ -1,0 +1,82 @@
+<!doctype html>
+<!-- Fuber Tarayıcı (0.14 T15, düzeltme turu 4: K1–K7) üçüncü yerel test sayfası: site içi GET arama + POST telemetri, ret sonrası sayfanın 12 sn sonra
+     yinelediği gönderim, onaylı ve gecikmeli iki gönderim (çerçeveye: 2 sn ve 4 sn), başka kökenli çerçevedeki form, iki sekme ayrımı için 2,5 sn
+     gecikmeli gönderim. Yalnız scripts/dev/tarayici-onizle.mjs yerel sunucusunda (/t15c) açılır; __CAPRAZ__ sunucuda başka kökenli adresle değiştirilir.
+     Gerçek siteye hiçbir şey gitmez. -->
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Fuber Tarayıcı test sayfası 3</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px 36px; color: #14161c; background: #fff; line-height: 1.4 }
+  h1 { font-size: 24px; margin: 0 0 6px }
+  section { margin-top: 10px; padding: 8px 14px; border-radius: 10px; background: #f2f4f8; max-width: 720px }
+  h2 { font-size: 14px; margin: 0 0 4px }
+  input { font-size: 14px; padding: 5px 8px; margin: 3px 0; width: 260px; border: 1px solid #c5cad6; border-radius: 6px; display: block }
+  iframe { width: 300px; height: 44px; border: 1px solid #c5cad6; margin: 3px 0; display: block }
+  button, .dugme { margin: 4px 8px 0 0; font-size: 14px; padding: 5px 14px; border-radius: 999px; border: 0; background: #14161c; color: #fff; display: inline-block; cursor: pointer }
+  #durum { font-weight: 600; color: #1747c9 }
+</style>
+</head>
+<body>
+  <h1>Test sayfası 3</h1>
+  <p>Durum: <span id="durum">hazır</span> · <a id="bos" href="#bos">Boş bağlantı</a></p>
+
+  <section>
+    <h2>Site içi arama (açık GET) ve POST telemetri</h2>
+    <!-- Açık GET formunda Enter: arama onaysızdır; submit'i kalkanı kurmaz, sayfanın telemetrisi geçer (Amazon unagi, Algolia sorguları gibi). -->
+    <form id="arama" method="get" action="/ara" onsubmit="event.preventDefault(); fetch('/telemetri', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15c-arama' }).then(function () { durum('arama telemetri gitti'); }, function () { durum('arama telemetri iptal'); })">
+      <input name="q" placeholder="Site içi arama" aria-label="Site içi arama">
+    </form>
+  </section>
+
+  <section>
+    <h2>Ret ve yineleme</h2>
+    <!-- Yöntemsiz (AJAX) form: gönderim başarısız olursa sayfa 12 sn sonra aynı isteği bir kez yineler (axios-retry, gönderim kuyruğu gibi). -->
+    <form id="yform" onsubmit="event.preventDefault(); yinelet(0)"></form>
+    <div class="dugme" id="yinele" role="presentation" onclick="document.getElementById('yform').requestSubmit()">Kaydet (başarısızsa 12 sn sonra yeniden dener)</div>
+  </section>
+
+  <section>
+    <h2>Onaylı ve gecikmeli iki gönderim (çerçeveye)</h2>
+    <form id="cform" method="post" action="/gonder" target="hedef"><input type="hidden" name="kaynak" value="t15c-onayli"><input type="hidden" name="ad" value="onayli"></form>
+    <button type="button" id="cift" onclick="setTimeout(function () { document.getElementById('cform').submit(); }, 2000); setTimeout(function () { document.getElementById('cform').submit(); }, 4000)">Onayla (2 sn ve 4 sn sonra çerçeveye yollar)</button>
+    <iframe name="hedef" id="hedef" title="Sonuç"></iframe>
+  </section>
+
+  <section>
+    <h2>Başka kökenli çerçevedeki form</h2>
+    <iframe id="capraz-form" title="Abonelik çerçevesi" src="__CAPRAZ__/capraz-form"></iframe>
+    <div class="dugme" id="cerceve-dugme" role="presentation" onclick="document.getElementById('capraz-form').contentWindow.postMessage('kaydet', '*')">Çerçevede kaydet</div>
+  </section>
+
+  <section>
+    <h2>İki sekme: 2,5 sn gecikmeli gönderim</h2>
+    <form id="gform" onsubmit="event.preventDefault(); setTimeout(function () { fetch('/gonder', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15c-gec&amp;ad=gec' }).then(function () { durum('gec gitti'); }, function () { durum('gec iptal'); }); }, 2500)"></form>
+    <div class="dugme" id="gec" role="presentation" onclick="document.getElementById('gform').requestSubmit()">Kaydet (2,5 sn sonra)</div>
+  </section>
+
+  <section>
+    <h2>Kart açıkken zaman aşımı ve yineleme (tur 5)</h2>
+    <!-- Sayfa bekletilen isteği 11 sn'de kendi zaman aşımıyla keser (AbortController) ve aynı POST'u kullanıcı yanıtlamadan bir kez yeniden yollar. -->
+    <form id="zform" onsubmit="event.preventDefault(); zamanli(0)"></form>
+    <div class="dugme" id="zaman" role="presentation" onclick="document.getElementById('zform').requestSubmit()">Kaydet (11 sn yanıt yoksa yeniden dener)</div>
+  </section>
+
+  <script>
+    function durum(m) { document.getElementById('durum').textContent = m; }
+    function yinelet(n) {
+      fetch('/gonder', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15c-yineleme&ad=' + n })
+        .then(function () { durum('yineleme ' + n + ' gitti'); }, function () { durum('yineleme ' + n + ' iptal'); if (n === 0) setTimeout(function () { yinelet(1); }, 12000); });
+    }
+    function zamanli(n) {
+      var c = new AbortController();
+      var t = setTimeout(function () { c.abort(); }, 11000);
+      fetch('/gonder', { method: 'POST', signal: c.signal, headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15c-zaman&ad=' + n })
+        .then(function () { clearTimeout(t); durum('zaman ' + n + ' gitti'); }, function () { clearTimeout(t); durum('zaman ' + n + ' kesildi'); if (n === 0) zamanli(1); });
+    }
+    // Başka kökenli çerçeve sonucu postMessage ile bildirir.
+    window.addEventListener('message', function (e) { if (typeof e.data === 'string' && e.data.indexOf('capraz ') === 0) durum(e.data); });
+  </script>
+</body>
+</html>

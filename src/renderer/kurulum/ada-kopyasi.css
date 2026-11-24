@@ -1,0 +1,99 @@
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   ADA KOPYASI — kurulumun Ada adımı, tema kartları ve tanıtım turu (AdaKopyasi.tsx). Gerçek adanın (ada/ada.css) biçimi:
+   üst kenara yapışık, alt köşeleri yuvarlak; yaylı büyüme cubic-bezier(.32,1.25,.4,1); geri çekilme hızlı ve yaysız.
+   9 sn'lik döngü (taslak ada-bicimi.html): %0–18 sessiz · %24–48 hatırlatıcı · %54–92 Fuber konuşur · sonra geri çekilir.
+   İçerik katmanları hedef enle çizilir, şekil onları maske gibi açar; katmanlar hafif bulanıklıkla çapraz solar.
+   Az hareket: canlandırma yok, yalnız sabit kart. Renkler belirteçlerden (--ada-zemin, --ada-golge, --ink…).
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+.ada-kopya {
+  --ak-yay: cubic-bezier(0.32, 1.25, 0.4, 1);
+  --ak-cekil: cubic-bezier(0.32, 0.72, 0, 1);
+  --ak-sure: 9s;
+  position: absolute; top: 0; left: 50%; z-index: 2; overflow: hidden; transform: translateX(-50%);
+  width: 128px; height: 34px; border-radius: 0 0 16px 16px;
+  background: var(--ada-zemin); box-shadow: var(--ada-golge); color: var(--ink);
+  animation: ak-boy var(--ak-sure) var(--ak-yay) infinite;
+}
+/* Gerçek adayla aynı: açık temada ince gölge (`.koyu-bolge` gölgeyi koyu değerine sıfırlar). */
+:root[data-tema='acik'] .ada-kopya, [data-tema-kutu='acik'] .ada-kopya { --ada-golge: 0 6px 18px -6px rgb(0 0 0 / 0.38); }
+@keyframes ak-boy {
+  0%, 18% { width: 128px; height: 34px; border-radius: 0 0 16px 16px; }
+  24%, 48% { width: 300px; height: 42px; border-radius: 0 0 20px 20px; }
+  54% { width: 384px; height: 148px; border-radius: 0 0 22px 22px; }
+  92% { width: 384px; height: 148px; border-radius: 0 0 22px 22px; animation-timing-function: var(--ak-cekil); }
+  100% { width: 128px; height: 34px; border-radius: 0 0 16px 16px; }
+}
+
+/* Katmanlar */
+.ak-an {
+  position: absolute; top: 0; left: 50%; display: flex; align-items: center; opacity: 0; transform: translateX(-50%);
+  animation: var(--ak-sure) linear infinite;
+}
+.ak-an--1 { width: 128px; height: 34px; justify-content: center; gap: 8px; animation-name: ak-an1; }
+.ak-an--2 { width: 300px; height: 42px; gap: 10px; padding: 0 16px; animation-name: ak-an2; }
+.ak-an--3 { width: 384px; height: 148px; flex-direction: column; align-items: stretch; justify-content: center; gap: 7px; padding: 14px 18px 16px; animation-name: ak-an3; }
+@keyframes ak-an1 { 0%, 16% { opacity: 1; filter: none; } 21%, 96% { opacity: 0; filter: blur(4px); } 100% { opacity: 1; filter: none; } }
+@keyframes ak-an2 { 0%, 23% { opacity: 0; filter: blur(4px); } 28%, 47% { opacity: 1; filter: none; } 51%, 100% { opacity: 0; filter: blur(4px); } }
+@keyframes ak-an3 { 0%, 55% { opacity: 0; filter: blur(4px); } 61%, 90% { opacity: 1; filter: none; } 93%, 100% { opacity: 0; filter: blur(4px); } }
+
+/* Büyük: yazılar (gerçek adanın ölçüleri; en küçük 12 px) */
+.ak-isik { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--mavi-2); box-shadow: 0 0 10px color-mix(in srgb, var(--mavi-2) 70%, transparent); animation: ak-nefes 2.8s ease-in-out infinite; }
+@keyframes ak-nefes { 50% { transform: scale(0.68); opacity: 0.5; } }
+.ak-ad { font-size: 13px; font-weight: 650; letter-spacing: -0.01em; }
+.ak-zil { display: grid; flex: none; color: var(--ada-dikkat); }
+.ak-baslik { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 650; letter-spacing: -0.012em; white-space: nowrap; }
+.ak-sure { flex: none; font-size: 12.5px; font-weight: 650; color: var(--ada-dikkat); font-variant-numeric: tabular-nums; }
+.ak-ust { font-size: 12px; font-weight: 550; color: var(--ink-4); }
+.ak-metin { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); text-wrap: pretty; }
+.ak-metin b { color: var(--ink); font-weight: 650; }
+.ak-dugmeler { display: flex; gap: 8px; margin-top: 3px; }
+.ak-dgm { display: inline-flex; align-items: center; height: 30px; padding: 0 14px; border-radius: var(--r-hap); background: var(--dugme-2); color: var(--ink); font-size: 13px; font-weight: 600; }
+.ak-dgm--birincil { background: var(--ters); color: var(--ters-ink); }
+
+/* Mini: yazısız biçimler, sahneye göre ölçü (container units) */
+.ada-kopya[data-olcek='mini'] { width: 26cqw; height: 9cqh; border-radius: 0 0 2.6cqw 2.6cqw; animation-name: ak-boy-mini; }
+@keyframes ak-boy-mini {
+  0%, 18% { width: 26cqw; height: 9cqh; border-radius: 0 0 2.6cqw 2.6cqw; }
+  24%, 48% { width: 52cqw; height: 12cqh; border-radius: 0 0 3.2cqw 3.2cqw; }
+  54% { width: 68cqw; height: 42cqh; border-radius: 0 0 4cqw 4cqw; }
+  92% { width: 68cqw; height: 42cqh; border-radius: 0 0 4cqw 4cqw; animation-timing-function: var(--ak-cekil); }
+  100% { width: 26cqw; height: 9cqh; border-radius: 0 0 2.6cqw 2.6cqw; }
+}
+.ada-kopya[data-olcek='mini'] .ak-an--1 { width: 26cqw; height: 9cqh; gap: 1.6cqw; }
+.ada-kopya[data-olcek='mini'] .ak-an--2 { width: 52cqw; height: 12cqh; gap: 2cqw; padding: 0 3.4cqw; }
+.ada-kopya[data-olcek='mini'] .ak-an--3 { width: 68cqw; height: 42cqh; gap: 2.4cqh; padding: 0 4.4cqw; }
+.ada-kopya[data-olcek='mini'] .ak-isik { width: 1.8cqw; height: 1.8cqw; box-shadow: 0 0 1.6cqw color-mix(in srgb, var(--mavi-2) 70%, transparent); }
+.ak-nokta { flex: none; width: 1.8cqw; height: 1.8cqw; border-radius: 50%; background: var(--ada-dikkat); }
+.ak-cizgi {display: block; flex: none; height: 1.5cqh; min-height: 2px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 72%, transparent); }
+.ak-cizgi--soluk { background: color-mix(in srgb, var(--ink) 34%, transparent); }
+.ak-cizgi--uyari { background: var(--ada-dikkat); }
+.ak-haplar { display: flex; gap: 1.6cqw; margin-top: 0.6cqh; }
+.ak-hap { display: block; width: 12cqw; height: 5.6cqh; border-radius: 99px; background: var(--dugme-2); }
+.ak-hap--birincil { background: var(--ters); }
+
+/* ── Sahne: duvar kâğıdı + küçük Fuber penceresi + görev çubuğu ─────────────── */
+.ada-sahne {
+  position: relative; overflow: hidden; aspect-ratio: 16 / 10; border-radius: 18px; container-type: size;
+  background: var(--masaustu); box-shadow: inset 0 0 0 1px var(--cizgi);
+}
+.ada-sahne--mini { border-radius: 12px; }
+.ada-sahne__pencere {
+  position: absolute; left: 7%; top: 30%; width: 70%; height: 60%; overflow: hidden; display: grid; grid-template-columns: 13% minmax(0, 1fr);
+  border-radius: 3.4cqw; background: var(--pano-zemin); box-shadow: var(--pencere-golge), inset 0 0 0 1px var(--pano-cizgi);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+}
+.ada-sahne__ray { display: grid; align-content: start; justify-items: center; gap: 9%; padding: 30% 0; }
+.ada-sahne__ray i { display: block; width: 46%; aspect-ratio: 1; border-radius: 30%; background: var(--kart-3); }
+.ada-sahne__ana { display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 4cqw; padding: 5cqw 5cqw 0 1.6cqw; }
+.ada-sahne__ana i { position: relative; display: block; height: 0; padding-bottom: 46%; border-radius: 2.2cqw; background: var(--kart); box-shadow: inset 0 0 0 1px var(--cizgi), var(--kart-golge); }
+.ada-sahne__ana i::after { content: ''; position: absolute; left: 10%; top: 22%; width: 56%; height: 10%; border-radius: 4px; background: var(--cizgi-2); }
+.ada-sahne__ana i.uzun { grid-column: 1 / -1; padding-bottom: 22%; }
+.ada-sahne__gorev { position: absolute; inset: auto 0 0 0; height: 7%; background: color-mix(in srgb, var(--ters-ink) 62%, transparent); box-shadow: inset 0 1px 0 var(--cizgi); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Canlandırma yok: sabit kart ("Fuber konuşur"). Genel kural (tasarim.css) süreyi 1 ms yapar; döngü titremesin diye adı da kapanır. */
+  .ada-kopya, .ak-an, .ak-isik { animation: none !important; }
+  .ada-kopya { width: 384px; height: 148px; border-radius: 0 0 22px 22px; }
+  .ada-kopya[data-olcek='mini'] { width: 68cqw; height: 42cqh; border-radius: 0 0 4cqw 4cqw; }
+  .ak-an--3 { opacity: 1; }
+}

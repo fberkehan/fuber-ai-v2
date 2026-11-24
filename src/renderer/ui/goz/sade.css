@@ -1,0 +1,58 @@
+/* Sade mod işareti (0.14 T6b; SadeIsaret.tsx). Karakterle aynı kutu; yalnız transform ve opacity canlanır, dönüş ekseni merkez (50,50).
+   Renk --sade-vurgu (kipin vurgusu); onay sarı, hata kırmızı. Az hareket / prefers-reduced-motion: hareket yok, hâl renk ve saydamlıkla okunur. */
+.sade-isaret {
+  --sade-renk: var(--sade-vurgu, #8E8E93);
+  display: block;
+  flex: none;
+  overflow: visible;
+  color: var(--sade-renk);
+}
+/* 11 Kas (bulgu 10): açık temada turuncu/yeşil vurgu #F5F5F7 üstünde ~2,2-2,7:1 kalıyordu; halka ve F vurgunun koyulaştırılmış tonuyla çizilir (onay/hata kendi rengini korur). */
+[data-tema='acik'] .sade-isaret:not([data-hal='onay']):not([data-hal='hata']) { --sade-renk: color-mix(in srgb, var(--sade-vurgu, #8E8E93) 70%, #000); }
+.sade-isaret[data-hal='onay'] { --sade-renk: #FFB020; }
+.sade-isaret[data-hal='hata'] { --sade-renk: #FF453A; }
+.sade-isaret circle, .sade-isaret__f { transform-box: view-box; transform-origin: 50px 50px; transition: opacity 240ms ease-out; } /* son inceleme Minor 19: yalnız opacity (renk anında değişir) */
+.sade-isaret__hale { fill: var(--sade-renk); opacity: 0.14; }
+.sade-isaret__halka { stroke: var(--sade-renk); opacity: 0.9; }
+.sade-isaret__yay { stroke: var(--sade-renk); opacity: 0; stroke-dasharray: 28 72; stroke-linecap: round; }
+/* 11 Kas (bulgu 10): ortada Fuber'in F işareti — halkayla aynı renk (her zeminde halka nerede okunuyorsa F de orada okunur; açık zeminde kurulum
+   rengi kendisi koyulaştırır). Onay/hata hâlinde F de o renge geçer. */
+.sade-isaret__f { fill: var(--sade-renk); }
+.sade-isaret[data-hal='uyuyor'] .sade-isaret__f { opacity: 0.7; }
+
+/* Hâllerin durağan ayrımı (her zaman; az harekette tek ipucu bu). */
+.sade-isaret[data-hal='dinliyor'] .sade-isaret__hale { opacity: 0.24; }
+.sade-isaret[data-hal='dusunuyor'] .sade-isaret__halka { opacity: 0.35; }
+.sade-isaret[data-hal='dusunuyor'] .sade-isaret__yay { opacity: 1; }
+.sade-isaret[data-hal='konusuyor'] .sade-isaret__hale { opacity: 0.2; }
+.sade-isaret[data-hal='uyuyor'] { opacity: 0.45; }
+.sade-isaret[data-hal='sevinc'] .sade-isaret__hale { opacity: 0.28; }
+
+@keyframes sade-nefes { 0%, 100% { transform: scale(1); opacity: 0.16; } 50% { transform: scale(1.14); opacity: 0.3; } }
+@keyframes sade-don { to { transform: rotate(360deg); } }
+@keyframes sade-at { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes sade-parla { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .sade-isaret:not([data-az-hareket])[data-hal='dinliyor'] .sade-isaret__hale { animation: sade-nefes 1600ms ease-in-out infinite; }
+  .sade-isaret:not([data-az-hareket])[data-hal='dusunuyor'] .sade-isaret__yay { animation: sade-don 1400ms linear infinite; }
+  .sade-isaret:not([data-az-hareket])[data-hal='konusuyor'] .sade-isaret__f { animation: sade-at 520ms ease-in-out infinite; }
+  .sade-isaret:not([data-az-hareket])[data-hal='sevinc'] .sade-isaret__halka { animation: sade-parla 600ms ease-out 1; }
+}
+.sade-isaret[data-az-hareket] circle, .sade-isaret[data-az-hareket] .sade-isaret__f { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sade-isaret circle, .sade-isaret__f { transition: none; }
+}
+
+/* Sade mod geçişi (ModGecisi.tsx, Sade'de): iki işaret aynı kutuda üst üste; yalnız vurgu rengi çapraz solar (eski söner, yeni belirir). */
+.mod-gecisi--sade > [data-gecis] { position: absolute; inset: 0; pointer-events: none; }
+@keyframes sade-belir { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sade-son { from { opacity: 1; } to { opacity: 0; } }
+.mod-gecisi--sade > [data-gecis='yeni'] { animation: sade-belir var(--sade-gecis, 240ms) ease-in-out both; }
+.mod-gecisi--sade > [data-gecis='eski'] { animation: sade-son var(--sade-gecis, 240ms) ease-in-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .mod-gecisi--sade > [data-gecis] { animation: none; }
+  .mod-gecisi--sade > [data-gecis='eski'] { opacity: 0; }
+}
+.mod-gecisi--sade[data-az-hareket] > [data-gecis] { animation: none; }
+.mod-gecisi--sade[data-az-hareket] > [data-gecis='eski'] { opacity: 0; }

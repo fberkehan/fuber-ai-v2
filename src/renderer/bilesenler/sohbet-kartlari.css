@@ -1,0 +1,112 @@
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   SOHBET KARTLARI (0.11 G6) — araç adımları (tek satır, "N adım" katlanır) ve yapay zekânın `kart_goster` kartları.
+   Hepsi Fuber arayüz kütüphanesinden (ui/ui.css) kurulur; burada yalnız kütüphanede olmayan yerleşim: madde işareti, adım numarası, tablo.
+   Renkler YALNIZ tasarim.css belirteçlerinden (üç tema); yazı ≥ 12 px; kartın içinde kaydırma çubuğu yok (metin satır sınırıyla kırpılır:
+   MetinKirp, tamamı title'da ve klavye odağında). scripts/dev/tasma.mjs kartları ölçer.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Araç adımları ───────────────────────────────────────────────────────────────────────────────────────── */
+/* Adım kartı sohbetin düzyazısından ayrışsın ama bağırmasın: ince, tek satır. Yoğun kartın iç boşluğu burada daha da kısık. */
+.ui-kart.arac-adim { gap: 0; padding: 3px 14px; border-radius: 14px; }
+.arac-adim .ui-kart__govde { gap: 0; }
+.arac-adim .ui-satir { min-height: 38px; }
+.arac-adim .ui-satir__baslik { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.arac-adim .ui-satir__sol { min-width: 20px; color: var(--ink-3); }
+.arac-adim .ui-satir__sag { color: var(--ink-3); }
+.arac-adim [data-durum='reddedildi'] .ui-satir__baslik { color: var(--ink-3); }
+/* Sohbet balonu buzlu camda yarı saydam: kütüphanenin en soluk yazı tonu (--ink-4) ve hata rozetinin rengi orada 4,5:1'in altına iniyor
+   (okunurluk denetimi pencerenin altını saf beyaz sayar). Kartlarda alt satırlar --ink-3, hata rozeti yazısı --ink-2 (noktası kırmızı kalır). */
+.arac-adim .ui-satir__alt, .yz-kart .ui-satir__alt { color: var(--ink-3); }
+.arac-adim .ui-rozet[data-ton='hata'] { color: var(--ink-2); }
+/* Durum: sürüyorsa dönen halka, tamamsa küçük onay, olmadıysa rozet. */
+.arac-durum { display: inline-grid; place-items: center; width: 18px; height: 18px; color: var(--ink-3); }
+.arac-durum .donen { width: 13px; height: 13px; }
+.arac-chevron { transition: transform var(--sure-orta) var(--yay); transform: rotate(0deg); }
+.arac-adim [aria-expanded='true'] .arac-chevron { transform: rotate(180deg); }
+.arac-grup { display: grid; gap: 0; min-width: 0; }
+.arac-grup__liste { padding-left: 0; }
+/* Ayrıntılar (yalnız Geliştirici): ham girdi ve çıktı. Kaydırma yok — metin önceden kısaltılır, uzun satır kırılır. */
+.arac-ayrinti { display: grid; gap: 6px; min-width: 0; padding: 2px 0 10px 32px; }
+.arac-ayrinti__baslik { margin: 0; font-size: 12px; font-weight: 650; letter-spacing: 0.02em; color: var(--ink-3); }
+.arac-ayrinti__kod {
+  margin: 0; padding: 8px 10px; min-width: 0; border-radius: var(--r-kucuk); background: var(--dolgu-1); box-shadow: inset 0 0 0 1px var(--cizgi);
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; line-height: 1.5; color: var(--ink-2);
+  white-space: pre-wrap; overflow-wrap: anywhere; user-select: text;
+}
+.arac-gorsel { display: block; width: 100%; max-height: 108px; margin: 2px 0 8px; border-radius: var(--r-kucuk); object-fit: cover; object-position: top; box-shadow: inset 0 0 0 1px var(--cizgi); }
+.arac-adim .ui-kart__govde > .ui-dugme { margin: 2px 0 8px 32px; }
+
+/* ── Yapay zekâ kartı ────────────────────────────────────────────────────────────────────────────────────── */
+/* Balon içeriğine göre daralmasın: kartı taşıyan balon okunur bir genişlikte (en çok 560 px; dar panelde kabına sığar). Kart ızgara öğesi olarak
+   kendi içeriğinin genişliğini balona dayatmaz (min-width: 0 .ui-kart'ta). */
+.mesaj__govde:has(> .yz-kart) { width: min(100%, 560px); }
+.ui-kart.yz-kart { width: 100%; }
+.yz-maddeler, .yz-adimlar, .yz-ozet { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.yz-maddeler li, .yz-adimlar li { display: grid; gap: 10px; min-width: 0; font-size: 13.5px; line-height: 1.5; color: var(--metin); }
+.yz-maddeler li { grid-template-columns: 6px minmax(0, 1fr); }
+.yz-nokta { width: 6px; height: 6px; margin-top: 7px; border-radius: 50%; background: var(--ink-4); }
+.yz-adimlar li { grid-template-columns: 22px minmax(0, 1fr); align-items: start; }
+.yz-no {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--dolgu-3); box-shadow: inset 0 0 0 1px var(--cizgi);
+  color: var(--ink-2); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums;
+}
+.yz-sag { display: block; min-width: 0; max-width: 100%; color: var(--ink-3); }
+
+/* Tablo ve karşılaştırma: gerçek <table>; sütun genişliği içeriğe göre, uzun sözcük bölünür (yatay taşma yok), hücre en çok 4 satır. */
+.yz-tablo-kap { min-width: 0; }
+.yz-tablo { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.yz-tablo th, .yz-tablo td { min-width: 0; padding: 8px 12px 8px 0; text-align: left; vertical-align: top; overflow-wrap: anywhere; border-bottom: 1px solid var(--cizgi); }
+.yz-tablo th:last-child, .yz-tablo td:last-child { padding-right: 0; }
+.yz-tablo thead th { padding-top: 0; padding-bottom: 8px; vertical-align: bottom; font-size: 12px; font-weight: 650; letter-spacing: 0.01em; color: var(--ink-3); border-bottom-color: var(--cizgi-2); }
+.yz-tablo td { color: var(--metin); }
+.yz-tablo tbody tr:last-child th, .yz-tablo tbody tr:last-child td { padding-bottom: 0; border-bottom: 0; }
+.yz-bos { color: var(--ink-3); }
+/* Dar kapta (< 460 px) dört ve daha çok sütunlu tablo YIĞILIR: her satır bir blok, her hücre "sütun adı · değer" (adı CSS attr() ile; başlık satırı
+   kalkar). Sütunlar 13 px'e sıkışıp harf harf bölünmesin. Kap, kartın içeriğidir (inline-size kabı). */
+.yz-tablo-kap { container: yz-tablo / inline-size; }
+@container yz-tablo (max-width: 459px) {
+  .yz-tablo[data-genis], .yz-tablo[data-genis] tbody, .yz-tablo[data-genis] tr, .yz-tablo[data-genis] th, .yz-tablo[data-genis] td { display: block; }
+  .yz-tablo[data-genis] thead { display: none; } /* her hücre kendi sütun adını taşır (aşağıda ::before) */
+  .yz-tablo[data-genis] tr { padding: 10px 0; border-bottom: 1px solid var(--cizgi); }
+  .yz-tablo[data-genis] tbody tr:first-child { padding-top: 0; }
+  .yz-tablo[data-genis] tbody tr:last-child { padding-bottom: 0; border-bottom: 0; }
+  .yz-tablo[data-genis] td, .yz-tablo[data-genis] tbody th { padding: 2px 0; border: 0; }
+  .yz-tablo[data-genis] td { display: grid; grid-template-columns: minmax(0, 36%) minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  .yz-tablo[data-genis] td::before { content: attr(data-sutun); min-width: 0; overflow-wrap: anywhere; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+  .yz-tablo[data-genis] tbody th { padding-bottom: 4px; font-size: 13px; font-weight: 650; color: var(--ink); }
+}
+/* Karşılaştırma: seçenek adları başlıkta belirgin, özellik adı satır başında soluk. */
+.yz-tablo--kars thead th { font-size: 13px; color: var(--ink); }
+.yz-tablo--kars tbody th { font-size: 12.5px; font-weight: 550; color: var(--ink-3); }
+
+/* ── Adada kısaltılmış kart ─────────────────────────────────────────────────────────────────────────────── */
+.ui-kart.yz-kart--ada { width: auto; max-width: 100%; }
+.yz-ozet { gap: 4px; }
+.yz-ozet li { min-width: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+/* Adadaki kısaltılmış tablo (11 Kas, bulgu 8): sabit düzen, eşit sütunlar, hücre tek satır ve kırpılır; sayılar hizalı. */
+.yz-ozet-tablo { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 13px; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.yz-ozet-tablo th, .yz-ozet-tablo td { min-width: 0; padding: 3px 10px 3px 0; text-align: left; font-weight: 450; color: var(--ink-2); border-bottom: 1px solid var(--cizgi); }
+.yz-ozet-tablo th:last-child, .yz-ozet-tablo td:last-child { padding-right: 0; }
+.yz-ozet-tablo thead th { padding-top: 0; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.yz-ozet-tablo tbody th { font-weight: 600; color: var(--ink); }
+.yz-ozet-tablo tbody tr:last-child th, .yz-ozet-tablo tbody tr:last-child td { border-bottom: 0; }
+.yz-kalan { margin: 0; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .arac-chevron { transition: none; }
+}
+
+/* ── 0.14 T30: sohbet Nusa dilinde ──────────────────────────────────────────────────────────────────────────────────────────────────────
+   Fuber iletisinin başı: 24 px gözler siyah dairede (11 Kas; Sohbet.tsx FuberBasi; sohbet-avatar.ts) — açık temada da siyah daire; kipsiz eski
+   iletide ve Sade modda aynı boyda Fuber işareti dairesi. Balonlar daha yuvarlak (hap diline yakın), düşünce ışığı ekranın vurgusunu taşır
+   (Sohbetler'de kipin vurgu rengi, kokpitte kokpit mavisi; nabız yalnız transform). Boş sohbet: gözler ve tek satır, önerilerle aynı hizada. */
+.sohbet .mesaj__ust { min-height: 24px; }
+.sohbet .mesaj__avatar { width: 24px; height: 24px; }
+.sohbet .mesaj__avatar--goz { background: var(--goz-sahne); box-shadow: none; overflow: hidden; }
+.sohbet .mesaj__avatar--goz .gozler { display: block; }
+.sohbet .mesaj__govde { border-radius: 8px 22px 22px 22px; }
+.sohbet .mesaj--user .balon { border-radius: 22px 22px 8px 22px; }
+.sohbet .dusunce__isik { background: oklch(from var(--vurgu) clamp(var(--vurgu-l-taban), l, var(--vurgu-l-tavan)) c h); box-shadow: 0 0 10px color-mix(in srgb, var(--vurgu) 50%, transparent); }
+.sohbet .mesaj--not[data-tavan-devam] { margin-top: -8px; }
+.sohbet__oneriler > .ui-bos { align-items: flex-start; min-height: 0; padding: 0 0 6px; text-align: left; gap: 10px; }
+.sohbet__oneriler > .ui-bos .ui-bos__baslik { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }

@@ -1,0 +1,74 @@
+/* ── Kendi pencere düğmelerimiz (PencereDugmeleri.tsx; Görev 22, K12) ─────────────────────────────────────────────────────
+   1. Köşe çentiği: panonun sağ üstüne oyulmuş çerçeve (--bg) parçası — logolu orta çentiğin omuz eğrisi; panoya 32 px iner (üstteki
+      8 px çerçeveyle 40 px; eski Windows şeridi 38 px idi). Sayfaların içeriği 48 px'ten başlar: hiçbiri kaymaz ya da altında kalmaz
+      (scripts/dev/pencere-onizle.mjs çentiğin gerçek şekliyle ölçer). Altında panonun yeni köşesi 20 px yarıçapla döner. Camda orta
+      çentik gibi opak (--centik).
+   2. Düğme: 40 px genişlik × 40 px (pencerenin üst kenarına kadar; Kapat sağ kenara kadar) tıklama alanı, içinde 26 px daire —
+      orta çentikteki logo gibi çentiğin gövdesinde ortalı (camda saydam çerçeveye taşmaz). Üzerine gelince ince dolgu, Kapat'ta
+      kırmızı + beyaz simge; basılıyken bir ton koyu; klavye odağında ince çift halka. Pencere odakta değilken simge söner.
+   3. Katmanlar: çentik ve sürükleme şeridi z 82 (sayfanın, ilk kurulumun ve yeniden açılan sihirbazın [z 80] üstünde; abonelik
+      [85], tanıtım turu [90] ve model seçicinin [900] perdesinin altında), düğmeler z 1100 (Windows'un kendi düğmeleri gibi her
+      zaman tıklanır). Renkler yalnız belirteçlerden; üç temada simge ≥ 3:1 (pencere-onizle ölçer). */
+:root {
+  --pd-centik: var(--bg);
+  --pd-simge: var(--ink-3);
+  --pd-simge-soluk: var(--ink-4);
+  --pd-simge-ust: var(--ink);
+  --pd-ust: rgb(255 255 255 / 0.1);
+  --pd-bas: rgb(255 255 255 / 0.17);
+  --pd-kapat: #d93a3a;
+  --pd-kapat-bas: #b42f2f;
+}
+:root[data-tema='acik'] { --pd-ust: rgb(0 0 0 / 0.07); --pd-bas: rgb(0 0 0 / 0.13); }
+:root[data-tema='cam'] { --pd-centik: var(--centik); --pd-ust: rgb(255 255 255 / 0.12); --pd-bas: rgb(255 255 255 / 0.19); }
+
+/* ── Köşe (ana pencere, kurulum) ── */
+.pd-centik { position: fixed; top: 8px; right: 8px; z-index: 82; display: block; pointer-events: none; fill: var(--pd-centik); }
+/* Çentiğin gövdesi ve üstteki 8 px çerçeve sürüklenir (Windows: çift tıkla büyüt/geri al, Aero Snap). Belge sırasında sayfanın
+   bölgelerinden sonra gelir; düğmelerin "sürüklenmez" alanı ondan da sonra. */
+.pd-surukle { position: fixed; top: 0; right: 0; z-index: 82; width: 189px; height: 40px; -webkit-app-region: drag; }
+.pd--kose .pd-dugmeler { position: fixed; top: 0; right: 0; z-index: 1100; display: flex; height: 40px; }
+.pd--kose .pd-dgm { height: 40px; padding-top: 8px; }
+/* Daireler çentik gövdesinde ortalı (iki yanda 15 px): Kapat'ın tıklama alanı pencerenin sağ kenarına uzanır. */
+.pd--kose .pd-dgm[data-eylem='kapat'] { width: 56px; padding-right: 16px; }
+
+/* ── Satır (Fuber Tarayıcı araç çubuğu, 48 px) ── */
+.pd--satir { flex: none; align-self: stretch; display: flex; }
+.pd--satir .pd-dugmeler { display: flex; height: 100%; }
+.pd--satir .pd-dgm { height: 100%; }
+.pd--satir .pd-dgm[data-eylem='kapat'] { width: 46px; padding-right: 6px; }
+
+/* ── Düğme ── */
+.pd-dgm {
+  display: grid; place-items: center; width: 40px; margin: 0; padding: 0; border: 0; background: none; color: inherit;
+  cursor: default; -webkit-app-region: no-drag; outline: none;
+}
+.pd-dgm__daire {
+  display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: var(--pd-simge);
+  transition: background-color var(--sure-hiz) ease, color var(--sure-hiz) ease, box-shadow var(--sure-hiz) ease;
+}
+.pd-dgm__daire svg { display: block; }
+:root[data-pencere-odak='0'] .pd-dgm__daire { color: var(--pd-simge-soluk); }
+.pd-dgm:hover .pd-dgm__daire { background: var(--pd-ust); color: var(--pd-simge-ust); }
+.pd-dgm:active .pd-dgm__daire { background: var(--pd-bas); color: var(--pd-simge-ust); transition-duration: 0s; }
+.pd-dgm[data-eylem='kapat']:hover .pd-dgm__daire { background: var(--pd-kapat); color: #fff; }
+.pd-dgm[data-eylem='kapat']:active .pd-dgm__daire { background: var(--pd-kapat-bas); color: #fff; }
+.pd-dgm:focus-visible .pd-dgm__daire { color: var(--pd-simge-ust); box-shadow: 0 0 0 1.5px var(--pd-centik), 0 0 0 3px var(--odak); }
+
+/* Tam ekranda düğme yok (Windows da göstermez); çentik de kalkar. */
+:root[data-pencere-tam] .pd { display: none; }
+
+/* ── macOS: yerel trafik ışıkları (main/pencere-kabugu.ts şeridin ortasına oturtur); Fuber Tarayıcı'nın araç çubuğu onlara yer açar. */
+:root[data-pencere='mac'] .tb-ust { padding-left: 80px; padding-right: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-dgm__daire { transition: none; }
+}
+
+/* Windows yüksek karşıtlık (zorlanmış renkler): gölgeler (odak halkası) ve dolgu renkleri sistemindir — odak ve üzerine gelme
+   çizgiyle gösterilir; çentik şekli anlamını yitirir (sayfa zeminleri sistem rengidir), çizilmez. Simgeler currentColor. */
+@media (forced-colors: active) {
+  .pd-centik { display: none; }
+  .pd-dgm:hover .pd-dgm__daire, .pd-dgm:active .pd-dgm__daire { outline: 1px solid CanvasText; outline-offset: -1px; }
+  .pd-dgm:focus-visible .pd-dgm__daire { box-shadow: none; outline: 2px solid Highlight; outline-offset: 1px; }
+}

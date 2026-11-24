@@ -1,0 +1,77 @@
+<!doctype html>
+<!-- Fuber Tarayıcı (0.14 T15, düzeltme turu 1) ikinci yerel test sayfası: gecikmeli submit, fetch POST, bağlantı/menü/span düğmeleri, textarea,
+     yöntemsiz form, iframe (aynı ve başka kökenli) ve gölge DOM'daki parola/kart alanları, ödeme iframe'li form. Yalnız
+     scripts/dev/tarayici-onizle.mjs yerel sunucusunda (/t15b) açılır. __CAPRAZ__ sunucuda başka kökenli adresle değiştirilir. -->
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Fuber Tarayıcı test sayfası 2</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px 36px; color: #14161c; background: #fff; line-height: 1.4 }
+  h1 { font-size: 24px; margin: 0 0 6px }
+  section { margin-top: 10px; padding: 8px 14px; border-radius: 10px; background: #f2f4f8; max-width: 720px }
+  h2 { font-size: 14px; margin: 0 0 4px }
+  input, textarea { font-size: 14px; padding: 5px 8px; margin: 3px 0; width: 260px; border: 1px solid #c5cad6; border-radius: 6px; display: block }
+  iframe { width: 240px; height: 44px; border: 1px solid #c5cad6; margin: 3px 0; display: block }
+  button, .dugme { margin: 4px 8px 0 0; font-size: 14px; padding: 5px 14px; border-radius: 999px; border: 0; background: #14161c; color: #fff; display: inline-block; cursor: pointer }
+  #durum { font-weight: 600; color: #1747c9 }
+</style>
+</head>
+<body>
+  <h1>Test sayfası 2</h1>
+  <p>Durum: <span id="durum">hazır</span></p>
+
+  <section>
+    <h2>Betikle gönderen düğmeler</h2>
+    <form id="gizli" method="post" action="/gonder"><input type="hidden" name="kaynak" value="t15b-gecikmeli"><input type="hidden" name="ad" value="gecikmeli"></form>
+    <div class="dugme" id="gecikme" role="presentation" onclick="setTimeout(function () { document.getElementById('gizli').submit(); }, 4000)">Sürdür (gecikmeli)</div>
+    <!-- Düzeltme turu 3: ölçüt içerik türü değil gerçek form gönderim olayı. "İleri (fetch)": requestSubmit() submit olayı doğurur; işleyici FormData (multipart)
+         fetch'i yollar, 3,2 sn sonra ikinci (urlencoded) istek. "Dene (urlencoded)": submit olayı YOK, doğrudan urlencoded fetch (bekletilmez). "Dene (json + olay)":
+         submit olayından sonra JSON fetch (bekletilir). "Dene (iframe olay)": iframe içindeki form submit olur. -->
+    <form id="fform" onsubmit="event.preventDefault(); var fd = new FormData(); fd.append('kaynak', 't15b-fetch'); fd.append('ad', 'fetch'); fetch('/gonder', { method: 'POST', body: fd }).then(function () { document.getElementById('durum').textContent = 'fetch gitti'; }, function () { document.getElementById('durum').textContent = 'fetch iptal'; }); setTimeout(function () { fetch('/gonder', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15b-fetch-2&amp;ad=ikinci' }).then(function () { document.getElementById('durum').textContent += ' ikinci gitti'; }, function () { document.getElementById('durum').textContent += ' ikinci iptal'; }); }, 3200)"></form>
+    <div class="dugme" id="fetchdiv" role="presentation" onclick="document.getElementById('fform').requestSubmit()">İleri (fetch)</div>
+    <div class="dugme" id="ufetch" role="presentation" onclick="fetch('/gonder', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15b-ufetch&amp;ad=u' }).then(function () { document.getElementById('durum').textContent = 'ufetch gitti'; }, function () { document.getElementById('durum').textContent = 'ufetch iptal'; })">Dene (urlencoded)</div>
+    <form id="jform" onsubmit="event.preventDefault(); fetch('/telemetri', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{&quot;b&quot;:2}' }).then(function () { document.getElementById('durum').textContent = 'jsonsub gitti'; }, function () { document.getElementById('durum').textContent = 'jsonsub iptal'; })"></form>
+    <div class="dugme" id="jsonsub" role="presentation" onclick="document.getElementById('jform').requestSubmit()">Dene (json + olay)</div>
+    <iframe id="ifr" style="height:30px" srcdoc="&lt;form id=f onsubmit=&quot;event.preventDefault(); fetch('/gonder', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15b-iframe&amp;amp;ad=ic' }).then(function () { parent.document.getElementById('durum').textContent = 'iframe gitti'; }, function () { parent.document.getElementById('durum').textContent = 'iframe iptal'; })&quot;&gt;&lt;/form&gt;"></iframe>
+    <div class="dugme" id="ifrdiv" role="presentation" onclick="document.getElementById('ifr').contentDocument.getElementById('f').requestSubmit()">Dene (iframe olay)</div>
+    <!-- Düzeltme turu 2: JSON isteği (bekletilmez), araç döndükten sonra giden form isteği (kartsız iptal + not), onaylı ve 2 sn gecikmeli submit (geçer). -->
+    <div class="dugme" id="json" role="presentation" onclick="fetch('/telemetri', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{&quot;a&quot;:1}' }).then(function () { document.getElementById('durum').textContent = 'json gitti'; })">Yükle (json)</div>
+    <form id="gform" onsubmit="event.preventDefault(); setTimeout(function () { fetch('/gonder', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'kaynak=t15b-fetch-gec&amp;ad=gec' }).then(function () { document.getElementById('durum').textContent = 'gec fetch gitti'; }, function () { document.getElementById('durum').textContent = 'gec fetch iptal'; }); }, 2500)"></form>
+    <div class="dugme" id="gecfetch" role="presentation" onclick="document.getElementById('gform').requestSubmit()">Kaydet (gecikmeli fetch)</div>
+    <form id="onayli" method="post" action="/gonder"><input type="hidden" name="kaynak" value="t15b-onayli"><input type="hidden" name="ad" value="onayli"></form>
+    <button type="button" id="onayli-dugme" onclick="setTimeout(function () { document.getElementById('onayli').submit(); }, 2000)">Onayla (2 sn sonra gönderir)</button>
+  </section>
+
+  <section>
+    <h2>Bağlantı gibi görünen düğmeler</h2>
+    <a id="sil-link" href="#" onclick="document.getElementById('durum').textContent = 'bağlantı silindi'; return false">Sil</a>
+    <div id="menu-sil" role="menuitem" onclick="document.getElementById('durum').textContent = 'menü silindi'">Delete</div>
+    <span id="span-al" onclick="document.getElementById('durum').textContent = 'span satın alındı'">Satın al</span>
+    <a id="gezin-link" href="/a">Fiyatlar</a>
+  </section>
+
+  <section>
+    <h2>Mesaj kutusu ve yöntemsiz form</h2>
+    <textarea id="mesaj" placeholder="Mesaj kutusu" aria-label="Mesaj kutusu"></textarea>
+    <form id="yontemsiz" action="/ara"><input name="q" placeholder="Yöntemsiz alan"><button>İlerle</button></form>
+  </section>
+
+  <section>
+    <h2>Çerçeveler ve gölge DOM</h2>
+    <iframe id="ic-parola" srcdoc="&lt;input id=p type=password placeholder=Parola&gt;"></iframe>
+    <iframe id="capraz" title="Kart alanı" src="__CAPRAZ__/kart-cerceve"></iframe>
+    <div id="golge"></div>
+    <form id="odeme" method="post" action="/gonder">
+      <input type="hidden" name="kaynak" value="t15b-odeme">
+      <iframe id="odeme-cerceve" title="Güvenli ödeme" src="__CAPRAZ__/kart-cerceve"></iframe>
+      <button type="button" id="odeme-dugme" onclick="document.getElementById('durum').textContent = 'ödeme denendi'">Sürdür</button>
+    </form>
+  </section>
+
+  <script>
+    var kok = document.getElementById('golge').attachShadow({ mode: 'open' });
+    kok.innerHTML = '<input id="sp" type="password" placeholder="Gölge parola">';
+  </script>
+</body>
+</html>

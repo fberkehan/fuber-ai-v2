@@ -1,0 +1,145 @@
+/* ── İş izi: hareket belirteçleri ve şeritler (11 Kas; tasarımcı Bölüm 5.4) ─────────────────────────────────────────────────────────────
+   YALNIZ transform ve opacity canlanır (box-shadow, filter, width, left, background-position yok). Döngüler (yörünge, nefes) yalnız aktif işin
+   işaretinde takılıdır; iş yokken bu dosyanın hiçbir öğesi DOM'da değildir. Az hareket ([data-is-az] ya da Windows'un tercihi): yalnız opaklık. */
+:root {
+  --h-giris: 220ms; --h-cikis: 160ms; --h-fiil: 180ms; --h-dongu: 2.4s; --h-tik: 320ms; --h-ucus: 480ms; --h-ilerleme: 300ms;
+  --h-egri: cubic-bezier(.2, .8, .2, 1); --h-yay: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* Yardımcının rengi: kipin vurgusundan sıraya göre ton kayması (oklch göreli renk; --is-ton derece sayısı). */
+.is-seridi, .is-isaret, .ray__is, .is-yorunge { --is-renk: oklch(from var(--is-vurgu, var(--vurgu, #0a84ff)) l c calc(h + var(--is-ton, 0))); }
+
+/* ── Durum işareti ── */
+.is-isaret { position: relative; display: inline-grid; place-items: center; flex: none; color: var(--is-renk); }
+.is-isaret > i { position: absolute; inset: 0; }
+.is-isaret__halka { border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; opacity: .35; }
+.is-isaret[data-hal='sirada'] .is-isaret__halka { opacity: .4; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.is-isaret[data-hal='basliyor'] .is-isaret__halka { animation: is-dol var(--h-giris) var(--h-egri) both; }
+.is-isaret__yorunge { animation: is-yorunge var(--h-dongu) linear infinite; }
+.is-isaret__yorunge > b { position: absolute; left: 50%; top: -1px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: currentColor; }
+.is-isaret__nokta { inset: 4px !important; border-radius: 50%; background: currentColor; }
+.is-isaret[data-hal='bekliyor'] .is-isaret__halka { opacity: .2; }
+.is-isaret[data-hal='bekliyor'] .is-isaret__nokta { animation: is-nefes var(--h-dongu) ease-in-out infinite; }
+.is-isaret[data-hal='onay'] { color: #f5a524; }
+.is-isaret[data-hal='onay'] .is-isaret__halka { opacity: .3; }
+.is-isaret[data-hal='onay'] .is-isaret__nokta { animation: is-sicra 180ms ease-out 2; }
+.is-isaret[data-hal='olmadi'] { color: var(--ink-3); }
+.is-isaret[data-hal='olmadi'] .is-isaret__halka { opacity: .25; }
+.is-isaret[data-hal='bitti'] { color: var(--yazi-basari, #30d158); }
+.is-isaret__tik { width: 100%; height: 100%; animation: is-tik var(--h-tik) var(--h-yay) both; }
+
+@keyframes is-yorunge { to { transform: rotate(360deg); } }
+@keyframes is-nefes { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@keyframes is-dol { from { transform: scale(.6); opacity: 0; } }
+@keyframes is-tik { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes is-sicra { 50% { transform: translateY(-2px); } }
+@keyframes is-giris { from { opacity: 0; transform: translateY(6px); } }
+@keyframes is-fiil-cik { to { opacity: 0; transform: translateY(-4px); } }
+@keyframes is-fiil-gir { from { opacity: 0; transform: translateY(4px); } }
+@keyframes is-soluk-gir { from { opacity: 0; } }
+@keyframes is-soluk-cik { to { opacity: 0; } }
+
+/* ── Fiil (çapraz solma) ── */
+.is-fiil { display: grid; min-width: 0; overflow: hidden; }
+.is-fiil__metin { grid-area: 1 / 1; min-width: 0; display: flex; }
+.is-fiil__metin > .ui-kirp, .is-seridi__baslik > .ui-kirp { min-width: 0; overflow-wrap: anywhere; }
+.is-fiil__metin--cikan > .ui-kirp { pointer-events: none; }
+.is-fiil__metin--cikan { animation: is-fiil-cik var(--h-fiil) var(--h-egri) both; pointer-events: none; }
+.is-fiil__metin--giren { animation: is-fiil-gir var(--h-fiil) var(--h-egri) both; }
+
+/* ── Şerit ── */
+.is-seridi { position: relative; display: flex; align-items: center; gap: 6px; min-width: 0; animation: is-giris var(--h-giris) var(--h-egri) both; }
+.is-seridi__ana { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 7px 8px; border-radius: 10px; cursor: default; }
+button.is-seridi__ana { cursor: pointer; }
+button.is-seridi__ana:hover { background: var(--dolgu-2); }
+button.is-seridi__ana:focus-visible { outline: 2px solid var(--odak, var(--is-renk)); outline-offset: 1px; }
+.is-seridi__govde { display: grid; flex: 1; min-width: 0; gap: 1px; }
+.is-seridi__ust { display: flex; gap: 6px; min-width: 0; font-size: 12px; line-height: 16px; color: var(--ink-3); }
+.is-seridi__kim { white-space: nowrap; }
+.is-seridi__kim { font-weight: 600; color: var(--ink-2); flex: none; }
+.is-seridi__baslik { display: flex; min-width: 0; }
+.is-seridi__baslik::before { content: '·'; margin-right: 6px; color: var(--ink-4, var(--ink-3)); }
+.is-seridi__fiil { font-size: 13.5px; line-height: 19px; color: var(--ink); font-weight: 500; }
+.is-seridi__yer { font-size: 12px; line-height: 16px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.is-seridi__sure { flex: none; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.is-seridi__eylem { flex: none; display: flex; gap: 6px; }
+.is-seridi[data-hal='bitti'] .is-seridi__fiil, .is-seridi[data-hal='olmadi'] .is-seridi__fiil { color: var(--ink-2); }
+/* Yardımcının tonu solda ince çizgi (yalnız sıralı yardımcılarda; durağan). */
+.is-seridi[style*='--is-ton']::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 9px; width: 2px; border-radius: 2px; background: var(--is-renk); opacity: .7; }
+.is-ilerleme { position: absolute; left: 34px; right: 10px; bottom: 2px; height: 2px; border-radius: 2px; background: color-mix(in srgb, var(--is-renk) 18%, transparent); overflow: hidden; }
+.is-ilerleme > b { position: absolute; inset: 0; background: var(--is-renk); transform-origin: left center; transition: transform var(--h-ilerleme) ease-out; }
+
+/* ── Grup (sohbet, kokpit) ── */
+.is-grubu { display: grid; gap: 2px; min-width: 0; }
+.is-grubu__not { font-size: 12px; color: var(--ink-3); padding: 2px 8px 0 34px; animation: is-soluk-gir var(--h-giris) ease both; }
+.is-grubu__cocuklar { display: grid; gap: 1px; padding-left: 16px; }
+.is-grubu__ozet { display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 34px; font-size: 12.5px; color: var(--ink-2); animation: is-soluk-gir var(--h-giris) ease both; }
+
+/* ── Katlı satır (11 Kas; biten alt ajanlar sohbette çok büyük yer kaplıyordu): biten iş tek kısa satır, tıklayınca açılır ──
+   Yükseklik canlanmaz: kapanış anında, açılışta içerik yalnız opaklık ve küçük bir kaymayla gelir; ok döner (transform). */
+.is-katli { display: grid; min-width: 0; animation: is-soluk-gir var(--h-giris) ease both; }
+.is-katli__bas { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 32px; padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 12.5px; line-height: 18px; color: var(--ink-2); }
+.is-katli__bas:hover { background: var(--dolgu-2); color: var(--ink); }
+.is-katli__bas:focus-visible { outline: 2px solid var(--odak); outline-offset: 1px; }
+.is-katli__metin { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.is-katli__ok { flex: none; color: var(--ink-3); transform: rotate(-90deg); transition: transform var(--h-fiil) var(--h-egri); }
+.is-katli[data-acik] > .is-katli__bas .is-katli__ok { transform: rotate(0deg); }
+.is-katli__ic { display: grid; gap: 1px; min-width: 0; animation: is-katli-ac var(--h-giris) var(--h-egri) both; }
+@keyframes is-katli-ac { from { opacity: 0; transform: translateY(-4px); } }
+[data-is-az] .is-katli, [data-is-az] .is-katli__ic { animation: is-soluk-gir 120ms ease both !important; }
+[data-is-az] .is-katli__ok { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .is-katli, .is-katli__ic { animation: is-soluk-gir 120ms ease both !important; }
+  .is-katli__ok { transition: none; }
+}
+
+/* Sohbet: yazı alanının üstündeki iş şeridi (sakin kart). */
+.is-sohbet { margin: 0 auto 8px; width: min(100%, 760px); padding: 6px; border-radius: 16px; background: var(--kart); box-shadow: inset 0 0 0 1px var(--cizgi-2, var(--cizgi)); display: grid; gap: 4px; animation: is-giris var(--h-giris) var(--h-egri) both; }
+.sohbet:not(.sohbet--genis) .is-sohbet { width: auto; margin: 0 10px 8px; }
+
+/* Canlı balonun fiil satırı (sohbet): süre sağda, eş aralıklı rakam. */
+.dusunce__sure { font-size: 12px; color: var(--ink-4, var(--ink-3)); font-variant-numeric: tabular-nums; }
+.dusunce .is-fiil { max-width: 60ch; }
+
+/* Claude Code: alt ajan kartının başlığı ve işler şeridinin satırı ortak şerittir (kartın kendi ızgarası yerine şeridin düzeni). */
+.is-seridi__ana.cc-arac__bas { display: flex; grid-template-columns: none; width: auto; min-height: 44px; padding: 6px 10px 6px 10px; border-radius: 0; }
+.cc-ajan > .is-seridi { animation: none; }
+.cc-ajan > .is-seridi::before { top: 12px; bottom: 12px; left: 1px; }
+.cc-ajan .is-seridi__fiil { font-family: var(--yazi); }
+.cc-is__satir > .is-seridi { flex: 1; min-width: 0; }
+.cc-is__satir > .is-seridi > .is-seridi__ana { padding: 4px 6px; }
+
+/* ── Kokpit / Etkinlik "Şu an" ── */
+.su-an { display: grid; gap: 10px; min-width: 0; }
+.su-an__liste { display: grid; gap: 4px; min-width: 0; }
+.su-an__bos { margin: 2px 0; font-size: 13.5px; color: var(--ink-3); }
+.su-an__devam { all: unset; justify-self: start; padding: 2px 8px 0 34px; font-size: 12.5px; color: var(--ink-2); cursor: pointer; }
+.su-an__devam:hover { color: var(--ink); }
+.su-an__bugun { display: grid; gap: 2px; padding-top: 8px; border-top: 1px solid var(--cizgi-2, var(--cizgi)); }
+.su-an__etiket { margin: 0 0 2px; }
+
+/* ── Ray noktası: işin yürüdüğü sayfanın simgesinde 6 px nokta (canlıyken nefes; sürekli işte durağan) ── */
+.ray__is { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--is-renk); pointer-events: none; animation: is-soluk-gir var(--h-giris) ease both; }
+.ray__is[data-is-ray='canli'] { animation: is-soluk-gir var(--h-giris) ease both, is-nefes var(--h-dongu) ease-in-out var(--h-giris) infinite; }
+.ray__is[data-is-ray='surekli'] { opacity: .55; }
+
+/* ── Uçan nokta (hedefe uçuş; Web Animations sürer) ── */
+.is-ucan { position: fixed; z-index: 2147483000; width: 8px; height: 8px; border-radius: 50%; background: var(--is-ucan-renk, var(--yazi-basari, #30d158)); pointer-events: none; will-change: transform, opacity; }
+
+/* ── Yörünge (çentik hapı, kokpit kartı başlığı): ortadaki işaretin çevresinde N nokta tek halkada döner ── */
+.is-yorunge { position: relative; display: inline-grid; place-items: center; flex: none; }
+.is-yorunge__halka { position: absolute; inset: 0; border-radius: 50%; animation: is-yorunge var(--h-dongu) linear infinite; pointer-events: none; }
+.is-yorunge__halka > b { --is-renk: oklch(from var(--is-vurgu, var(--vurgu, #0a84ff)) l c calc(h + var(--is-ton, 0))); position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--is-renk); }
+
+/* ── Az hareket: yalnız opaklık ── */
+[data-is-az] .is-isaret__yorunge, [data-is-az] .is-yorunge__halka, [data-is-az] .is-isaret__nokta, [data-is-az] .ray__is { animation: none !important; }
+[data-is-az] .is-isaret__tik, [data-is-az] .is-isaret__halka { animation: is-soluk-gir 120ms ease both !important; }
+[data-is-az] .is-seridi, [data-is-az] .is-sohbet, [data-is-az] .is-fiil__metin--giren { animation: is-soluk-gir 120ms ease both !important; }
+[data-is-az] .is-fiil__metin--cikan { animation: is-soluk-cik 120ms ease both !important; }
+[data-is-az] .is-ilerleme > b { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .is-isaret__yorunge, .is-yorunge__halka, .is-isaret__nokta, .ray__is { animation: none !important; }
+  .is-isaret__tik, .is-isaret__halka, .is-seridi, .is-sohbet, .is-fiil__metin--giren { animation: is-soluk-gir 120ms ease both !important; }
+  .is-fiil__metin--cikan { animation: is-soluk-cik 120ms ease both !important; }
+  .is-ilerleme > b { transition: none; }
+}

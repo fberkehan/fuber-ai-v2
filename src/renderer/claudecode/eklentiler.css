@@ -1,0 +1,247 @@
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   ÖNERİLEN ARAÇLAR (Görev 29, K18; 0.10 Görev 7 + K8) — sihirbazın "Geliştirici araçları" adımı, Claude Code → Eklentiler sekmesi, mod
+   değişince gelen teklif kartı. Renkler YALNIZ tasarim.css belirteçlerinden; yazı ≥ 12 px, düğme ≥ 32 px; sayfanın kendisi kaymaz (yalnız
+   listeler). K8: sakin, seyrek — listeler tek kutuda kıl payı ayraçlı satırlar (her satır ayrı kart değil).
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Claude Code durumu (sihirbaz ve sekme) ───────────────────────────────── */
+.ccd { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; }
+.ccd__simge { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; background: var(--ters); color: var(--ters-ink); }
+.ccd__metin { display: grid; gap: 2px; min-width: 0; }
+.ccd__metin b { font-size: 14px; font-weight: 650; letter-spacing: -0.01em; }
+.ccd__metin > span { display: block; font-size: 13px; line-height: 1.45; color: var(--ink-3); }
+.ccd__metin .nokta, .ccd__metin .donen { display: inline-block; margin-right: 7px; vertical-align: 1px; }
+.ccd__dugmeler { display: flex; align-items: center; gap: 8px; }
+/* Eklentiler sekmesinin üstünde yalnız sorun varken çıkan ince şerit (B-36): tek satır, küçük simge. */
+.ccd--serit { grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; padding: 7px 8px 7px 10px; }
+.ccd--serit .ccd__simge { width: 28px; height: 28px; border-radius: 9px; }
+.ccd--serit .ccd__metin { display: flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
+.ccd--serit .ccd__metin b { font-size: 13.5px; }
+.ccd--serit .ccd__metin > span { color: var(--ink-2); }
+
+/* ── Seçim kutusu (role=checkbox; tıklama alanı tüm satır) ───────────────────── */
+.gp-kutu { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 6px; background: var(--dugme-2); box-shadow: inset 0 0 0 1.5px var(--cizgi-3); color: transparent; transition: background var(--sure-hiz), box-shadow var(--sure-hiz), color var(--sure-hiz); }
+[aria-checked='true'] > .gp-kutu { background: var(--ters); box-shadow: none; color: var(--ters-ink); }
+
+/* ── Paket (sihirbaz: sıkı iki sütunlu ızgara + ayrıntı şeridi) ───────────────── */
+.gp { display: grid; gap: 10px; padding: 14px 16px; }
+.gp__bas { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.gp__bas > b { font-size: 14.5px; font-weight: 650; letter-spacing: -0.01em; }
+.gp__sayi { font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.gp__bas .sekmeler { margin-left: auto; }
+.gp .sekmeler button, .ek .sekmeler button { height: 32px; }
+/* Üç sütun: dokuz önerilen üç satır, on isteğe bağlı dört satır — adım 1080×680'de de kaydırmasız sığar. */
+.gp__izgara { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.gp__oge {
+  display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 40px; padding: 5px 10px; border: 0; border-radius: 12px;
+  background: var(--kart-2); box-shadow: inset 0 0 0 1px var(--cizgi); color: var(--ink); text-align: left; cursor: pointer;
+  transition: box-shadow var(--sure-hiz), background var(--sure-hiz);
+}
+.gp__oge:hover { box-shadow: inset 0 0 0 1px var(--cizgi-3); }
+.gp__oge[aria-checked='true'] { box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.gp__oge[data-odak] { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.gp__oge:focus-visible { outline: 2px solid var(--odak); outline-offset: 2px; }
+.gp__oge { position: relative; }
+.gp__oge-metin { display: grid; min-width: 0; flex: 1; }
+/* Hâl işareti: karonun sağ üst KÖŞESİNE oturan küçük rozet (karo dışına 6 px taşar; yazı kutusunun dışında kalır — yazıya binmez, yazıdan
+   yer de almaz). Kartın iç boşluğu ve ızgara aralığı rozete yer verir. */
+.gp-isaret {
+  position: absolute; top: -6px; right: -6px; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--kart); box-shadow: 0 0 0 1px var(--cizgi-3); color: var(--ink-2);
+}
+.gp-isaret > i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-4); }
+.gp-isaret[data-hal='kuruldu'], .gp-isaret[data-hal='kurulu'] { color: var(--yazi-basari); box-shadow: 0 0 0 1px color-mix(in srgb, var(--yazi-basari) 55%, transparent); }
+.gp-isaret[data-hal='onay'] > i, .gp-isaret[data-hal='bekliyor'] > i { background: var(--turuncu); }
+.gp-isaret[data-hal='hata'] > i { background: var(--kirmizi); }
+.gp-isaret .donen { width: 10px; height: 10px; }
+.gp__oge-metin b { font-size: 13.5px; font-weight: 620; letter-spacing: -0.01em; line-height: 1.3; }
+.gp__oge-metin span { font-size: 12px; line-height: 1.35; color: var(--ink-3); }
+.gp__ayrinti { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 54px; padding: 8px 8px 8px 12px; border-radius: 12px; background: var(--dolgu-2); font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+.gp__ayrinti-yazi { display: grid; gap: 2px; min-width: 0; }
+.gp__ayrinti b { color: var(--ink); font-weight: 620; }
+.gp__ayrinti-meta { color: var(--ink-3); overflow-wrap: anywhere; }
+.gp__ayrinti > .dgm { align-self: center; padding-inline: 10px 8px; gap: 4px; }
+
+/* Öğenin hâli (küçük hap): yazı her temada okunur mürekkepte, hâlin rengi yalnız noktada / simgede (açık temada renkli yazı 4.5:1'i tutmuyordu). */
+.gp-hal { display: inline-flex; align-items: center; gap: 6px; flex: none; height: 22px; padding: 0 8px; border-radius: var(--r-hap); background: var(--dolgu-2); box-shadow: inset 0 0 0 1px var(--cizgi); font-size: 12px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.gp-hal__nokta { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-4); }
+.gp-hal[data-hal='kuruldu'] svg, .gp-hal[data-hal='kurulu'] svg { color: var(--yazi-basari); }
+.gp-hal[data-hal='onay'] .gp-hal__nokta, .gp-hal[data-hal='bekliyor'] .gp-hal__nokta { background: var(--turuncu); }
+.gp-hal[data-hal='hata'] .gp-hal__nokta { background: var(--kirmizi); }
+.gp-hal .donen { width: 10px; height: 10px; }
+
+/* Ayrıntı katmanı (sihirbaz: "Ne yazar, ağ" — bütün öğelerin açıklaması; kendi içinde kayar). */
+/* Yüzey: seçici paneliyle aynı (--acilir) + bulanıklık — buzlu camda alttaki adım içeriği katmanın içinden okunmasın. */
+.gp-sayfa { position: absolute; inset: 0; z-index: 5; display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--acilir); backdrop-filter: blur(28px) saturate(1.1); border-radius: inherit; }
+.gp-sayfa__bas { display: flex; align-items: center; gap: 12px; padding: calc(var(--ust) + 10px) 34px 12px 40px; border-bottom: 1px solid var(--cizgi); }
+.gp-sayfa__bas b { font-size: 17px; font-weight: 650; letter-spacing: -0.015em; }
+.gp-sayfa__bas span { flex: 1; font-size: 13px; color: var(--ink-3); }
+.gp-sayfa__liste { overflow-y: auto; padding: 14px 34px 20px 40px; display: grid; align-content: start; gap: 10px; }
+
+/* Ayrıntılı öğe satırı (sekme ve ayrıntı katmanı). */
+.ekl { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 12px 14px; border-radius: 14px; background: var(--kart-2); box-shadow: inset 0 0 0 1px var(--cizgi); }
+.ekl > .gp-kutu-dgm { grid-row: 1 / span 2; margin-top: 1px; }
+.ekl__bas { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.ekl__bas b { font-size: 14px; font-weight: 640; letter-spacing: -0.01em; }
+.ekl__kimlik { font-size: 12px; color: var(--ink-3); font-family: var(--kod), ui-monospace, monospace; overflow-wrap: anywhere; }
+.ekl__metin { grid-column: 2; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+/* Satırın nedeni (kurulamadı / onaylamadın): cümlenin altında, sakin. */
+.ekl__neden { display: block; margin-top: 2px; font-size: 12.5px; line-height: 1.45; color: var(--ink-3); }
+.ekl__neden[data-hata] { color: var(--yazi-hata); }
+.ekl__yan { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 8px; }
+/* Gerçek bir sorun (Graphify kancası bozuk, eklentinin hatası): satırın içinde tek, sakin hata kutusu. */
+.ekl__sorun {
+  grid-column: 2 / -1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; padding: 8px 8px 8px 12px; border-radius: 11px;
+  background: color-mix(in srgb, var(--kirmizi) 8%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kirmizi) 32%, transparent);
+  font-size: 12.5px; line-height: 1.45; color: var(--ink);
+}
+.ekl__sorun > span { flex: 1; min-width: 200px; }
+.ekl__sorun-nokta { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--kirmizi); }
+.ekl__ayrinti { grid-column: 2 / -1; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 4px 0 0; font-size: 12.5px; line-height: 1.45; }
+.ekl__ayrinti dt { color: var(--ink-3); font-weight: 600; }
+.ekl__ayrinti dd { margin: 0; color: var(--ink-2); overflow-wrap: anywhere; }
+.ekl__ayrinti ul { margin: 0; padding-left: 16px; }
+/* İki sütunlu satır (kurulu eklenti, beceri, MCP, katalog): solda başlık, sağda eylemler — ikisi aynı hizada; altta tam genişlikte metin. */
+.ekl--iki { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.ekl--iki > .ekl__bas { grid-column: 1; grid-row: 1; min-height: 32px; } /* düğmesiz satır da düğmeli kadar: satır boyları eşit */
+.ekl--iki > .ekl__yan { grid-column: 2; grid-row: 1; }
+.ekl--iki > .ekl__metin, .ekl--iki > .ekl__ayrinti, .ekl--iki > .ekl__alt, .ekl--iki > .ekl__tam, .ekl--iki > .ekl__sorun { grid-column: 1 / -1; }
+.ekl--iki > .ekl__ayrinti { margin-top: 2px; }
+/* Önerilen araç satırı: solda seçim sütunu (kurulu öğede boş — seçim kutusu yok, B-24), ortada ad + tek cümle, sağda hâl ve eylemler. */
+.ekl--oge { grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; }
+.ekl__sol { grid-column: 1; grid-row: 1 / span 2; display: grid; place-items: center; width: 32px; height: 32px; align-self: center; }
+.ekl__sol > .gp-kutu-dgm { margin: 0; }
+.ekl--oge > .ekl__bas { grid-column: 2; grid-row: 1; }
+.ekl--oge > .ekl__metin { grid-column: 2; grid-row: 2; }
+.ekl--oge > .ekl__yan { grid-column: 3; grid-row: 1 / span 2; }
+/* Liste kutusu: satırlar tek kutuda, aralarında kıl payı çizgi (iOS gruplu liste gibi; her satır ayrı kart değil). */
+.ek-kume { display: grid; border-radius: 14px; background: var(--kart-2); box-shadow: inset 0 0 0 1px var(--cizgi); }
+.ek-kume > .ekl { border-radius: 0; background: transparent; box-shadow: none; }
+.ek-kume > .ekl + .ekl { box-shadow: inset 0 1px 0 var(--cizgi); }
+.gp-kutu-dgm { display: grid; place-items: center; width: 32px; height: 32px; margin: -7px; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+.gp-kutu-dgm:focus-visible { outline: 2px solid var(--odak); outline-offset: 0; }
+.ekl__ac { display: inline-flex; align-items: center; gap: 4px; }
+.ekl__ac svg { transition: transform var(--sure-orta) var(--yay); }
+.ekl__ac[aria-expanded='true'] svg { transform: rotate(90deg); }
+
+/* Kurulum komutu onayı. */
+.ek-onay { grid-column: 2 / -1; display: grid; gap: 8px; margin-top: 6px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--yazi-uyari) 10%, var(--kart)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--yazi-uyari) 35%, transparent); }
+.ek-onay > b { font-size: 13.5px; font-weight: 640; color: var(--ink); }
+/* Komutun TAMAMI kartın kendisinde (iç kaydırma yok: sonu gözden kaçmasın; uzunluk KOMUT_GOSTERIM_SINIRI ile sınırlı). */
+.ek-onay__komut { margin: 0; padding: 9px 11px; border-radius: 9px; background: var(--kart-3); color: var(--ink); font: 12.5px/1.5 var(--kod), ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: isolate; direction: ltr; }
+/* Görünmeyen / yön değiştiren karakterin yerine konan işaret ("U+202E"). */
+/* Yazı mürekkep rengi (üç temada ≥ 4.5:1), kırmızı çerçeve işaret eder. */
+.ek-onay__gizli { display: inline-block; margin: 0 2px; padding: 0 5px; border-radius: 5px; background: var(--kart); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--yazi-hata); font: 650 12px/1.45 var(--kod), ui-monospace, monospace; }
+.ek-onay__ayrinti { display: grid; gap: 3px; margin: 0; font-size: 12.5px; line-height: 1.45; }
+.ek-onay__ayrinti > div { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px; }
+.ek-onay__ayrinti dt { color: var(--ink-2); }
+/* Boşluklar olduğu gibi (art arda boşluk yutulmasın: gösterilen = onaylanan). */
+.ek-onay__ayrinti dd { margin: 0; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--kod), ui-monospace, monospace; unicode-bidi: isolate; direction: ltr; }
+/* Fuber'in kendi sözlüğündeki değer (tür adı "Kurulum yardımcısı"): düz yazı; ham değer ipucunda. */
+.ek-onay__ayrinti dd.ek-onay__duz { font-family: inherit; white-space: normal; direction: inherit; unicode-bidi: normal; }
+/* ASCII dışı ama görünür karakter: okunur, kesik çerçeveli, yanında kodu; yönü yalıtılır (İbranice/Arapça harf çevresini yeniden dizemez). */
+.ek-onay__ascii-disi { display: inline-flex; align-items: baseline; gap: 3px; margin: 0 1px; padding: 0 4px; border-radius: 5px; background: var(--kart); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--yazi-uyari); unicode-bidi: isolate; font: inherit; }
+.ek-onay__ascii-disi bdi { unicode-bidi: isolate; }
+.ek-onay__kod { font: 650 12px/1.45 var(--kod), ui-monospace, monospace; color: var(--ink); }
+.ek-onay__ozet { font-size: 12px; }
+.ek-onay__uyari { position: relative; padding-left: 16px; font-size: 12.5px; line-height: 1.45; font-weight: 600; color: var(--ink); }
+.ek-onay__uyari::before { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--yazi-hata); }
+.ek-onay__not { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+.ek-onay__dugmeler { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ══════════ Eklentiler sekmesi ══════════ */
+.cc[data-sekme='eklentiler'] { overflow: hidden; grid-template-rows: auto minmax(0, 1fr); }
+.cc__govde.cc__govde--eklentiler { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+.cc__sekmeler button { height: 32px; }
+/* Üst şerit yalnız sorun varken (data-ust): yoksa gövde bütün yüksekliği alır. */
+.ek { display: grid; grid-template-rows: minmax(0, 1fr); gap: 12px; min-height: 0; min-width: 0; }
+.ek[data-ust] { grid-template-rows: auto minmax(0, 1fr); }
+.ek__ust { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.ek__ust > .ccd { flex: 1; min-width: 0; }
+.ek__durum { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+/* Sağ üstteki durum hapı ("1 onay bekliyor", "1 araçta sorun"): tıklayınca o satıra götürür. */
+.ek-cip {
+  display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border: 0; border-radius: var(--r-hap);
+  background: var(--kart); box-shadow: inset 0 0 0 1px var(--cizgi-2); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600;
+  white-space: nowrap; cursor: pointer; transition: background var(--sure-hiz);
+}
+.ek-cip:hover { background: var(--dolgu-2); }
+.ek-cip:focus-visible { outline: 2px solid var(--odak); outline-offset: 2px; }
+.ek-cip__nokta { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--turuncu); }
+.ek-cip[data-ek-cip='hata'] .ek-cip__nokta { background: var(--kirmizi); }
+.ek__ilerleme { width: 120px; flex: none; }
+/* Sol panel Oturumlar'la aynı genişlikte (B-36: --cc-sol, claudecode.css). */
+.ek__govde { display: grid; grid-template-columns: var(--cc-sol, 232px) minmax(0, 1fr); gap: 12px; min-height: 0; }
+.ek__menu { display: flex; flex-direction: column; gap: 4px; padding: 8px; min-height: 0; overflow-y: auto; }
+.ek__menu-liste { display: grid; gap: 4px; }
+.ek__menu-liste button { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px 0 12px; border: 0; border-radius: 11px; background: transparent; color: var(--ink-2); font-size: 13.5px; font-weight: 560; text-align: left; cursor: pointer; transition: background var(--sure-hiz), color var(--sure-hiz); }
+.ek__menu-liste button:hover { background: var(--dolgu-2); color: var(--ink); }
+.ek__menu-liste button[aria-selected='true'] { background: var(--sekme-secili); color: var(--sekme-secili-ink); box-shadow: var(--sekme-secili-golge); }
+.ek__menu-liste button span:first-of-type { flex: 1; white-space: nowrap; }
+.ek__menu-sayi { min-width: 24px; height: 22px; padding: 0 7px; display: inline-grid; place-items: center; border-radius: var(--r-hap); background: var(--dolgu-2); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: inherit; }
+/* Menünün altı: "?" (bu sekme nasıl çalışır; tıklayınca açıklama) ve kurulum günlüğü. */
+.ek__menu-alt { display: flex; align-items: center; gap: 6px; margin-top: auto; padding: 8px 2px 0; border-top: 1px solid var(--cizgi); }
+.ek__yardim { width: 32px; padding: 0; justify-content: center; font-size: 14px; font-weight: 700; }
+.ek__menu-not { margin: 2px 6px 4px; font-size: 12.5px; line-height: 1.5; color: var(--ink-2); }
+.ek__icerik { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; min-width: 0; }
+.ek__bolum-bas { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px 12px; border-bottom: 1px solid var(--cizgi); }
+.ek__bolum-bas > div { display: grid; gap: 2px; flex: 1; min-width: 220px; }
+.ek__bolum-bas b { font-size: 15px; font-weight: 650; letter-spacing: -0.015em; }
+.ek__bolum-bas span { font-size: 13px; line-height: 1.45; color: var(--ink-3); }
+.ek__liste { overflow-y: auto; min-height: 0; padding: 12px 14px 16px; display: grid; align-content: start; gap: 8px; scrollbar-gutter: stable; }
+.ek__grup { margin: 6px 2px 0; font-size: 12px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.ek__grup:first-child { margin-top: 0; }
+.ek__bos { display: grid; gap: 10px; justify-items: start; padding: 18px; border-radius: 14px; background: var(--dolgu-2); font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.ek__bos b { font-size: 14.5px; color: var(--ink); }
+.ek__ileti { margin: 0 14px 12px; padding: 8px 12px; border-radius: 10px; font-size: 13px; line-height: 1.45; background: var(--dolgu-2); color: var(--ink-2); }
+.ek__ileti[data-hata] { color: var(--yazi-hata); background: color-mix(in srgb, var(--yazi-hata) 10%, transparent); }
+.ek__ara { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px; border-radius: 99px; background: var(--girdi); box-shadow: inset 0 0 0 1px var(--cizgi-2); color: var(--ink-3); flex: 1; min-width: 220px; }
+.ek__ara input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 14px; outline: none; }
+.ek__ara input::placeholder { color: var(--ink-4); }
+.ek-mcp-hal { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.ek-sor { display: inline-flex; align-items: center; gap: 6px; }
+.ek-sor span { font-size: 12.5px; color: var(--ink-2); }
+
+@media (max-height: 760px) {
+  .ek__liste { gap: 6px; padding-top: 10px; }
+  .ekl { padding: 10px 12px; }
+  .ek__bolum-bas { padding: 10px 14px 10px; }
+}
+
+/* ══════════ Sihirbaz adımı ══════════ */
+.kurulum[data-adim-id='gelistirici-araclari'] .kurulum__icerik { gap: 12px; }
+.kurulum[data-adim-id='gelistirici-araclari'] .kurulum__form { position: relative; }
+/* Alçak pencere (1080×680; yükseltmede üstte "Fuber güncellendi" notu da var): adım kaydırmasız sığsın diye giriş satırı gizli (alttaki
+   not aynısını söyler: "Seçtiklerini arka planda kurarım."), not ve kartlar sıkı; yazı yine ≥ 12 px, düğmeler ≥ 32 px. */
+@media (max-height: 760px) {
+  .kurulum[data-adim-id='gelistirici-araclari'] .kurulum__icerik { gap: 8px; }
+  .kurulum[data-adim-id='gelistirici-araclari'] .kurulum__bas .t-giris { display: none; }
+  .kurulum[data-adim-id='gelistirici-araclari'] .kurulum-yeni { padding-block: 7px; }
+  .ccd { grid-template-columns: 32px minmax(0, 1fr) auto; padding: 7px 12px; }
+  .ccd__simge { width: 32px; height: 32px; border-radius: 10px; }
+  .gp { padding: 9px 12px; gap: 7px; }
+  .gp__izgara { gap: 5px; }
+  .gp__oge { min-height: 36px; padding-block: 2px; }
+  .gp__ayrinti { min-height: 0; padding: 5px 6px 5px 11px; }
+}
+
+/* ══════════ Mod değişince teklif (G23 bulgu 5; I8 son inceleme) ══════════ */
+/* Ayarlar → Genel → Kullanım biçimi: mod kartlarının HEMEN ALTINDA, satır içinde (ayarlar/Genel.tsx). Eskiden pencerenin üstünde sabit
+   bir kart (top: 44px) Ayarlar'ın başlığını örtüyordu. Akışta yer alır: hiçbir şeyin üstüne binmez; düğmeleri ikincil. */
+.araclar-teklif {
+  container-type: inline-size;
+  display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 6px 12px; align-items: center;
+  margin-top: 12px; padding: 10px 10px 10px 12px; border-radius: 14px; animation: teklif-gir 320ms var(--yay-cikis) both;
+  background: var(--acilir); box-shadow: inset 0 0 0 1px var(--cizgi-2);
+}
+.araclar-teklif .ccd__simge { width: 32px; height: 32px; border-radius: 10px; }
+.araclar-teklif__metin { display: grid; gap: 1px; min-width: 0; }
+.araclar-teklif__metin b { font-size: 13.5px; font-weight: 650; letter-spacing: -0.01em; }
+.araclar-teklif__metin span { font-size: 12.5px; line-height: 1.4; color: var(--ink-2); }
+.araclar-teklif__dugmeler { display: flex; gap: 6px; }
+/* Dar sütun: iki sıra — başlık ve açıklama, altında sağa yaslı düğmeler. */
+@container (max-width: 520px) {
+  .araclar-teklif__dugmeler { grid-column: 1 / -1; justify-content: flex-end; }
+}
+@keyframes teklif-gir { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .araclar-teklif { animation: none; } .ekl__ac svg { transition: none; } }

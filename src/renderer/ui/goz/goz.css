@@ -1,0 +1,29 @@
+/* ── Gözler ("Pamuk", 11 Kas; Gozler.tsx) ─────────────────────────────────────────────────────────────────────────────────────────────
+   Beyaz göz, siyah bebek, siyah kapak ve yanak: göz her yüzeyde siyah bir sahnede durur. svg taşanı kırpar (kapak gözün üstüne uzanır).
+   Dönüşüm ekseni her öğede gözün kendi merkezidir (transform-box: view-box, köken 0 0; göz grubu translate(cx 20) ile yerleşir).
+   Yalnız transform ve opacity canlanır; renk geçişi yalnız parıltının saydamlığıdır (280 ms). */
+/* Gözün sahnesi her temada siyah (kapak ve yanak siyah şekillerdir); yüzeyler bu belirteci kullanır. */
+:root { --goz-sahne: #000; }
+.gozler { display: block; overflow: hidden; flex: none; color: #fff; --kalin: 3px; }
+.gozler g, .gozler path, .gozler circle { transform-box: view-box; transform-origin: 0px 0px; }
+.gozler[data-kademe='xs'] { --kalin: 6.5px; }
+.gozler[data-kademe='s'] { --kalin: 3.4px; }
+.goz-kapali { fill: none; stroke: #fff; stroke-linecap: round; stroke-width: var(--kalin); }
+/* Küçük parıltı kipin renginde: mod değişince çapraz solar. Nötr (beyaz) kopya yalnız kip bilinmezse görünür. */
+.goz-parilti > * { transition: opacity 280ms ease-in-out; }
+.gozler .goz-p-n { opacity: 0; }
+.gozler[data-mod='business'] .goz-p-d, .gozler[data-mod='developer'] .goz-p-b { opacity: 0; }
+/* Biçim katmanları (12 Kas; Business Pamuk, Developer Odak): gövde ve kapak her biçim için çizilir, kök svg'nin data-sekil'i görüneni seçer. Geçiş YOK:
+   takas kırpmanın kapalı anında olur (beyin.ts sekilDegisti), kapaklar gövdeyi tam örttüğünden görünmez. */
+.gozler [data-katman] { opacity: 0; }
+.gozler[data-sekil='pamuk'] [data-katman='pamuk'],
+.gozler[data-sekil='odak'] [data-katman='odak'],
+.gozler[data-sekil='ufuk'] [data-katman='ufuk'],
+.gozler[data-sekil='mercek'] [data-katman='mercek'] { opacity: 1; }
+/* 24 px avatarda ince ayrıntı (küçük parıltı) gizlenir. */
+.gozler[data-kademe='xs'] .goz-ince { display: none; }
+/* Mod geçişi: göz aynı kalır (ModGecisi.tsx); Sade'de iki işaret üst üste (sade.css). */
+.mod-gecisi { position: relative; display: block; flex: none; line-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .goz-parilti > * { transition: none !important; }
+}

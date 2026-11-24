@@ -1,0 +1,68 @@
+{
+  "name": "fuber-ai-v1",
+  "productName": "Fuber AI",
+  "version": "0.18.2",
+  "description": "Fuber AI v1 — local-first personal desktop AI assistant for Windows (open source, Apache-2.0)",
+  "author": "Fuber AI",
+  "license": "Apache-2.0",
+  "homepage": "https://fuber.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fberkehan/orion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fberkehan/orion/issues"
+  },
+  "type": "module",
+  "main": "dist/main/main.js",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build:main": "node scripts/build-main.mjs",
+    "build:renderer": "vite build",
+    "build": "npm run build:main && npm run build:renderer",
+    "dev": "npm run build && electron .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node scripts/testleri-kos.mjs",
+    "dist": "node scripts/paket-bekcisi.mjs once && npm run build && electron-builder --win nsis && node scripts/kurulum-paketle.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.310",
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "docx": "^9.15.1",
+    "exceljs": "^4.4.0",
+    "imapflow": "^2.5.5",
+    "keyv": "^5.6.0",
+    "mailparser": "^3.9.46",
+    "mammoth": "^1.13.0",
+    "nodemailer": "^10.1.7",
+    "openai": "^7.38.0",
+    "pdf-parse": "^2.4.5",
+    "pptxgenjs": "^4.0.1",
+    "qrcode": "^1.5.4",
+    "ws": "^8.22.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/mailparser": "^3.9.0",
+    "@types/node": "^26.6.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "dompurify": "^3.4.17",
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "marked": "^18.1.1",
+    "playwright-core": "^1.64.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4",
+    "vosk-browser": "^0.0.8"
+  }
+}
